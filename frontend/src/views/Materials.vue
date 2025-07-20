@@ -402,7 +402,7 @@ th.sortable:hover {
   gap: 8px;
   margin: 0; /* Reset del margine */
   padding: 0; /* Reset del padding */
-  height: 28px; /* Altezza fissa uguale ai pulsanti */
+  justify-content: center; /* Centra orizzontalmente */
   align-items: center; /* Allineamento verticale */
 }
 

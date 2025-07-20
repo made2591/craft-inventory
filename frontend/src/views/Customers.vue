@@ -421,9 +421,11 @@ table {
 }
 
 th, td {
-  padding: 12px;
+  padding: 8px 12px;
   text-align: left;
   border-bottom: 1px solid #ddd;
+  vertical-align: middle; /* Allineamento verticale al centro */
+  height: 44px; /* Altezza fissa per tutte le celle */
 }
 
 th {
@@ -450,7 +452,7 @@ th.sortable:hover {
   gap: 8px;
   margin: 0; /* Reset del margine */
   padding: 0; /* Reset del padding */
-  height: 28px; /* Altezza fissa uguale ai pulsanti */
+  justify-content: center; /* Centra orizzontalmente */
   align-items: center; /* Allineamento verticale */
 }
 
