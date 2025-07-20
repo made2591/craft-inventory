@@ -1,0 +1,61 @@
+version: '3'
+
+services:
+  postgres:
+    image: postgres:14-alpine
+    container_name: craft-postgres
+    environment:
+      POSTGRES_USER: craftuser
+      POSTGRES_PASSWORD: craftpassword
+      POSTGRES_DB: craftdb
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./backend/init-db:/docker-entrypoint-initdb.d
+    networks:
+      craft-network:
+        ipv4_address: 172.28.1.2
+    restart: unless-stopped
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: craft-backend
+    ports:
+      - "8080:8080"
+    environment:
+      NODE_ENV: development
+      DATABASE_URL: postgres://craftuser:craftpassword@172.28.1.2:5432/craftdb
+    depends_on:
+      - postgres
+    networks:
+      craft-network:
+        ipv4_address: 172.28.1.3
+    restart: unless-stopped
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: craft-frontend
+    ports:
+      - "3000:80"
+    depends_on:
+      - backend
+    networks:
+      craft-network:
+        ipv4_address: 172.28.1.4
+    restart: unless-stopped
+
+networks:
+  craft-network:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.28.0.0/16
+          gateway: 172.28.0.1
+
+volumes:
+  postgres_data:
