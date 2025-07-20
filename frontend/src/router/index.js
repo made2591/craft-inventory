@@ -7,6 +7,11 @@ const routes = [
     component: () => import('../views/Home.vue')
   },
   {
+    path: '/database',
+    name: 'DatabaseManagement',
+    component: () => import('../views/DatabaseManagement.vue')
+  },
+  {
     path: '/materials',
     name: 'Materials',
     component: () => import('../views/Materials.vue')

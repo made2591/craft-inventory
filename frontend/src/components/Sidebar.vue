@@ -84,6 +84,22 @@
             </router-link>
           </div>
         </div>
+        
+        <!-- Sezione Sistema -->
+        <div class="menu-section">
+          <div class="section-header" @click="toggleSection('system')" :title="isCollapsed ? 'Sistema' : ''">
+            <i class="fas fa-cogs"></i>
+            <span v-if="!isCollapsed">Sistema</span>
+            <i v-if="!isCollapsed" :class="['fas', sections.system ? 'fa-chevron-down' : 'fa-chevron-right']"></i>
+          </div>
+          
+          <div class="section-items" v-if="sections.system || isCollapsed">
+            <router-link to="/database" class="menu-item" :title="isCollapsed ? 'Gestione Database' : ''">
+              <i class="fas fa-database"></i>
+              <span v-if="!isCollapsed">Gestione Database</span>
+            </router-link>
+          </div>
+        </div>
       </div>
     </div>
   </div>
@@ -98,7 +114,8 @@ export default {
       sections: {
         inventory: true,
         contacts: true,
-        transactions: true
+        transactions: true,
+        system: true
       }
     };
   },

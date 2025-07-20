@@ -18,9 +18,9 @@ RUN npm run build
 # Stage 2: Production
 FROM nginx:stable-alpine as production-stage
 
-# Crea un utente non-root
-RUN addgroup -g 101 -S nginx-app && \
-    adduser -S -D -H -u 101 -h /var/cache/nginx -s /sbin/nologin -G nginx-app -g nginx-app nginx-app
+# Crea un utente non-root con un GID e UID diversi da quelli già in uso
+RUN addgroup -S nginx-app && \
+    adduser -S -D -H -h /var/cache/nginx -s /sbin/nologin -G nginx-app -g nginx-app nginx-app
 
 # Copia i file compilati dalla fase di build
 COPY --from=build-stage /app/dist /usr/share/nginx/html
