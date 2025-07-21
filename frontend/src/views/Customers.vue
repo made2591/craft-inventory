@@ -60,9 +60,9 @@
                 {{ sortOrder === 'asc' ? '▲' : '▼' }}
               </span>
             </th>
-            <th @click="sortBy('customer_type')" class="sortable">
+            <th @click="sortBy('customerType')" class="sortable">
               Tipo
-              <span v-if="sortKey === 'customer_type'" class="sort-icon">
+              <span v-if="sortKey === 'customerType'" class="sort-icon">
                 {{ sortOrder === 'asc' ? '▲' : '▼' }}
               </span>
             </th>
@@ -90,7 +90,7 @@
         <tbody>
           <tr v-for="customer in paginatedCustomers" :key="customer.id">
             <td>{{ customer.name }}</td>
-            <td>{{ formatCustomerType(customer.customer_type) }}</td>
+            <td>{{ formatCustomerType(customer.customerType) }}</td>
             <td>{{ customer.contactPerson || 'N/A' }}</td>
             <td>{{ customer.email || 'N/A' }}</td>
             <td>{{ customer.phone || 'N/A' }}</td>
@@ -198,7 +198,7 @@ export default {
       
       // Apply type filter
       if (this.typeFilter) {
-        filtered = filtered.filter(customer => customer.customer_type === this.typeFilter);
+        filtered = filtered.filter(customer => customer.customerType === this.typeFilter);
       }
       
       // Apply search filter

@@ -41,7 +41,7 @@ export default function customersRoutes(pool, toCamelCase) {
   // POST /api/customers - Crea un nuovo cliente
   router.post('/', async (req, res) => {
     try {
-      const { name, contactPerson, customer_type, email, phone, address, notes } = req.body;
+      const { name, contactPerson, customerType, email, phone, address, notes } = req.body;
       const id = uuidv4();
       const now = new Date();
       
@@ -51,7 +51,7 @@ export default function customersRoutes(pool, toCamelCase) {
       }
       
       // Imposta un tipo cliente predefinito se non specificato
-      const defaultCustomerType = customer_type || 'private';
+      const defaultCustomerType = customerType || 'private';
 
       const result = await pool.query(
         'INSERT INTO customers (id, name, contact_person, customer_type, email, phone, address, notes, created_at, updated_at) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10) RETURNING *',
@@ -69,12 +69,12 @@ export default function customersRoutes(pool, toCamelCase) {
   router.put('/:id', async (req, res) => {
     try {
       const { id } = req.params;
-      const { name, contactPerson, customer_type, email, phone, address, notes } = req.body;
+      const { name, contactPerson, customerType, email, phone, address, notes } = req.body;
       const now = new Date();
 
       const result = await pool.query(
         'UPDATE customers SET name = $1, contact_person = $2, customer_type = $3, email = $4, phone = $5, address = $6, notes = $7, updated_at = $8 WHERE id = $9 RETURNING *',
-        [name, contactPerson, customer_type, email, phone, address, notes, now, id]
+        [name, contactPerson, customerType, email, phone, address, notes, now, id]
       );
 
       if (result.rows.length === 0) {
