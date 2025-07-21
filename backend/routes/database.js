@@ -317,5 +317,51 @@ export default function databaseRoutes(_, __) {
     }
   });
 
+  // GET /api/database/schema - Ottieni lo schema della tabella inventory_items
+  router.get('/schema', async (req, res) => {
+    try {
+      const connectionString = process.env.DATABASE_URL || 'postgres://craftuser:craftpassword@172.28.1.2:5432/craftdb';
+      const match = connectionString.match(/postgres:\/\/([^:]+):([^@]+)@([^:]+):(\d+)\/(.+)/);
+
+      if (!match) {
+        return res.status(500).json({ error: 'Impossibile analizzare la stringa di connessione del database' });
+      }
+
+      const [, user, password, host, port, database] = match;
+
+      const psqlProcess = spawn('psql', [
+        '-h', host,
+        '-p', port,
+        '-U', user,
+        '-d', database,
+        '-c', '\\d inventory_items'
+      ], {
+        env: { ...process.env, PGPASSWORD: password }
+      });
+
+      let stdout = '';
+      let stderr = '';
+
+      psqlProcess.stdout.on('data', (data) => {
+        stdout += data.toString();
+      });
+
+      psqlProcess.stderr.on('data', (data) => {
+        stderr += data.toString();
+      });
+
+      psqlProcess.on('close', (code) => {
+        if (code === 0) {
+          res.json({ schema: stdout });
+        } else {
+          res.status(500).json({ error: 'Errore durante il recupero dello schema', details: stderr });
+        }
+      });
+    } catch (err) {
+      console.error('Error fetching schema:', err);
+      res.status(500).json({ error: 'Errore interno del server' });
+    }
+  });
+
   return router;
 }

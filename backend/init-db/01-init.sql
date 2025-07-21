@@ -15,6 +15,7 @@ CREATE TABLE IF NOT EXISTS materials (
     id UUID PRIMARY KEY,
     name VARCHAR(255) NOT NULL,
     description TEXT,
+    sku VARCHAR(8) UNIQUE NOT NULL,
     unit_of_measure VARCHAR(50) NOT NULL,
     cost_per_unit DECIMAL(10, 2) NOT NULL,
     current_stock DECIMAL(10, 2) NOT NULL,
@@ -49,6 +50,7 @@ CREATE TABLE IF NOT EXISTS product_models (
     id UUID PRIMARY KEY,
     name VARCHAR(255) NOT NULL,
     description TEXT,
+    sku VARCHAR(8) UNIQUE NOT NULL,
     production_cost DECIMAL(10, 2) NOT NULL,
     selling_price DECIMAL(10, 2) NOT NULL,
     labor_time_minutes INTEGER NOT NULL,
@@ -125,6 +127,42 @@ CREATE TABLE IF NOT EXISTS transaction_items (
     FOREIGN KEY (material_id) REFERENCES materials(id) ON DELETE SET NULL
 );
 
+-- Components table
+CREATE TABLE IF NOT EXISTS components (
+    id UUID PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
+    description TEXT,
+    sku VARCHAR(8) UNIQUE NOT NULL,
+    created_at TIMESTAMP WITH TIME ZONE NOT NULL,
+    updated_at TIMESTAMP WITH TIME ZONE NOT NULL
+);
+
+-- Component materials table (many-to-many relationship)
+CREATE TABLE IF NOT EXISTS component_materials (
+    id UUID PRIMARY KEY,
+    component_id UUID NOT NULL,
+    material_id UUID NOT NULL,
+    quantity DECIMAL(10, 2) NOT NULL,
+    custom_cost DECIMAL(10, 2),
+    use_material_cost BOOLEAN NOT NULL DEFAULT TRUE,
+    created_at TIMESTAMP WITH TIME ZONE NOT NULL,
+    updated_at TIMESTAMP WITH TIME ZONE NOT NULL,
+    FOREIGN KEY (component_id) REFERENCES components(id) ON DELETE CASCADE,
+    FOREIGN KEY (material_id) REFERENCES materials(id) ON DELETE CASCADE
+);
+
+-- Model components table (many-to-many relationship)
+CREATE TABLE IF NOT EXISTS model_components (
+    id UUID PRIMARY KEY,
+    model_id UUID NOT NULL,
+    component_id UUID NOT NULL,
+    quantity INTEGER NOT NULL,
+    created_at TIMESTAMP WITH TIME ZONE NOT NULL,
+    updated_at TIMESTAMP WITH TIME ZONE NOT NULL,
+    FOREIGN KEY (model_id) REFERENCES product_models(id) ON DELETE CASCADE,
+    FOREIGN KEY (component_id) REFERENCES components(id) ON DELETE CASCADE
+);
+
 -- Create indexes
 CREATE INDEX idx_materials_supplier_id ON materials(supplier_id);
 CREATE INDEX idx_model_materials_model_id ON model_materials(model_id);
@@ -135,3 +173,7 @@ CREATE INDEX idx_transactions_supplier_id ON transactions(supplier_id);
 CREATE INDEX idx_transaction_items_transaction_id ON transaction_items(transaction_id);
 CREATE INDEX idx_transaction_items_product_model_id ON transaction_items(product_model_id);
 CREATE INDEX idx_transaction_items_material_id ON transaction_items(material_id);
+CREATE INDEX idx_component_materials_component_id ON component_materials(component_id);
+CREATE INDEX idx_component_materials_material_id ON component_materials(material_id);
+CREATE INDEX idx_model_components_model_id ON model_components(model_id);
+CREATE INDEX idx_model_components_component_id ON model_components(component_id);

@@ -12,6 +12,22 @@ const routes = [
     component: () => import('../views/DatabaseManagement.vue')
   },
   {
+    path: '/components',
+    name: 'Components',
+    component: () => import('../views/Components.vue')
+  },
+  {
+    path: '/components/new',
+    name: 'NewComponent',
+    component: () => import('../views/ComponentForm.vue')
+  },
+  {
+    path: '/components/:id',
+    name: 'EditComponent',
+    component: () => import('../views/ComponentForm.vue'),
+    props: true
+  },
+  {
     path: '/materials',
     name: 'Materials',
     component: () => import('../views/Materials.vue')

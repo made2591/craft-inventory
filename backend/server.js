@@ -43,7 +43,7 @@ pool.on('error', (err, _) => {
 
 // Helper function to convert snake_case to camelCase
 const toCamelCase = (obj) => {
-  if (obj === null || typeof obj !== 'object') {
+  if (obj === null || typeof obj !== 'object' || obj instanceof Date) {
     return obj;
   }
 
@@ -52,7 +52,7 @@ const toCamelCase = (obj) => {
   }
 
   return Object.keys(obj).reduce((acc, key) => {
-    const camelKey = key.replace(/_([a-z])/g, (_, letter) => letter.toUpperCase());
+    const camelKey = key.replace(/_([a-zA-Z])/g, (_, letter) => letter.toUpperCase());
     acc[camelKey] = toCamelCase(obj[key]);
     return acc;
   }, {});

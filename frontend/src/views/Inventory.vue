@@ -83,9 +83,9 @@
         </thead>
         <tbody>
           <tr v-for="item in paginatedItems" :key="item.id">
-            <td>{{ item.model_name }}</td>
+            <td>{{ item.modelName || item.model_name || 'N/A' }}</td>
             <td>{{ item.quantity }}</td>
-            <td>{{ formatDate(item.production_date) }}</td>
+            <td>{{ formatDate(item.productionDate || item.production_date) }}</td>
             <td>{{ item.notes || 'N/A' }}</td>
             <td class="actions">
               <button @click="editItem(item.id)" class="btn btn-sm btn-edit">Modifica</button>
@@ -272,8 +272,27 @@ export default {
     },
     
     formatDate(dateString) {
-      const date = new Date(dateString);
-      return date.toLocaleDateString();
+      if (!dateString) return 'N/A';
+      
+      try {
+        // Prova a creare un oggetto Date valido
+        const date = new Date(dateString);
+        
+        // Verifica se la data è valida
+        if (isNaN(date.getTime())) {
+          return 'N/A';
+        }
+        
+        // Formatta la data in modo leggibile (giorno/mese/anno)
+        return new Intl.DateTimeFormat('it-IT', {
+          day: '2-digit',
+          month: '2-digit',
+          year: 'numeric'
+        }).format(date);
+      } catch (error) {
+        console.error('Error formatting date:', error);
+        return 'N/A';
+      }
     },
     
     editItem(id) {

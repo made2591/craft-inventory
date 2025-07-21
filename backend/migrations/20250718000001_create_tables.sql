@@ -1,6 +1,6 @@
 -- Create users table
 CREATE TABLE IF NOT EXISTS users (
-    id TEXT PRIMARY KEY,
+    id UUID PRIMARY KEY,
     username TEXT NOT NULL UNIQUE,
     email TEXT NOT NULL UNIQUE,
     password_hash TEXT NOT NULL,
@@ -11,7 +11,7 @@ CREATE TABLE IF NOT EXISTS users (
 
 -- Create suppliers table
 CREATE TABLE IF NOT EXISTS suppliers (
-    id TEXT PRIMARY KEY,
+    id UUID PRIMARY KEY,
     name TEXT NOT NULL,
     contact_person TEXT,
     email TEXT,
@@ -25,7 +25,7 @@ CREATE TABLE IF NOT EXISTS suppliers (
 
 -- Create materials table
 CREATE TABLE IF NOT EXISTS materials (
-    id TEXT PRIMARY KEY,
+    id UUID PRIMARY KEY,
     name TEXT NOT NULL,
     description TEXT,
     unit_of_measure TEXT NOT NULL,
@@ -40,7 +40,7 @@ CREATE TABLE IF NOT EXISTS materials (
 
 -- Create product_models table
 CREATE TABLE IF NOT EXISTS product_models (
-    id TEXT PRIMARY KEY,
+    id UUID PRIMARY KEY,
     name TEXT NOT NULL,
     description TEXT,
     production_cost REAL NOT NULL,
@@ -52,7 +52,7 @@ CREATE TABLE IF NOT EXISTS product_models (
 
 -- Create model_materials table (relazione molti a molti tra modelli e materiali)
 CREATE TABLE IF NOT EXISTS model_materials (
-    id TEXT PRIMARY KEY,
+    id UUID PRIMARY KEY,
     model_id TEXT NOT NULL,
     material_id TEXT NOT NULL,
     quantity REAL NOT NULL,
@@ -64,7 +64,7 @@ CREATE TABLE IF NOT EXISTS model_materials (
 
 -- Create inventory_items table
 CREATE TABLE IF NOT EXISTS inventory_items (
-    id TEXT PRIMARY KEY,
+    id UUID PRIMARY KEY,
     model_id TEXT NOT NULL,
     quantity INTEGER NOT NULL,
     production_date TEXT NOT NULL,
@@ -76,7 +76,7 @@ CREATE TABLE IF NOT EXISTS inventory_items (
 
 -- Create customers table
 CREATE TABLE IF NOT EXISTS customers (
-    id TEXT PRIMARY KEY,
+    id UUID PRIMARY KEY,
     name TEXT NOT NULL,
     customer_type TEXT NOT NULL, -- 'private', 'online', 'store'
     contact_person TEXT,
@@ -90,7 +90,7 @@ CREATE TABLE IF NOT EXISTS customers (
 
 -- Create transactions table
 CREATE TABLE IF NOT EXISTS transactions (
-    id TEXT PRIMARY KEY,
+    id UUID PRIMARY KEY,
     transaction_type TEXT NOT NULL, -- 'purchase', 'sale'
     date TEXT NOT NULL,
     customer_id TEXT,
@@ -106,7 +106,7 @@ CREATE TABLE IF NOT EXISTS transactions (
 
 -- Create transaction_items table
 CREATE TABLE IF NOT EXISTS transaction_items (
-    id TEXT PRIMARY KEY,
+    id UUID PRIMARY KEY,
     transaction_id TEXT NOT NULL,
     product_model_id TEXT,
     material_id TEXT,

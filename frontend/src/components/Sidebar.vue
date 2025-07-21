@@ -31,6 +31,11 @@
               <span v-if="!isCollapsed">Materiali</span>
             </router-link>
             
+            <router-link to="/components" class="menu-item" :title="isCollapsed ? 'Componenti' : ''">
+              <i class="fas fa-cogs"></i>
+              <span v-if="!isCollapsed">Componenti</span>
+            </router-link>
+            
             <router-link to="/models" class="menu-item" :title="isCollapsed ? 'Modelli' : ''">
               <i class="fas fa-cubes"></i>
               <span v-if="!isCollapsed">Modelli</span>

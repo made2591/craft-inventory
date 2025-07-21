@@ -1,11 +1,13 @@
 import materialsRoutes from './materials.js';
 import modelsRoutes from './models.js';
+import componentsRoutes from './components.js';
 import inventoryRoutes from './inventory.js';
 import suppliersRoutes from './suppliers.js';
 import customersRoutes from './customers.js';
 import transactionsRoutes from './transactions.js';
 import authRoutes from './auth.js';
 import databaseRoutes from './database.js';
+import testDataRoutes from './test-data.js';
 
 /**
  * Configura tutti i router per l'applicazione
@@ -21,6 +23,7 @@ export default function setupRoutes(app, pool, toCamelCase) {
 
   // Configura i router per ciascuna risorsa
   app.use('/api/materials', materialsRoutes(pool, toCamelCase));
+  app.use('/api/components', componentsRoutes(pool, toCamelCase));
   app.use('/api/models', modelsRoutes(pool, toCamelCase));
   app.use('/api/inventory', inventoryRoutes(pool, toCamelCase));
   app.use('/api/suppliers', suppliersRoutes(pool, toCamelCase));
@@ -28,4 +31,5 @@ export default function setupRoutes(app, pool, toCamelCase) {
   app.use('/api/transactions', transactionsRoutes(pool, toCamelCase));
   app.use('/api/auth', authRoutes(pool, toCamelCase));
   app.use('/api/database', databaseRoutes(pool, toCamelCase));
+  app.use('/api/test-data', testDataRoutes(pool, toCamelCase));
 }

@@ -95,11 +95,27 @@ export default {
     },
     formattedDate: {
       get() {
-        if (!this.item.production_date) return '';
-        return this.item.production_date.split('T')[0];
+        // Supporta sia camelCase che snake_case
+        const date = this.item.productionDate || this.item.production_date;
+        if (!date) return '';
+        
+        // Gestisci diversi formati di data
+        if (typeof date === 'string') {
+          return date.split('T')[0];
+        }
+        
+        // Se è un oggetto Date
+        if (date instanceof Date) {
+          return date.toISOString().split('T')[0];
+        }
+        
+        return '';
       },
       set(value) {
-        this.item.production_date = value ? `${value}T00:00:00Z` : null;
+        // Imposta sia camelCase che snake_case per compatibilità
+        const formattedDate = value ? `${value}T00:00:00.000Z` : null;
+        this.item.productionDate = formattedDate;
+        this.item.production_date = formattedDate;
       }
     }
   },
@@ -140,13 +156,25 @@ export default {
       this.error = null;
       
       try {
+        // Prepara i dati da inviare
+        const itemData = {
+          model_id: this.item.model_id,
+          quantity: this.item.quantity,
+          production_date: this.formattedDate ? `${this.formattedDate}T00:00:00.000Z` : null,
+          notes: this.item.notes
+        };
+        
+        console.log('Saving inventory item with data:', itemData);
+        
         if (this.isEditing) {
+          // Includi anche la data di produzione nell'aggiornamento
           await api.put(`/api/inventory/${this.id}`, {
             quantity: this.item.quantity,
+            production_date: this.formattedDate ? `${this.formattedDate}T00:00:00.000Z` : null,
             notes: this.item.notes
           });
         } else {
-          await api.post('/api/inventory', this.item);
+          await api.post('/api/inventory', itemData);
         }
         
         this.$router.push('/inventory');

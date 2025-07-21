@@ -2,59 +2,100 @@
   <div class="database-management">
     <h1>Gestione Database</h1>
     
+    <!-- Sezione Backup e Ripristino -->
     <div class="card">
-      <h2>Esportazione Database</h2>
-      <p>Scarica un backup completo del database in formato SQL.</p>
-      <div class="actions">
-        <button @click="exportDatabase" class="btn btn-primary" :disabled="exporting">
-          <span v-if="exporting">Esportazione in corso...</span>
-          <span v-else>Esporta Database</span>
-        </button>
+      <div class="card-header">
+        <h2>Backup e Ripristino</h2>
       </div>
-      <div v-if="exportError" class="error-message">
-        {{ exportError }}
+      <div class="card-body">
+        <p>
+          Esporta il database come file SQL per il backup o importa un file SQL per ripristinare il database.
+        </p>
+        
+        <div class="action-buttons">
+          <button 
+            @click="exportDatabase" 
+            class="btn btn-primary" 
+            :disabled="loading"
+          >
+            {{ loading && operation === 'export' ? 'Esportazione in corso...' : 'Esporta Database' }}
+          </button>
+          
+          <label for="import-file" class="btn btn-secondary" :class="{ disabled: loading }">
+            {{ loading && operation === 'import' ? 'Importazione in corso...' : 'Importa Database' }}
+          </label>
+          <input 
+            type="file" 
+            id="import-file" 
+            ref="fileInput" 
+            accept=".sql" 
+            @change="handleFileUpload" 
+            style="display: none;"
+          >
+        </div>
       </div>
     </div>
     
+    <!-- Sezione Reset Database -->
     <div class="card">
-      <h2>Importazione Database</h2>
-      <p>Carica un file SQL per ripristinare il database. <strong>Attenzione:</strong> questa operazione sovrascriverà i dati esistenti.</p>
-      <div class="file-upload">
-        <input type="file" id="sql-file" ref="fileInput" accept=".sql" @change="handleFileChange" />
-        <label for="sql-file" class="file-label">
-          <span v-if="selectedFile">{{ selectedFile.name }}</span>
-          <span v-else>Seleziona file SQL</span>
-        </label>
+      <div class="card-header">
+        <h2>Reset Database</h2>
       </div>
-      <div class="actions">
-        <button @click="importDatabase" class="btn btn-danger" :disabled="importing || !selectedFile">
-          <span v-if="importing">Importazione in corso...</span>
-          <span v-else>Importa Database</span>
-        </button>
-      </div>
-      <div v-if="importError" class="error-message">
-        {{ importError }}
-      </div>
-      <div v-if="importSuccess" class="success-message">
-        {{ importSuccess }}
+      <div class="card-body">
+        <p>
+          Ripristina il database allo stato iniziale, eliminando tutti i dati esistenti.
+          <strong>Attenzione:</strong> Questa operazione è irreversibile.
+        </p>
+        
+        <div class="action-buttons">
+          <button 
+            @click="resetDatabase" 
+            class="btn btn-danger" 
+            :disabled="loading"
+          >
+            {{ loading && operation === 'reset' ? 'Reset in corso...' : 'Reset Database' }}
+          </button>
+        </div>
       </div>
     </div>
     
+    <!-- Sezione Inizializzazione Dati di Test -->
     <div class="card">
-      <h2>Reset Database</h2>
-      <p><strong>Attenzione:</strong> questa operazione eliminerà tutti i dati e ripristinerà il database allo stato iniziale.</p>
-      <div class="actions">
-        <button @click="confirmReset" class="btn btn-danger" :disabled="resetting">
-          <span v-if="resetting">Reset in corso...</span>
-          <span v-else>Reset Database</span>
-        </button>
+      <div class="card-header">
+        <h2>Inizializzazione Dati di Test</h2>
       </div>
-      <div v-if="resetError" class="error-message">
-        {{ resetError }}
+      <div class="card-body">
+        <p>
+          Questa funzione inizializza il database con dati di test per facilitare lo sviluppo e il testing dell'applicazione.
+          <strong>Attenzione:</strong> Questa operazione eliminerà tutti i dati esistenti nel database e li sostituirà con dati di test.
+        </p>
+        
+        <div class="test-data-summary">
+          <h3>Dati che verranno creati:</h3>
+          <ul>
+            <li><strong>3 Fornitori</strong>: Fornitore Legno, Fornitore Metalli, Fornitore Tessuti</li>
+            <li><strong>3 Materiali</strong>: Legno di Quercia, Acciaio Inox, Tessuto Cotone</li>
+            <li><strong>2 Componenti</strong>: Gamba Tavolo, Piano Tavolo</li>
+            <li><strong>2 Modelli</strong>: Tavolo Moderno, Tavolo Rustico</li>
+            <li><strong>4 Articoli in Magazzino</strong>: 2 per ogni modello</li>
+          </ul>
+        </div>
+        
+        <div class="action-buttons">
+          <button 
+            @click="initTestData" 
+            class="btn btn-warning" 
+            :disabled="loading"
+          >
+            {{ loading && operation === 'init' ? 'Inizializzazione in corso...' : 'Inizializza Dati di Test' }}
+          </button>
+        </div>
       </div>
-      <div v-if="resetSuccess" class="success-message">
-        {{ resetSuccess }}
-      </div>
+    </div>
+    
+    <!-- Messaggi di feedback -->
+    <div v-if="message" class="alert" :class="messageType === 'success' ? 'alert-success' : 'alert-error'">
+      {{ message }}
     </div>
   </div>
 </template>
@@ -63,118 +104,128 @@
 import api from '../services/api';
 
 export default {
-  name: 'DatabaseManagementView',
+  name: 'DatabaseManagement',
   data() {
     return {
-      selectedFile: null,
-      importing: false,
-      exporting: false,
-      resetting: false,
-      importError: null,
-      exportError: null,
-      resetError: null,
-      importSuccess: null,
-      resetSuccess: null
+      loading: false,
+      operation: null, // 'export', 'import', 'reset', 'init'
+      message: '',
+      messageType: 'success',
+      selectedFile: null
     };
   },
   methods: {
-    handleFileChange(event) {
-      const file = event.target.files[0];
-      if (file && file.name.endsWith('.sql')) {
-        this.selectedFile = file;
-        this.importError = null;
-      } else {
-        this.selectedFile = null;
-        this.importError = 'Per favore seleziona un file SQL valido.';
+    async exportDatabase() {
+      this.loading = true;
+      this.operation = 'export';
+      this.message = '';
+      
+      try {
+        // Richiedi il download del file di backup
+        window.location.href = '/api/database/export';
+        this.message = 'Esportazione del database avviata. Il download dovrebbe iniziare a breve.';
+        this.messageType = 'success';
+      } catch (error) {
+        console.error('Error exporting database:', error);
+        this.message = 'Si è verificato un errore durante l\'esportazione del database. Riprova più tardi.';
+        this.messageType = 'error';
+      } finally {
+        this.loading = false;
+        this.operation = null;
       }
     },
     
-    async exportDatabase() {
-      this.exporting = true;
-      this.exportError = null;
-      
-      try {
-        const response = await api.get('/api/database/export', { responseType: 'blob' });
-        
-        // Crea un URL per il blob e avvia il download
-        const url = window.URL.createObjectURL(new Blob([response.data]));
-        const link = document.createElement('a');
-        link.href = url;
-        
-        // Genera un nome file con data e ora corrente
-        const date = new Date();
-        const formattedDate = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
-        const formattedTime = `${String(date.getHours()).padStart(2, '0')}-${String(date.getMinutes()).padStart(2, '0')}`;
-        
-        link.setAttribute('download', `craft-inventory-backup-${formattedDate}_${formattedTime}.sql`);
-        document.body.appendChild(link);
-        link.click();
-        
-        // Pulisci
-        window.URL.revokeObjectURL(url);
-        document.body.removeChild(link);
-      } catch (error) {
-        console.error('Error exporting database:', error);
-        this.exportError = 'Si è verificato un errore durante l\'esportazione del database.';
-      } finally {
-        this.exporting = false;
+    handleFileUpload(event) {
+      this.selectedFile = event.target.files[0];
+      if (this.selectedFile) {
+        this.importDatabase();
       }
     },
     
     async importDatabase() {
       if (!this.selectedFile) {
-        this.importError = 'Per favore seleziona un file SQL da importare.';
+        this.message = 'Nessun file selezionato.';
+        this.messageType = 'error';
         return;
       }
       
-      if (!confirm('Sei sicuro di voler importare questo database? Questa operazione sovrascriverà tutti i dati esistenti.')) {
+      if (!confirm('Sei sicuro di voler importare questo file SQL? Tutti i dati esistenti verranno sovrascritti.')) {
+        this.$refs.fileInput.value = null;
+        this.selectedFile = null;
         return;
       }
       
-      this.importing = true;
-      this.importError = null;
-      this.importSuccess = null;
+      this.loading = true;
+      this.operation = 'import';
+      this.message = '';
       
       try {
         const formData = new FormData();
         formData.append('sqlFile', this.selectedFile);
         
-        await api.post('/api/database/import', formData, {
+        const response = await api.post('/api/database/import', formData, {
           headers: {
             'Content-Type': 'multipart/form-data'
           }
         });
         
-        this.importSuccess = 'Database importato con successo!';
-        this.selectedFile = null;
-        this.$refs.fileInput.value = '';
+        this.message = response.data.message || 'Database importato con successo.';
+        this.messageType = 'success';
       } catch (error) {
         console.error('Error importing database:', error);
-        this.importError = 'Si è verificato un errore durante l\'importazione del database.';
+        this.message = 'Si è verificato un errore durante l\'importazione del database. Riprova più tardi.';
+        this.messageType = 'error';
       } finally {
-        this.importing = false;
-      }
-    },
-    
-    confirmReset() {
-      if (confirm('ATTENZIONE: Stai per eliminare tutti i dati e ripristinare il database allo stato iniziale. Questa operazione non può essere annullata. Sei sicuro di voler procedere?')) {
-        this.resetDatabase();
+        this.loading = false;
+        this.operation = null;
+        this.$refs.fileInput.value = null;
+        this.selectedFile = null;
       }
     },
     
     async resetDatabase() {
-      this.resetting = true;
-      this.resetError = null;
-      this.resetSuccess = null;
+      if (!confirm('Sei sicuro di voler ripristinare il database allo stato iniziale? Tutti i dati esistenti verranno eliminati.')) {
+        return;
+      }
+      
+      this.loading = true;
+      this.operation = 'reset';
+      this.message = '';
       
       try {
-        await api.post('/api/database/reset');
-        this.resetSuccess = 'Database ripristinato con successo allo stato iniziale!';
+        const response = await api.post('/api/database/reset');
+        this.message = response.data.message || 'Database ripristinato con successo.';
+        this.messageType = 'success';
       } catch (error) {
         console.error('Error resetting database:', error);
-        this.resetError = 'Si è verificato un errore durante il reset del database.';
+        this.message = 'Si è verificato un errore durante il ripristino del database. Riprova più tardi.';
+        this.messageType = 'error';
       } finally {
-        this.resetting = false;
+        this.loading = false;
+        this.operation = null;
+      }
+    },
+    
+    async initTestData() {
+      if (!confirm('Sei sicuro di voler inizializzare il database con dati di test? Tutti i dati esistenti verranno eliminati.')) {
+        return;
+      }
+      
+      this.loading = true;
+      this.operation = 'init';
+      this.message = '';
+      
+      try {
+        const response = await api.post('/api/test-data/init');
+        this.message = `Inizializzazione completata con successo! Creati: ${response.data.data.suppliers} fornitori, ${response.data.data.materials} materiali, ${response.data.data.components} componenti, ${response.data.data.models} modelli e ${response.data.data.inventoryItems} articoli in magazzino.`;
+        this.messageType = 'success';
+      } catch (error) {
+        console.error('Error initializing test data:', error);
+        this.message = 'Si è verificato un errore durante l\'inizializzazione dei dati di test. Riprova più tardi.';
+        this.messageType = 'error';
+      } finally {
+        this.loading = false;
+        this.operation = null;
       }
     }
   }
@@ -184,49 +235,65 @@ export default {
 <style scoped>
 .database-management {
   padding: 20px;
+  max-width: 1000px;
+  margin: 0 auto;
 }
 
 h1 {
   margin-bottom: 20px;
 }
 
-h2 {
-  margin-top: 0;
-  margin-bottom: 10px;
-  font-size: 1.5rem;
-}
-
 .card {
   background-color: #fff;
   border-radius: 8px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  padding: 20px;
   margin-bottom: 20px;
+  overflow: hidden;
 }
 
-.actions {
-  margin-top: 15px;
+.card-header {
+  background-color: #f8f9fa;
+  padding: 15px 20px;
+  border-bottom: 1px solid #eee;
+}
+
+.card-header h2 {
+  margin: 0;
+  font-size: 1.5rem;
+}
+
+.card-body {
+  padding: 20px;
+}
+
+.test-data-summary {
+  background-color: #f8f9fa;
+  padding: 15px;
+  border-radius: 4px;
+  margin: 15px 0;
+}
+
+.test-data-summary h3 {
+  margin-top: 0;
+  font-size: 1.2rem;
+}
+
+.test-data-summary ul {
+  margin-bottom: 0;
+}
+
+.action-buttons {
+  margin-top: 20px;
+  text-align: right;
 }
 
 .btn {
-  display: inline-block;
-  padding: 8px 16px;
+  padding: 10px 20px;
   border-radius: 4px;
-  text-decoration: none;
   cursor: pointer;
   border: none;
   font-size: 14px;
-  min-width: 180px;
-}
-
-.btn:disabled {
-  opacity: 0.7;
-  cursor: not-allowed;
-}
-
-.btn-primary {
-  background-color: #42b983;
-  color: white;
+  font-weight: bold;
 }
 
 .btn-danger {
@@ -234,40 +301,26 @@ h2 {
   color: white;
 }
 
-.file-upload {
-  margin: 15px 0;
+.btn:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
 }
 
-.file-upload input[type="file"] {
-  display: none;
-}
-
-.file-label {
-  display: inline-block;
-  padding: 8px 16px;
-  background-color: #f8f9fa;
-  border: 1px solid #ddd;
+.alert {
+  padding: 15px;
   border-radius: 4px;
-  cursor: pointer;
-  min-width: 200px;
-  text-align: center;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  max-width: 100%;
+  margin-top: 20px;
 }
 
-.file-label:hover {
-  background-color: #e9ecef;
+.alert-success {
+  background-color: #d4edda;
+  color: #155724;
+  border: 1px solid #c3e6cb;
 }
 
-.error-message {
-  color: #dc3545;
-  margin-top: 10px;
-}
-
-.success-message {
-  color: #28a745;
-  margin-top: 10px;
+.alert-error {
+  background-color: #f8d7da;
+  color: #721c24;
+  border: 1px solid #f5c6cb;
 }
 </style>

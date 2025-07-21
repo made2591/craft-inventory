@@ -34,22 +34,22 @@
       
       <div class="form-row">
         <div class="form-group">
-          <label for="unit_of_measure">Unità di Misura *</label>
+          <label for="unitOfMeasure">Unità di Misura *</label>
           <input 
             type="text" 
-            id="unit_of_measure" 
-            v-model="material.unit_of_measure" 
+            id="unitOfMeasure" 
+            v-model="material.unitOfMeasure" 
             required
             placeholder="es. metri, kg, pezzi"
           >
         </div>
         
         <div class="form-group">
-          <label for="cost_per_unit">Costo per Unità *</label>
+          <label for="costPerUnit">Costo per Unità *</label>
           <input 
             type="number" 
-            id="cost_per_unit" 
-            v-model.number="material.cost_per_unit" 
+            id="costPerUnit" 
+            v-model.number="material.costPerUnit" 
             required
             min="0"
             step="0.01"
@@ -60,11 +60,11 @@
       
       <div class="form-row">
         <div class="form-group">
-          <label for="current_stock">Quantità Disponibile *</label>
+          <label for="currentStock">Quantità Disponibile *</label>
           <input 
             type="number" 
-            id="current_stock" 
-            v-model.number="material.current_stock" 
+            id="currentStock" 
+            v-model.number="material.currentStock" 
             required
             min="0"
             step="0.01"
@@ -73,11 +73,11 @@
         </div>
         
         <div class="form-group">
-          <label for="min_stock_level">Livello Minimo di Scorta</label>
+          <label for="minStockLevel">Livello Minimo di Scorta</label>
           <input 
             type="number" 
-            id="min_stock_level" 
-            v-model.number="material.min_stock_level" 
+            id="minStockLevel" 
+            v-model.number="material.minStockLevel" 
             min="0"
             step="0.01"
             placeholder="0.00"
@@ -86,8 +86,8 @@
       </div>
       
       <div class="form-group">
-        <label for="supplier_id">Fornitore</label>
-        <select id="supplier_id" v-model="material.supplier_id">
+        <label for="supplierId">Fornitore</label>
+        <select id="supplierId" v-model="material.supplierId">
           <option value="">-- Seleziona un fornitore --</option>
           <option v-for="supplier in suppliers" :key="supplier.id" :value="supplier.id">
             {{ supplier.name }}
@@ -120,11 +120,11 @@ export default {
       material: {
         name: '',
         description: '',
-        unit_of_measure: '',
-        cost_per_unit: 0,
-        current_stock: 0,
-        min_stock_level: null,
-        supplier_id: null
+        unitOfMeasure: '',
+        costPerUnit: 0,
+        currentStock: 0,
+        minStockLevel: null,
+        supplierId: null
       },
       suppliers: [],
       loading: false,

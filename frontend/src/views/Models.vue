@@ -43,6 +43,12 @@
       <table>
         <thead>
           <tr>
+            <th @click="sortBy('sku')" class="sortable">
+              SKU
+              <span v-if="sortKey === 'sku'" class="sort-icon">
+                {{ sortOrder === 'asc' ? '▲' : '▼' }}
+              </span>
+            </th>
             <th @click="sortBy('name')" class="sortable">
               Nome
               <span v-if="sortKey === 'name'" class="sort-icon">
@@ -79,11 +85,12 @@
         </thead>
         <tbody>
           <tr v-for="model in paginatedModels" :key="model.id">
+            <td><strong>{{ model.sku || 'N/A' }}</strong></td>
             <td>{{ model.name }}</td>
             <td>{{ model.description || 'N/A' }}</td>
-            <td>€ {{ model.production_cost !== undefined && model.production_cost !== null ? model.production_cost.toFixed(2) : '0.00' }}</td>
-            <td>€ {{ model.selling_price !== undefined && model.selling_price !== null ? model.selling_price.toFixed(2) : '0.00' }}</td>
-            <td>{{ formatTime(model.labor_time_minutes) }}</td>
+            <td>€ {{ formatCost(model.productionCost || model.production_cost) }}</td>
+            <td>€ {{ formatCost(model.sellingPrice || model.selling_price) }}</td>
+            <td>{{ formatTime(model.laborTimeMinutes || model.labor_time_minutes) }}</td>
             <td>{{ calculateMargin(model) }}%</td>
             <td class="actions">
               <button @click="editModel(model.id)" class="btn btn-sm btn-edit">Modifica</button>
@@ -245,20 +252,44 @@ export default {
     },
     
     formatTime(minutes) {
-      const hours = Math.floor(minutes / 60);
-      const mins = minutes % 60;
+      if (minutes === undefined || minutes === null) return '0m';
+      
+      // Assicurati che minutes sia un numero
+      const mins = typeof minutes === 'number' ? minutes : Number(minutes);
+      if (isNaN(mins)) return '0m';
+      
+      const hours = Math.floor(mins / 60);
+      const remainingMins = mins % 60;
       
       if (hours > 0) {
-        return `${hours}h ${mins}m`;
+        return `${hours}h ${remainingMins}m`;
       }
-      return `${mins}m`;
+      return `${remainingMins}m`;
+    },
+    
+    formatCost(cost) {
+      // Assicurati che cost sia un numero
+      if (cost === undefined || cost === null) return '0.00';
+      
+      // Converti in numero se è una stringa
+      const numCost = typeof cost === 'number' ? cost : Number(cost);
+      
+      // Verifica se è un numero valido
+      if (isNaN(numCost)) return '0.00';
+      
+      // Formatta con due decimali
+      return numCost.toFixed(2);
     },
     
     calculateMargin(model) {
-      if (!model.selling_price || !model.production_cost || model.selling_price === 0) {
+      // Supporta sia camelCase che snake_case
+      const sellingPrice = model.sellingPrice !== undefined ? model.sellingPrice : model.selling_price;
+      const productionCost = model.productionCost !== undefined ? model.productionCost : model.production_cost;
+      
+      if (!sellingPrice || !productionCost || sellingPrice === 0) {
         return '0.0';
       }
-      const margin = ((model.selling_price - model.production_cost) / model.selling_price) * 100;
+      const margin = ((sellingPrice - productionCost) / sellingPrice) * 100;
       return margin.toFixed(1);
     },
     

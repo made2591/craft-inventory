@@ -16,7 +16,29 @@ export default function inventoryRoutes(pool, toCamelCase) {
       const result = await pool.query(
         'SELECT i.*, p.name as model_name FROM inventory_items i JOIN product_models p ON i.model_id = p.id ORDER BY i.created_at DESC'
       );
-      res.json(toCamelCase(result.rows));
+      
+      // Converti i dati in camelCase
+      const items = toCamelCase(result.rows);
+      
+      // Assicurati che le date siano stringhe ISO
+      items.forEach(item => {
+        // Converti la data di produzione in una stringa ISO
+        if (item.productionDate) {
+          try {
+            const date = new Date(item.productionDate);
+            if (!isNaN(date.getTime())) {
+              item.productionDate = date.toISOString();
+            } else {
+              item.productionDate = null;
+            }
+          } catch (error) {
+            console.error('Error formatting production date:', error);
+            item.productionDate = null;
+          }
+        }
+      });
+      
+      res.json(items);
     } catch (err) {
       console.error('Error fetching inventory:', err);
       res.status(500).json({ error: 'Internal server error' });
@@ -36,7 +58,25 @@ export default function inventoryRoutes(pool, toCamelCase) {
         return res.status(404).json({ error: 'Inventory item not found' });
       }
 
-      res.json(toCamelCase(result.rows[0]));
+      // Converti i dati in camelCase
+      const item = toCamelCase(result.rows[0]);
+      
+      // Assicurati che la data di produzione sia una stringa ISO
+      if (item.productionDate) {
+        try {
+          const date = new Date(item.productionDate);
+          if (!isNaN(date.getTime())) {
+            item.productionDate = date.toISOString();
+          } else {
+            item.productionDate = null;
+          }
+        } catch (error) {
+          console.error('Error formatting production date:', error);
+          item.productionDate = null;
+        }
+      }
+
+      res.json(item);
     } catch (err) {
       console.error('Error fetching inventory item:', err);
       res.status(500).json({ error: 'Internal server error' });
@@ -46,10 +86,14 @@ export default function inventoryRoutes(pool, toCamelCase) {
   // POST /api/inventory - Crea un nuovo articolo in inventario
   router.post('/', async (req, res) => {
     try {
-      const { model_id, quantity, production_date, notes } = req.body;
+      // Supporta sia camelCase che snake_case
+      const modelId = req.body.modelId || req.body.model_id;
+      const quantity = req.body.quantity;
+      const productionDate = req.body.productionDate || req.body.production_date;
+      const notes = req.body.notes;
       
       // Validate required fields
-      if (!model_id) {
+      if (!modelId) {
         return res.status(400).json({ error: 'Il modello è obbligatorio' });
       }
       
@@ -60,9 +104,30 @@ export default function inventoryRoutes(pool, toCamelCase) {
       const id = uuidv4();
       const now = new Date();
 
+      // Verifica che il modello esista
+      const modelCheck = await pool.query('SELECT id FROM product_models WHERE id = $1', [modelId]);
+      if (modelCheck.rows.length === 0) {
+        return res.status(400).json({ error: 'Il modello selezionato non esiste' });
+      }
+
+      // Assicurati che la data di produzione sia in un formato valido
+      let formattedProductionDate = null;
+      if (productionDate) {
+        try {
+          formattedProductionDate = new Date(productionDate);
+          // Verifica se la data è valida
+          if (isNaN(formattedProductionDate.getTime())) {
+            formattedProductionDate = now; // Usa la data corrente se la data fornita non è valida
+          }
+        } catch (error) {
+          console.error('Error parsing production date:', error);
+          formattedProductionDate = now; // Usa la data corrente in caso di errore
+        }
+      }
+
       const result = await pool.query(
         'INSERT INTO inventory_items (id, model_id, quantity, production_date, notes, created_at, updated_at) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *',
-        [id, model_id, quantity, production_date, notes, now, now]
+        [id, modelId, quantity, formattedProductionDate, notes, now, now]
       );
 
       res.status(201).json(toCamelCase(result.rows[0]));
@@ -76,13 +141,55 @@ export default function inventoryRoutes(pool, toCamelCase) {
   router.put('/:id', async (req, res) => {
     try {
       const { id } = req.params;
-      const { quantity, notes } = req.body;
+      const { quantity, notes, productionDate, production_date } = req.body;
       const now = new Date();
 
-      const result = await pool.query(
-        'UPDATE inventory_items SET quantity = $1, notes = $2, updated_at = $3 WHERE id = $4 RETURNING *',
-        [quantity, notes, now, id]
-      );
+      // Prepara la query e i parametri
+      const updateFields = [];
+      const queryParams = [];
+      let paramIndex = 1;
+
+      // Aggiungi i campi da aggiornare
+      if (quantity !== undefined) {
+        updateFields.push(`quantity = $${paramIndex}`);
+        queryParams.push(quantity);
+        paramIndex++;
+      }
+
+      if (notes !== undefined) {
+        updateFields.push(`notes = $${paramIndex}`);
+        queryParams.push(notes);
+        paramIndex++;
+      }
+
+      // Gestisci la data di produzione
+      const dateToFormat = productionDate || production_date;
+      if (dateToFormat) {
+        try {
+          const formattedProductionDate = new Date(dateToFormat);
+          if (!isNaN(formattedProductionDate.getTime())) {
+            updateFields.push(`production_date = $${paramIndex}`);
+            queryParams.push(formattedProductionDate);
+            paramIndex++;
+          }
+        } catch (error) {
+          console.error('Error parsing production date:', error);
+        }
+      }
+
+      // Aggiorna sempre il timestamp updated_at
+      updateFields.push(`updated_at = $${paramIndex}`);
+      queryParams.push(now);
+      paramIndex++;
+
+      // Aggiungi l'ID per la clausola WHERE
+      queryParams.push(id);
+
+      // Costruisci la query
+      const queryText = `UPDATE inventory_items SET ${updateFields.join(', ')} WHERE id = $${paramIndex - 1} RETURNING *`;
+
+      // Esegui la query
+      const result = await pool.query(queryText, queryParams);
 
       if (result.rows.length === 0) {
         return res.status(404).json({ error: 'Inventory item not found' });

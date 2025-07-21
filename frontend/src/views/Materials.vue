@@ -43,33 +43,39 @@
       <table>
         <thead>
           <tr>
+            <th @click="sortBy('sku')" class="sortable">
+              SKU
+              <span v-if="sortKey === 'sku'" class="sort-icon">
+                {{ sortOrder === 'asc' ? '▲' : '▼' }}
+              </span>
+            </th>
             <th @click="sortBy('name')" class="sortable">
               Nome
               <span v-if="sortKey === 'name'" class="sort-icon">
                 {{ sortOrder === 'asc' ? '▲' : '▼' }}
               </span>
             </th>
-            <th @click="sortBy('unit_of_measure')" class="sortable">
+            <th @click="sortBy('unitOfMeasure')" class="sortable">
               Unità di Misura
-              <span v-if="sortKey === 'unit_of_measure'" class="sort-icon">
+              <span v-if="sortKey === 'unitOfMeasure'" class="sort-icon">
                 {{ sortOrder === 'asc' ? '▲' : '▼' }}
               </span>
             </th>
-            <th @click="sortBy('cost_per_unit')" class="sortable">
+            <th @click="sortBy('costPerUnit')" class="sortable">
               Costo per Unità
-              <span v-if="sortKey === 'cost_per_unit'" class="sort-icon">
+              <span v-if="sortKey === 'costPerUnit'" class="sort-icon">
                 {{ sortOrder === 'asc' ? '▲' : '▼' }}
               </span>
             </th>
-            <th @click="sortBy('current_stock')" class="sortable">
+            <th @click="sortBy('currentStock')" class="sortable">
               Quantità Disponibile
-              <span v-if="sortKey === 'current_stock'" class="sort-icon">
+              <span v-if="sortKey === 'currentStock'" class="sort-icon">
                 {{ sortOrder === 'asc' ? '▲' : '▼' }}
               </span>
             </th>
-            <th @click="sortBy('min_stock_level')" class="sortable">
+            <th @click="sortBy('minStockLevel')" class="sortable">
               Livello Minimo
-              <span v-if="sortKey === 'min_stock_level'" class="sort-icon">
+              <span v-if="sortKey === 'minStockLevel'" class="sort-icon">
                 {{ sortOrder === 'asc' ? '▲' : '▼' }}
               </span>
             </th>
@@ -78,11 +84,12 @@
         </thead>
         <tbody>
           <tr v-for="material in paginatedMaterials" :key="material.id" :class="{ 'low-stock': isLowStock(material) }">
+            <td><strong>{{ material.sku || 'N/A' }}</strong></td>
             <td>{{ material.name }}</td>
-            <td>{{ material.unit_of_measure }}</td>
-            <td>€ {{ material.cost_per_unit !== undefined && material.cost_per_unit !== null ? material.cost_per_unit.toFixed(2) : '0.00' }}</td>
-            <td>{{ material.current_stock !== undefined && material.current_stock !== null ? material.current_stock : '0' }} {{ material.unit_of_measure }}</td>
-            <td>{{ material.min_stock_level || 'N/A' }}</td>
+            <td>{{ material.unitOfMeasure }}</td>
+            <td>€ {{ formatCost(material.costPerUnit) }}</td>
+            <td>{{ material.currentStock !== undefined && material.currentStock !== null ? material.currentStock : '0' }} {{ material.unitOfMeasure }}</td>
+            <td>{{ material.minStockLevel || 'N/A' }}</td>
             <td class="actions">
               <button @click="editMaterial(material.id)" class="btn btn-sm btn-edit">Modifica</button>
               <button @click="deleteMaterial(material.id)" class="btn btn-sm btn-danger">Elimina</button>
@@ -172,6 +179,19 @@ export default {
       try {
         const response = await materialService.getAllMaterials();
         this.materials = response.data;
+        
+        // Compatibilità con i nomi dei campi
+        this.materials = this.materials.map(material => {
+          return {
+            ...material,
+            // Assicurati che i campi siano disponibili in camelCase
+            unitOfMeasure: material.unitOfMeasure || material.unit_of_measure || '',
+            costPerUnit: material.costPerUnit || material.cost_per_unit || 0,
+            currentStock: material.currentStock || material.current_stock || 0,
+            minStockLevel: material.minStockLevel || material.min_stock_level || null
+          };
+        });
+        
         this.filterMaterials();
       } catch (error) {
         console.error('Error fetching materials:', error);
@@ -189,7 +209,7 @@ export default {
         this.filteredMaterials = this.materials.filter(material => 
           material.name.toLowerCase().includes(query) ||
           material.description?.toLowerCase().includes(query) ||
-          material.unit_of_measure.toLowerCase().includes(query)
+          (material.unitOfMeasure && material.unitOfMeasure.toLowerCase().includes(query))
         );
       }
       
@@ -243,9 +263,16 @@ export default {
       }
     },
     
+    formatCost(cost) {
+      // Ensure cost is a number
+      if (cost === undefined || cost === null) return '0.00';
+      const numCost = typeof cost === 'number' ? cost : parseFloat(cost);
+      return isNaN(numCost) ? '0.00' : numCost.toFixed(2);
+    },
+    
     isLowStock(material) {
-      if (!material.min_stock_level) return false;
-      return material.current_stock <= material.min_stock_level;
+      if (!material.minStockLevel) return false;
+      return material.currentStock <= material.minStockLevel;
     },
     
     editMaterial(id) {

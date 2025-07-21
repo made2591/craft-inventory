@@ -4,6 +4,19 @@ import { v4 as uuidv4 } from 'uuid';
 const router = express.Router();
 
 /**
+ * Genera un codice SKU alfanumerico di 8 caratteri
+ * @returns {string} SKU generato
+ */
+function generateSKU() {
+  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+  let sku = '';
+  for (let i = 0; i < 8; i++) {
+    sku += chars.charAt(Math.floor(Math.random() * chars.length));
+  }
+  return sku;
+}
+
+/**
  * Configura le rotte per la gestione dei materiali
  * @param {Object} pool - Pool di connessione al database PostgreSQL
  * @param {Function} toCamelCase - Funzione per convertire snake_case in camelCase
@@ -65,9 +78,23 @@ export default function materialsRoutes(pool, toCamelCase) {
       const id = uuidv4();
       const now = new Date();
       
+      // Genera uno SKU univoco
+      let sku = generateSKU();
+      let isUnique = false;
+      
+      // Verifica che lo SKU sia univoco
+      while (!isUnique) {
+        const skuCheck = await pool.query('SELECT id FROM materials WHERE sku = $1', [sku]);
+        if (skuCheck.rows.length === 0) {
+          isUnique = true;
+        } else {
+          sku = generateSKU(); // Genera un nuovo SKU se quello attuale esiste già
+        }
+      }
+      
       const result = await pool.query(
-        'INSERT INTO materials (id, name, description, unit_of_measure, cost_per_unit, current_stock, min_stock_level, supplier_id, created_at, updated_at) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10) RETURNING *',
-        [id, name, description, defaultUnitOfMeasure, defaultCostPerUnit, defaultCurrentStock, defaultMinStockLevel, supplierId, now, now]
+        'INSERT INTO materials (id, name, description, sku, unit_of_measure, cost_per_unit, current_stock, min_stock_level, supplier_id, created_at, updated_at) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11) RETURNING *',
+        [id, name, description, sku, defaultUnitOfMeasure, defaultCostPerUnit, defaultCurrentStock, defaultMinStockLevel, supplierId, now, now]
       );
       
       res.status(201).json(toCamelCase(result.rows[0]));
