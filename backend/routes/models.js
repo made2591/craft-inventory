@@ -125,7 +125,7 @@ export default function modelsRoutes(pool, toCamelCase) {
             FROM component_materials cm
             JOIN materials m ON cm.material_id = m.id
             WHERE cm.component_id = $1
-          `, [component.component_id]);
+          `, [component.componentId]);
 
           // Somma il costo di tutti i materiali del componente
           const componentCost = componentCostResult.rows.reduce((sum, item) => sum + parseFloat(item.cost), 0);
@@ -178,8 +178,8 @@ export default function modelsRoutes(pool, toCamelCase) {
       if (components && components.length > 0) {
         for (const component of components) {
           const componentId = uuidv4(); // Generate a unique ID for each model_component relationship
-          // Supporta sia componentId (camelCase) che component_id (snake_case)
-          const componentIdValue = component.componentId || component.component_id;
+          // Supporta sia componentId (camelCase) che componentId (snake_case)
+          const componentIdValue = component.componentId;
           
           if (!componentIdValue) {
             await pool.query('ROLLBACK');
@@ -244,7 +244,7 @@ export default function modelsRoutes(pool, toCamelCase) {
             FROM component_materials cm
             JOIN materials m ON cm.material_id = m.id
             WHERE cm.component_id = $1
-          `, [component.component_id]);
+          `, [component.componentId]);
 
           // Somma il costo di tutti i materiali del componente
           const componentCost = componentCostResult.rows.reduce((sum, item) => sum + parseFloat(item.cost), 0);
@@ -293,7 +293,7 @@ export default function modelsRoutes(pool, toCamelCase) {
           for (const component of components) {
             const componentId = uuidv4();
             // Supporta sia componentId (camelCase) che component_id (snake_case)
-            const componentIdValue = component.componentId || component.component_id;
+            const componentIdValue = component.componentId;
             
             if (!componentIdValue) {
               await pool.query('ROLLBACK');

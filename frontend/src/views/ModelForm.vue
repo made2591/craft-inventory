@@ -84,7 +84,7 @@
               <label :for="`component-${index}`">Componente *</label>
               <select 
                 :id="`component-${index}`" 
-                v-model="component.component_id" 
+                v-model="component.componentId" 
                 required 
                 class="form-control"
                 @change="updateComponentCost(index)"
@@ -136,16 +136,16 @@
               </div>
             </div>
             
-            <div v-if="component.component_id && component.quantity" class="cost-summary">
-              <div v-if="component.useCalculatedCost && componentCosts[component.component_id]">
+            <div v-if="component.componentId && component.quantity" class="cost-summary">
+              <div v-if="component.useCalculatedCost && componentCosts[component.componentId]">
                 <p>
                   <strong>Costo totale:</strong> 
-                  € {{ (componentCosts[component.component_id] * component.quantity).toFixed(2) }}
-                  ({{ component.quantity }} × € {{ componentCosts[component.component_id].toFixed(2) }})
+                  € {{ (componentCosts[component.componentId] * component.quantity).toFixed(2) }}
+                  ({{ component.quantity }} × € {{ componentCosts[component.componentId].toFixed(2) }})
                 </p>
               </div>
               <div v-else-if="component.useCalculatedCost">
-                <button type="button" @click="loadComponentCost(component.component_id)" class="btn btn-sm btn-secondary">
+                <button type="button" @click="loadComponentCost(component.componentId)" class="btn btn-sm btn-secondary">
                   Calcola costo
                 </button>
               </div>
@@ -240,7 +240,7 @@ export default {
         this.model = {
           ...modelData,
           components: components.map(component => ({
-            component_id: component.component_id,
+            componentId: component.componentId,
             quantity: component.quantity,
             useCalculatedCost: component.useCalculatedCost !== undefined ? component.useCalculatedCost : true,
             customCost: component.customCost || 0
@@ -254,8 +254,8 @@ export default {
         
         // Carica i costi dei componenti
         for (const component of this.model.components) {
-          if (component.component_id) {
-            await this.loadComponentCost(component.component_id);
+          if (component.componentId) {
+            await this.loadComponentCost(component.componentId);
           }
         }
       } catch (error) {
@@ -282,7 +282,7 @@ export default {
     
     addComponent() {
       this.model.components.push({
-        component_id: '',
+        componentId: '',
         quantity: 1,
         useCalculatedCost: true,
         customCost: 0
@@ -312,17 +312,17 @@ export default {
     
     updateComponentCost(index) {
       const component = this.model.components[index];
-      if (component.component_id && !this.componentCosts[component.component_id]) {
-        this.loadComponentCost(component.component_id);
+      if (component.componentId && !this.componentCosts[component.componentId]) {
+        this.loadComponentCost(component.componentId);
       }
     },
     
     updateComponentCostType(index) {
       const component = this.model.components[index];
-      if (component.useCalculatedCost && component.component_id) {
+      if (component.useCalculatedCost && component.componentId) {
         // Se si passa a "usa costo calcolato", carica il costo del componente
-        if (!this.componentCosts[component.component_id]) {
-          this.loadComponentCost(component.component_id);
+        if (!this.componentCosts[component.componentId]) {
+          this.loadComponentCost(component.componentId);
         }
       }
     },
@@ -333,7 +333,7 @@ export default {
         
         if (component.useCalculatedCost) {
           // Usa il costo calcolato dal sistema
-          unitCost = this.componentCosts[component.component_id] || 0;
+          unitCost = this.componentCosts[component.componentId] || 0;
         } else {
           // Usa il costo personalizzato
           unitCost = component.customCost || 0;
@@ -377,7 +377,7 @@ export default {
       
       // Verifica che tutti i componenti abbiano un ID e una quantità
       const invalidComponent = this.model.components.find(
-        component => !component.component_id || !component.quantity
+        component => !component.componentId || !component.quantity
       );
       
       if (invalidComponent) {
