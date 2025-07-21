@@ -66,9 +66,9 @@
                 {{ sortOrder === 'asc' ? '▲' : '▼' }}
               </span>
             </th>
-            <th @click="sortBy('contact_person')" class="sortable">
+            <th @click="sortBy('contactPerson')" class="sortable">
               Contatto
-              <span v-if="sortKey === 'contact_person'" class="sort-icon">
+              <span v-if="sortKey === 'contactPerson'" class="sort-icon">
                 {{ sortOrder === 'asc' ? '▲' : '▼' }}
               </span>
             </th>
@@ -91,7 +91,7 @@
           <tr v-for="customer in paginatedCustomers" :key="customer.id">
             <td>{{ customer.name }}</td>
             <td>{{ formatCustomerType(customer.customer_type) }}</td>
-            <td>{{ customer.contact_person || 'N/A' }}</td>
+            <td>{{ customer.contactPerson || 'N/A' }}</td>
             <td>{{ customer.email || 'N/A' }}</td>
             <td>{{ customer.phone || 'N/A' }}</td>
             <td class="actions">
@@ -206,7 +206,7 @@ export default {
         const query = this.searchQuery.toLowerCase();
         filtered = filtered.filter(customer => 
           customer.name.toLowerCase().includes(query) ||
-          (customer.contact_person && customer.contact_person.toLowerCase().includes(query)) ||
+          (customer.contactPerson && customer.contactPerson.toLowerCase().includes(query)) ||
           (customer.email && customer.email.toLowerCase().includes(query)) ||
           (customer.phone && customer.phone.toLowerCase().includes(query))
         );
