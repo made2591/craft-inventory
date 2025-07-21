@@ -41,13 +41,14 @@ export default function suppliersRoutes(pool, toCamelCase) {
   // POST /api/suppliers - Crea un nuovo fornitore
   router.post('/', async (req, res) => {
     try {
-      const { name, contact_person, email, phone, address, notes } = req.body;
+      // Usa solo contactPerson in camelCase
+      const { name, contactPerson, email, phone, address, notes } = req.body;
       const id = uuidv4();
       const now = new Date();
 
       const result = await pool.query(
         'INSERT INTO suppliers (id, name, contact_person, email, phone, address, notes, created_at, updated_at) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING *',
-        [id, name, contact_person, email, phone, address, notes, now, now]
+        [id, name, contactPerson, email, phone, address, notes, now, now]
       );
 
       res.status(201).json(toCamelCase(result.rows[0]));
@@ -61,12 +62,12 @@ export default function suppliersRoutes(pool, toCamelCase) {
   router.put('/:id', async (req, res) => {
     try {
       const { id } = req.params;
-      const { name, contact_person, email, phone, address, notes } = req.body;
+      const { name, contactPerson, email, phone, address, notes } = req.body;
       const now = new Date();
 
       const result = await pool.query(
         'UPDATE suppliers SET name = $1, contact_person = $2, email = $3, phone = $4, address = $5, notes = $6, updated_at = $7 WHERE id = $8 RETURNING *',
-        [name, contact_person, email, phone, address, notes, now, id]
+        [name, contactPerson, email, phone, address, notes, now, id]
       );
 
       if (result.rows.length === 0) {

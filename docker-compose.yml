@@ -49,6 +49,15 @@ services:
         ipv4_address: 172.28.1.4
     restart: unless-stopped
 
+  cloudflared:
+    image: cloudflare/cloudflared:latest
+    restart: unless-stopped
+    command: tunnel run inventree-tunnel
+    depends_on:
+      - inventree-server
+    volumes:
+      - ./cloudflared:/etc/cloudflared
+
 networks:
   craft-network:
     driver: bridge

@@ -49,9 +49,9 @@
                 {{ sortOrder === 'asc' ? '▲' : '▼' }}
               </span>
             </th>
-            <th @click="sortBy('contact_person')" class="sortable">
+            <th @click="sortBy('contactPerson')" class="sortable">
               Contatto
-              <span v-if="sortKey === 'contact_person'" class="sort-icon">
+              <span v-if="sortKey === 'contactPerson'" class="sort-icon">
                 {{ sortOrder === 'asc' ? '▲' : '▼' }}
               </span>
             </th>
@@ -79,7 +79,7 @@
         <tbody>
           <tr v-for="supplier in paginatedSuppliers" :key="supplier.id">
             <td>{{ supplier.name }}</td>
-            <td>{{ supplier.contact_person || 'N/A' }}</td>
+            <td>{{ supplier.contactPerson || 'N/A' }}</td>
             <td>{{ supplier.email || 'N/A' }}</td>
             <td>{{ supplier.phone || 'N/A' }}</td>
             <td>{{ supplier.address || 'N/A' }}</td>
@@ -188,7 +188,7 @@ export default {
         const query = this.searchQuery.toLowerCase();
         this.filteredSuppliers = this.suppliers.filter(supplier => 
           supplier.name.toLowerCase().includes(query) ||
-          (supplier.contact_person && supplier.contact_person.toLowerCase().includes(query)) ||
+          (supplier.contactPerson && supplier.contactPerson.toLowerCase().includes(query)) ||
           (supplier.email && supplier.email.toLowerCase().includes(query)) ||
           (supplier.phone && supplier.phone.toLowerCase().includes(query)) ||
           (supplier.address && supplier.address.toLowerCase().includes(query))

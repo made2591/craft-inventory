@@ -23,11 +23,11 @@
       </div>
       
       <div class="form-group">
-        <label for="contact_person">Persona di Contatto</label>
+        <label for="contactPerson">Persona di Contatto</label>
         <input 
           type="text" 
-          id="contact_person" 
-          v-model="supplier.contact_person" 
+          id="contactPerson" 
+          v-model="supplier.contactPerson" 
           placeholder="Nome della persona di contatto"
         >
       </div>
@@ -97,7 +97,7 @@ export default {
     return {
       supplier: {
         name: '',
-        contact_person: '',
+        contactPerson: '',
         email: '',
         phone: '',
         address: '',
