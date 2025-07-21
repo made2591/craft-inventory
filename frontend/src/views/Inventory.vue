@@ -54,9 +54,9 @@
       <table>
         <thead>
           <tr>
-            <th @click="sortBy('model_name')" class="sortable">
+            <th @click="sortBy('modelName')" class="sortable">
               Modello
-              <span v-if="sortKey === 'model_name'" class="sort-icon">
+              <span v-if="sortKey === 'modelName'" class="sort-icon">
                 {{ sortOrder === 'asc' ? '▲' : '▼' }}
               </span>
             </th>
@@ -66,9 +66,9 @@
                 {{ sortOrder === 'asc' ? '▲' : '▼' }}
               </span>
             </th>
-            <th @click="sortBy('production_date')" class="sortable">
+            <th @click="sortBy('productionDate')" class="sortable">
               Data Produzione
-              <span v-if="sortKey === 'production_date'" class="sort-icon">
+              <span v-if="sortKey === 'productionDate'" class="sort-icon">
                 {{ sortOrder === 'asc' ? '▲' : '▼' }}
               </span>
             </th>
@@ -83,9 +83,9 @@
         </thead>
         <tbody>
           <tr v-for="item in paginatedItems" :key="item.id">
-            <td>{{ item.modelName || item.model_name || 'N/A' }}</td>
+            <td>{{ item.modelName || 'N/A' }}</td>
             <td>{{ item.quantity }}</td>
-            <td>{{ formatDate(item.productionDate || item.production_date) }}</td>
+            <td>{{ formatDate(item.productionDate) }}</td>
             <td>{{ item.notes || 'N/A' }}</td>
             <td class="actions">
               <button @click="editItem(item.id)" class="btn btn-sm btn-edit">Modifica</button>
@@ -146,7 +146,7 @@ export default {
       error: null,
       searchQuery: '',
       modelFilter: '',
-      sortKey: 'production_date',
+      sortKey: 'productionDate',
       sortOrder: 'desc',
       currentPage: 1,
       itemsPerPage: 10
@@ -202,14 +202,14 @@ export default {
       
       // Apply model filter
       if (this.modelFilter) {
-        filtered = filtered.filter(item => item.model_id === this.modelFilter);
+        filtered = filtered.filter(item => item.modelId === this.modelFilter);
       }
       
       // Apply search filter
       if (this.searchQuery) {
         const query = this.searchQuery.toLowerCase();
         filtered = filtered.filter(item => 
-          (item.model_name && item.model_name.toLowerCase().includes(query)) ||
+          (item.modelName && item.modelName.toLowerCase().includes(query)) ||
           (item.notes && item.notes.toLowerCase().includes(query))
         );
       }
@@ -232,7 +232,7 @@ export default {
         if (valueB === null || valueB === undefined) valueB = '';
         
         // Special handling for dates
-        if (key === 'production_date') {
+        if (key === 'productionDate') {
           valueA = new Date(valueA).getTime();
           valueB = new Date(valueB).getTime();
         }

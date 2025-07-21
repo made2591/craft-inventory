@@ -212,12 +212,12 @@ export default function testDataRoutes(pool, toCamelCase) {
       for (const modelId of modelIds) {
         for (let i = 0; i < 2; i++) {
           const id = uuidv4();
-          const productionDate = new Date();
-          productionDate.setDate(productionDate.getDate() - i * 7); // Una settimana di differenza
+          const production_date = new Date();
+          production_date.setDate(production_date.getDate() - i * 7); // Una settimana di differenza
           
           await pool.query(
             'INSERT INTO inventory_items (id, model_id, quantity, production_date, notes, created_at, updated_at) VALUES ($1, $2, $3, $4, $5, $6, $7)',
-            [id, modelId, i + 1, productionDate, `Articolo di test ${i + 1}`, now, now]
+            [id, modelId, i + 1, production_date, `Articolo di test ${i + 1}`, now, now]
           );
         }
       }

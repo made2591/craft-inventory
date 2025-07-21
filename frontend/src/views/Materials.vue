@@ -4,6 +4,9 @@
 
     <div class="actions">
       <router-link to="/materials/new" class="btn btn-primary">Nuovo Materiale</router-link>
+      <button @click="refreshMaterials" class="btn btn-secondary" :disabled="loading">
+        {{ loading ? 'Aggiornamento in corso...' : 'Aggiorna materiali' }}
+      </button>
     </div>
 
     <div v-if="loading" class="loading">
@@ -84,7 +87,7 @@
             <td>{{ material.unitOfMeasure }}</td>
             <td>€ {{ formatCost(material.costPerUnit) }}</td>
             <td>{{ material.currentStock !== undefined && material.currentStock !== null ? material.currentStock : '0'
-              }} {{ material.unitOfMeasure }}</td>
+            }} {{ material.unitOfMeasure }}</td>
             <td>{{ material.minStockLevel || 'N/A' }}</td>
             <td class="actions">
               <button @click="editMaterial(material.id)" class="btn btn-sm btn-edit">Modifica</button>
@@ -256,14 +259,14 @@ export default {
 
     isLowStock(material) {
       if (!material.minStockLevel) return false;
-      
+
       // Converti i valori in numeri per assicurarsi che il confronto sia numerico
       const currentStock = parseFloat(material.currentStock);
       const minStockLevel = parseFloat(material.minStockLevel);
-      
+
       // Verifica che entrambi i valori siano numeri validi
       if (isNaN(currentStock) || isNaN(minStockLevel)) return false;
-      
+
       // Un materiale è considerato "low stock" solo quando la quantità disponibile è INFERIORE al livello minimo
       return currentStock < minStockLevel;
     },
@@ -285,6 +288,10 @@ export default {
         console.error('Error deleting material:', error);
         alert('Si è verificato un errore durante l\'eliminazione del materiale.');
       }
+    },
+
+    async refreshMaterials() {
+      await this.fetchMaterials();
     }
   }
 };
@@ -315,6 +322,11 @@ h1 {
 
 .btn-primary {
   background-color: #42b983;
+  color: white;
+}
+
+.btn-secondary {
+  background-color: #6c757d;
   color: white;
 }
 

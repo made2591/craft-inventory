@@ -1,5 +1,5 @@
 import express from 'express';
-import { exec, spawn } from 'child_process';
+import { spawn } from 'child_process';
 import fs from 'fs';
 import path from 'path';
 import multer from 'multer';
@@ -32,8 +32,11 @@ const upload = multer({
  */
 export default function databaseRoutes(_, __) {
   // GET /api/database/export - Esporta il database come file SQL
-  router.get('/export', async (_, res) => {
+  router.get('/export', async (req, res) => {
     try {
+      // Controlla se l'utente vuole esportare solo i dati o lo schema completo
+      const dataOnly = req.query.dataOnly === 'true';
+      
       // Ottieni le credenziali del database dalla stringa di connessione
       const connectionString = process.env.DATABASE_URL || 'postgres://craftuser:craftpassword@172.28.1.2:5432/craftdb';
       const match = connectionString.match(/postgres:\/\/([^:]+):([^@]+)@([^:]+):(\d+)\/(.+)/);
@@ -49,32 +52,41 @@ export default function databaseRoutes(_, __) {
       if (!fs.existsSync(backupDir)) {
         fs.mkdirSync(backupDir, { recursive: true });
         // Assicurati che la directory abbia i permessi corretti
-        fs.chmodSync(backupDir, 0o777);
+        fs.chmodSync(backupDir, 0o755);
       }
 
       // Genera un nome file univoco per il backup
       const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
       const backupFile = path.join(backupDir, `backup-${timestamp}.sql`);
 
-      // Crea un file SQL con istruzioni CREATE e INSERT utilizzando pg_dump
-      console.log('Creating SQL dump file...');
-      console.log('Using pg_dump version:');
-      exec('pg_dump --version', (_, stdout) => {
-        console.log(stdout);
-      });
-
-      // Utilizziamo spawn invece di exec per gestire meglio l'output
-      const pgDumpProcess = spawn('pg_dump', [
+      // Prepara le opzioni per pg_dump
+      const pgDumpArgs = [
         '-h', host,
         '-p', port,
         '-U', user,
         '-d', database,
         '-f', backupFile,
-        '--create',
-        '--clean',
-        '--if-exists',
-        '--inserts'
-      ], {
+        '--inserts'       // Usa INSERT invece di COPY per maggiore compatibilità
+      ];
+      
+      // Aggiungi opzioni in base alla modalità di export
+      if (dataOnly) {
+        // Solo dati, senza schema
+        pgDumpArgs.push('--data-only');
+        console.log('Creating SQL dump file with data only...');
+      } else {
+        // Schema completo con dati
+        pgDumpArgs.push(
+          '--no-owner',     // Non includere i comandi per impostare il proprietario
+          '--no-acl',       // Non includere i comandi per impostare i privilegi
+          '--clean',        // Includi comandi DROP prima dei CREATE
+          '--if-exists'     // Usa IF EXISTS nei comandi DROP
+        );
+        console.log('Creating complete SQL dump file with schema and data...');
+      }
+      
+      // Utilizziamo spawn invece di exec per gestire meglio l'output
+      const pgDumpProcess = spawn('pg_dump', pgDumpArgs, {
         env: { ...process.env, PGPASSWORD: password }
       });
 
@@ -101,7 +113,26 @@ export default function databaseRoutes(_, __) {
         if (code === 0) {
           console.log('pg_dump completed successfully');
           console.log('Backup file created:', backupFile);
+          
+          // Verifica che il file esista e abbia dimensioni > 0
+          if (!fs.existsSync(backupFile) || fs.statSync(backupFile).size === 0) {
+            return res.status(500).json({
+              error: 'Errore durante l\'esportazione del database',
+              details: 'Il file di backup è vuoto o non è stato creato'
+            });
+          }
+          
           console.log('File size:', fs.statSync(backupFile).size);
+          
+          // Aggiungi informazioni sul database al file
+          const dbInfo = `-- Database: ${database}\n-- Host: ${host}\n-- Exported at: ${new Date().toISOString()}\n\n`;
+          
+          try {
+            const fileContent = fs.readFileSync(backupFile, 'utf8');
+            fs.writeFileSync(backupFile, dbInfo + fileContent);
+          } catch (err) {
+            console.error('Error adding metadata to backup file:', err);
+          }
 
           // Invia il file al client
           res.download(backupFile, `craft-inventory-backup-${timestamp}.sql`, (err) => {
@@ -139,6 +170,15 @@ export default function databaseRoutes(_, __) {
 
       console.log('File uploaded:', req.file.path);
       console.log('File size:', fs.statSync(req.file.path).size);
+      
+      // Verifica che il file non sia vuoto
+      if (fs.statSync(req.file.path).size === 0) {
+        fs.unlink(req.file.path, () => { });
+        return res.status(400).json({ error: 'Il file caricato è vuoto' });
+      }
+      
+      // Controlla se l'utente vuole preservare lo schema esistente
+      const preserveSchema = req.body.preserveSchema === 'true';
 
       // Ottieni le credenziali del database dalla stringa di connessione
       const connectionString = process.env.DATABASE_URL || 'postgres://craftuser:craftpassword@172.28.1.2:5432/craftdb';
@@ -151,56 +191,205 @@ export default function databaseRoutes(_, __) {
       }
 
       const [, user, password, host, port, database] = match;
-
-      // Utilizziamo spawn invece di exec per gestire meglio l'output
-      const psqlProcess = spawn('psql', [
-        '-h', host,
-        '-p', port,
-        '-U', user,
-        '-d', database,
-        '-f', req.file.path
-      ], {
-        env: { ...process.env, PGPASSWORD: password }
-      });
-
-      let stdout = '';
-      let stderr = '';
-
-      psqlProcess.stdout.on('data', (data) => {
-        stdout += data.toString();
-        console.log(`psql stdout: ${data}`);
-      });
-
-      psqlProcess.stderr.on('data', (data) => {
-        stderr += data.toString();
-        console.error(`psql stderr: ${data}`);
-      });
-
-      psqlProcess.on('error', (error) => {
-        console.error('Error executing psql:', error);
-        // Elimina il file temporaneo in caso di errore
-        fs.unlink(req.file.path, () => { });
-        return res.status(500).json({
-          error: 'Errore durante l\'importazione del database',
-          details: error.message
+      
+      // Funzione per procedere con l'importazione
+      const proceedWithImport = () => {
+        console.log('Proceeding with import...');
+        
+        // Importiamo il file SQL
+        const psqlProcess = spawn('psql', [
+          '-h', host,
+          '-p', port,
+          '-U', user,
+          '-d', database,
+          '-v', 'ON_ERROR_STOP=1', // Ferma l'esecuzione al primo errore
+          '-f', req.file.path
+        ], {
+          env: { ...process.env, PGPASSWORD: password }
         });
-      });
+      
+        let stdout = '';
+        let stderr = '';
 
-      psqlProcess.on('close', (code) => {
-        // Elimina il file temporaneo
-        fs.unlink(req.file.path, () => { });
+        psqlProcess.stdout.on('data', (data) => {
+          stdout += data.toString();
+          console.log(`psql stdout: ${data}`);
+        });
 
-        if (code === 0) {
-          console.log('psql import completed successfully');
-          res.json({ message: 'Database importato con successo' });
-        } else {
-          console.error(`psql process exited with code ${code}`);
-          res.status(500).json({
+        psqlProcess.stderr.on('data', (data) => {
+          stderr += data.toString();
+          console.error(`psql stderr: ${data}`);
+        });
+
+        psqlProcess.on('error', (error) => {
+          console.error('Error executing psql:', error);
+          // Elimina il file temporaneo in caso di errore
+          fs.unlink(req.file.path, () => { });
+          return res.status(500).json({
             error: 'Errore durante l\'importazione del database',
-            details: stderr || `Process exited with code ${code}`
+            details: error.message
           });
-        }
-      });
+        });
+
+        psqlProcess.on('close', (code) => {
+          // Elimina il file temporaneo
+          fs.unlink(req.file.path, () => { });
+
+          if (code === 0) {
+            console.log('psql import completed successfully');
+            
+            // Esegui una query di verifica per assicurarsi che le tabelle siano state create
+            const checkProcess = spawn('psql', [
+              '-h', host,
+              '-p', port,
+              '-U', user,
+              '-d', database,
+              '-c', '\\dt'
+            ], {
+              env: { ...process.env, PGPASSWORD: password }
+            });
+            
+            let checkOutput = '';
+            
+            checkProcess.stdout.on('data', (data) => {
+              checkOutput += data.toString();
+            });
+            
+            checkProcess.on('close', () => {
+              console.log('Database tables after import:', checkOutput);
+              res.json({ 
+                message: 'Database importato con successo',
+                tables: checkOutput
+              });
+            });
+          } else {
+            console.error(`psql process exited with code ${code}`);
+            res.status(500).json({
+              error: 'Errore durante l\'importazione del database',
+              details: stderr || `Process exited with code ${code}`
+            });
+          }
+        });
+      };
+      
+      // Se preserveSchema è true, procedi direttamente con l'importazione
+      // altrimenti, esegui prima il DROP SCHEMA
+      if (preserveSchema) {
+        // Se preserviamo lo schema, prima svuotiamo solo i dati dalle tabelle
+        console.log('Preserving schema, truncating tables only...');
+        
+        // Ottieni l'elenco delle tabelle
+        const listTablesProcess = spawn('psql', [
+          '-h', host,
+          '-p', port,
+          '-U', user,
+          '-d', database,
+          '-t', // Output in formato tabulare
+          '-c', "SELECT tablename FROM pg_tables WHERE schemaname = 'public';"
+        ], {
+          env: { ...process.env, PGPASSWORD: password }
+        });
+        
+        let tablesList = '';
+        
+        listTablesProcess.stdout.on('data', (data) => {
+          tablesList += data.toString();
+        });
+        
+        listTablesProcess.on('close', (code) => {
+          if (code === 0) {
+            // Estrai i nomi delle tabelle
+            const tables = tablesList
+              .split('\n')
+              .map(table => table.trim())
+              .filter(table => table);
+            
+            if (tables.length === 0) {
+              console.log('No tables found, proceeding with import...');
+              proceedWithImport();
+              return;
+            }
+            
+            console.log('Tables to truncate:', tables);
+            
+            // Crea un comando per svuotare tutte le tabelle
+            const truncateCommand = `TRUNCATE TABLE ${tables.join(', ')} CASCADE;`;
+            
+            const truncateProcess = spawn('psql', [
+              '-h', host,
+              '-p', port,
+              '-U', user,
+              '-d', database,
+              '-c', truncateCommand
+            ], {
+              env: { ...process.env, PGPASSWORD: password }
+            });
+            
+            truncateProcess.on('close', (truncateCode) => {
+              if (truncateCode === 0) {
+                console.log('Tables truncated successfully');
+                proceedWithImport();
+              } else {
+                console.error('Error truncating tables');
+                fs.unlink(req.file.path, () => { });
+                return res.status(500).json({
+                  error: 'Errore durante la preparazione del database',
+                  details: 'Impossibile svuotare le tabelle'
+                });
+              }
+            });
+          } else {
+            console.error('Error listing tables');
+            fs.unlink(req.file.path, () => { });
+            return res.status(500).json({
+              error: 'Errore durante la preparazione del database',
+              details: 'Impossibile ottenere l\'elenco delle tabelle'
+            });
+          }
+        });
+      } else {
+        // Se non preserviamo lo schema, eseguiamo un DROP SCHEMA completo
+        console.log('Dropping existing schema...');
+        const dropProcess = spawn('psql', [
+          '-h', host,
+          '-p', port,
+          '-U', user,
+          '-d', database,
+          '-c', 'DROP SCHEMA public CASCADE; CREATE SCHEMA public;'
+        ], {
+          env: { ...process.env, PGPASSWORD: password }
+        });
+        
+        let dropStderr = '';
+        
+        dropProcess.stderr.on('data', (data) => {
+          dropStderr += data.toString();
+          console.error(`psql drop stderr: ${data}`);
+        });
+        
+        dropProcess.on('error', (error) => {
+          console.error('Error executing drop schema:', error);
+          fs.unlink(req.file.path, () => { });
+          return res.status(500).json({
+            error: 'Errore durante la preparazione del database',
+            details: error.message
+          });
+        });
+        
+        dropProcess.on('close', (dropCode) => {
+          if (dropCode !== 0) {
+            console.error(`psql drop process exited with code ${dropCode}`);
+            fs.unlink(req.file.path, () => { });
+            return res.status(500).json({
+              error: 'Errore durante la preparazione del database',
+              details: dropStderr || `Process exited with code ${dropCode}`
+            });
+          }
+          
+          console.log('Schema dropped successfully');
+          proceedWithImport();
+        });
+      }
     } catch (err) {
       console.error('Error in database import:', err);
       // Elimina il file temporaneo in caso di errore
@@ -212,7 +401,7 @@ export default function databaseRoutes(_, __) {
   });
 
   // POST /api/database/reset - Ripristina il database allo stato iniziale
-  router.post('/reset', async (_, res) => {
+  router.post('/reset', async (req, res) => {
     try {
       // Ottieni le credenziali del database dalla stringa di connessione
       const connectionString = process.env.DATABASE_URL || 'postgres://craftuser:craftpassword@172.28.1.2:5432/craftdb';

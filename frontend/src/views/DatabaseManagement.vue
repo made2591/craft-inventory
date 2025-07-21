@@ -12,6 +12,24 @@
           Esporta il database come file SQL per il backup o importa un file SQL per ripristinare il database.
         </p>
         
+        <div class="export-options">
+          <h3>Opzioni di esportazione</h3>
+          <div class="checkbox-group">
+            <input type="checkbox" id="dataOnly" v-model="exportOptions.dataOnly">
+            <label for="dataOnly">Solo dati (senza schema)</label>
+            <span class="tooltip" title="Esporta solo i dati senza la struttura del database">ℹ️</span>
+          </div>
+        </div>
+        
+        <div class="import-options">
+          <h3>Opzioni di importazione</h3>
+          <div class="checkbox-group">
+            <input type="checkbox" id="preserveSchema" v-model="importOptions.preserveSchema">
+            <label for="preserveSchema">Preserva schema esistente</label>
+            <span class="tooltip" title="Mantiene la struttura attuale del database e aggiorna solo i dati">ℹ️</span>
+          </div>
+        </div>
+        
         <div class="action-buttons action-buttons-row">
           <button 
             @click="exportDatabase" 
@@ -111,7 +129,13 @@ export default {
       operation: null, // 'export', 'import', 'reset', 'init'
       message: '',
       messageType: 'success',
-      selectedFile: null
+      selectedFile: null,
+      exportOptions: {
+        dataOnly: false
+      },
+      importOptions: {
+        preserveSchema: false
+      }
     };
   },
   methods: {
@@ -121,9 +145,17 @@ export default {
       this.message = '';
       
       try {
+        // Costruisci l'URL con i parametri di query in base alle opzioni selezionate
+        let exportUrl = '/api/database/export';
+        if (this.exportOptions.dataOnly) {
+          exportUrl += '?dataOnly=true';
+        }
+        
         // Richiedi il download del file di backup
-        window.location.href = '/api/database/export';
-        this.message = 'Esportazione del database avviata. Il download dovrebbe iniziare a breve.';
+        window.location.href = exportUrl;
+        
+        const exportType = this.exportOptions.dataOnly ? 'solo dati' : 'completa';
+        this.message = `Esportazione ${exportType} del database avviata. Il download dovrebbe iniziare a breve.`;
         this.messageType = 'success';
       } catch (error) {
         console.error('Error exporting database:', error);
@@ -149,7 +181,12 @@ export default {
         return;
       }
       
-      if (!confirm('Sei sicuro di voler importare questo file SQL? Tutti i dati esistenti verranno sovrascritti.')) {
+      // Personalizza il messaggio di conferma in base all'opzione selezionata
+      let confirmMessage = this.importOptions.preserveSchema 
+        ? 'Sei sicuro di voler importare questo file SQL? I dati esistenti verranno aggiornati mantenendo la struttura attuale del database.'
+        : 'Sei sicuro di voler importare questo file SQL? Tutti i dati e la struttura esistenti verranno sovrascritti.';
+      
+      if (!confirm(confirmMessage)) {
         this.$refs.fileInput.value = null;
         this.selectedFile = null;
         return;
@@ -163,13 +200,20 @@ export default {
         const formData = new FormData();
         formData.append('sqlFile', this.selectedFile);
         
+        // Aggiungi l'opzione preserveSchema al FormData se selezionata
+        if (this.importOptions.preserveSchema) {
+          formData.append('preserveSchema', 'true');
+        }
+        
         const response = await api.post('/api/database/import', formData, {
           headers: {
             'Content-Type': 'multipart/form-data'
           }
         });
         
-        this.message = response.data.message || 'Database importato con successo.';
+        // Personalizza il messaggio di successo in base all'opzione selezionata
+        const importType = this.importOptions.preserveSchema ? 'con preservazione dello schema' : 'completa';
+        this.message = response.data.message || `Importazione ${importType} del database completata con successo.`;
         this.messageType = 'success';
       } catch (error) {
         console.error('Error importing database:', error);
@@ -336,5 +380,51 @@ h1 {
   background-color: #f8d7da;
   color: #721c24;
   border: 1px solid #f5c6cb;
+}
+
+.export-options,
+.import-options {
+  background-color: #f8f9fa;
+  padding: 15px;
+  border-radius: 4px;
+  margin-bottom: 15px;
+}
+
+.export-options h3,
+.import-options h3 {
+  margin-top: 0;
+  font-size: 1.1rem;
+  margin-bottom: 10px;
+}
+
+.checkbox-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.checkbox-group input[type="checkbox"] {
+  margin: 0;
+  width: auto;
+}
+
+.tooltip {
+  cursor: help;
+  position: relative;
+  display: inline-block;
+}
+
+.tooltip:hover::after {
+  content: attr(title);
+  position: absolute;
+  left: 0;
+  top: 100%;
+  background-color: #333;
+  color: white;
+  padding: 5px 10px;
+  border-radius: 4px;
+  font-size: 12px;
+  white-space: nowrap;
+  z-index: 10;
 }
 </style>

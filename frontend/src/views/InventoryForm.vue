@@ -1,62 +1,41 @@
 <template>
   <div class="inventory-form">
     <h1>{{ isEditing ? 'Modifica Articolo' : 'Nuovo Articolo in Magazzino' }}</h1>
-    
+
     <div v-if="loading" class="loading">
       Caricamento in corso...
     </div>
-    
+
     <div v-else-if="error" class="error">
       {{ error }}
     </div>
-    
+
     <form v-else @submit.prevent="saveItem">
       <div class="form-group">
-        <label for="model_id">Modello *</label>
-        <select 
-          id="model_id" 
-          v-model="item.model_id" 
-          required
-        >
+        <label for="modelId">Modello *</label>
+        <select id="modelId" v-model="item.modelId" required>
           <option value="">-- Seleziona un modello --</option>
-          <option v-for="model in models" :key="model.id" :value="model.id">
+          <option v-for="model in models" :key="model.id" :value="model.id" :selected="model.id == item.modelId">
             {{ model.name }}
           </option>
         </select>
       </div>
-      
+
       <div class="form-group">
         <label for="quantity">Quantità *</label>
-        <input 
-          type="number" 
-          id="quantity" 
-          v-model.number="item.quantity" 
-          required
-          min="1"
-          step="1"
-          placeholder="1"
-        >
+        <input type="number" id="quantity" v-model.number="item.quantity" required min="1" step="1" placeholder="1">
       </div>
-      
+
       <div class="form-group">
-        <label for="production_date">Data di Produzione</label>
-        <input 
-          type="date" 
-          id="production_date" 
-          v-model="formattedDate"
-        >
+        <label for="productionDate">Data di Produzione</label>
+        <input type="date" id="productionDate" v-model="formattedDate">
       </div>
-      
+
       <div class="form-group">
         <label for="notes">Note</label>
-        <textarea 
-          id="notes" 
-          v-model="item.notes" 
-          placeholder="Note aggiuntive sull'articolo"
-          rows="3"
-        ></textarea>
+        <textarea id="notes" v-model="item.notes" placeholder="Note aggiuntive sull'articolo" rows="3"></textarea>
       </div>
-      
+
       <div class="form-actions">
         <button type="button" class="btn btn-secondary" @click="goBack">Annulla</button>
         <button type="submit" class="btn btn-primary">{{ isEditing ? 'Aggiorna' : 'Salva' }}</button>
@@ -79,9 +58,9 @@ export default {
   data() {
     return {
       item: {
-        model_id: '',
+        modelId: '',
         quantity: 1,
-        production_date: new Date().toISOString(),
+        productionDate: new Date().toISOString(),
         notes: ''
       },
       models: [],
@@ -95,27 +74,26 @@ export default {
     },
     formattedDate: {
       get() {
-        // Supporta sia camelCase che snake_case
-        const date = this.item.productionDate || this.item.production_date;
+        // Usa solo snake_case per coerenza
+        const date = this.item.productionDate;
         if (!date) return '';
-        
+
         // Gestisci diversi formati di data
         if (typeof date === 'string') {
           return date.split('T')[0];
         }
-        
+
         // Se è un oggetto Date
         if (date instanceof Date) {
           return date.toISOString().split('T')[0];
         }
-        
+
         return '';
       },
       set(value) {
-        // Imposta sia camelCase che snake_case per compatibilità
+        // Imposta solo snake_case per coerenza
         const formattedDate = value ? `${value}T00:00:00.000Z` : null;
         this.item.productionDate = formattedDate;
-        this.item.production_date = formattedDate;
       }
     }
   },
@@ -135,11 +113,11 @@ export default {
         this.error = 'Si è verificato un errore durante il recupero dei modelli. Riprova più tardi.';
       }
     },
-    
+
     async fetchItem() {
       this.loading = true;
       this.error = null;
-      
+
       try {
         const response = await api.get(`/api/inventory/${this.id}`);
         this.item = response.data;
@@ -150,33 +128,33 @@ export default {
         this.loading = false;
       }
     },
-    
+
     async saveItem() {
       this.loading = true;
       this.error = null;
-      
+
       try {
         // Prepara i dati da inviare
         const itemData = {
-          model_id: this.item.model_id,
+          modelId: this.item.modelId,
           quantity: this.item.quantity,
-          production_date: this.formattedDate ? `${this.formattedDate}T00:00:00.000Z` : null,
+          productionDate: this.formattedDate ? `${this.formattedDate}T00:00:00.000Z` : null,
           notes: this.item.notes
         };
-        
+
         console.log('Saving inventory item with data:', itemData);
-        
+
         if (this.isEditing) {
           // Includi anche la data di produzione nell'aggiornamento
           await api.put(`/api/inventory/${this.id}`, {
             quantity: this.item.quantity,
-            production_date: this.formattedDate ? `${this.formattedDate}T00:00:00.000Z` : null,
+            productionDate: this.formattedDate ? `${this.formattedDate}T00:00:00.000Z` : null,
             notes: this.item.notes
           });
         } else {
           await api.post('/api/inventory', itemData);
         }
-        
+
         this.$router.push('/inventory');
       } catch (error) {
         console.error('Error saving inventory item:', error);
@@ -185,7 +163,7 @@ export default {
         this.loading = false;
       }
     },
-    
+
     goBack() {
       this.$router.push('/inventory');
     }
@@ -204,7 +182,8 @@ h1 {
   margin-bottom: 20px;
 }
 
-.loading, .error {
+.loading,
+.error {
   text-align: center;
   padding: 20px;
   background-color: #f8f9fa;
@@ -226,7 +205,9 @@ label {
   font-weight: bold;
 }
 
-input, textarea, select {
+input,
+textarea,
+select {
   width: 100%;
   padding: 8px;
   border: 1px solid #ddd;
