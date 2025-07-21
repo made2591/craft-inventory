@@ -12,16 +12,16 @@
           Esporta il database come file SQL per il backup o importa un file SQL per ripristinare il database.
         </p>
         
-        <div class="action-buttons">
+        <div class="action-buttons action-buttons-row">
           <button 
             @click="exportDatabase" 
-            class="btn btn-primary" 
+            class="btn btn-primary action-button" 
             :disabled="loading"
           >
             {{ loading && operation === 'export' ? 'Esportazione in corso...' : 'Esporta Database' }}
           </button>
           
-          <label for="import-file" class="btn btn-secondary" :class="{ disabled: loading }">
+          <label for="import-file" class="btn btn-secondary action-button" :class="{ disabled: loading }">
             {{ loading && operation === 'import' ? 'Importazione in corso...' : 'Importa Database' }}
           </label>
           <input 
@@ -47,10 +47,10 @@
           <strong>Attenzione:</strong> Questa operazione è irreversibile.
         </p>
         
-        <div class="action-buttons">
+        <div class="action-buttons action-buttons-row">
           <button 
             @click="resetDatabase" 
-            class="btn btn-danger" 
+            class="btn btn-danger action-button" 
             :disabled="loading"
           >
             {{ loading && operation === 'reset' ? 'Reset in corso...' : 'Reset Database' }}
@@ -81,10 +81,10 @@
           </ul>
         </div>
         
-        <div class="action-buttons">
+        <div class="action-buttons action-buttons-row">
           <button 
             @click="initTestData" 
-            class="btn btn-warning" 
+            class="btn btn-warning action-button" 
             :disabled="loading"
           >
             {{ loading && operation === 'init' ? 'Inizializzazione in corso...' : 'Inizializza Dati di Test' }}
@@ -285,6 +285,20 @@ h1 {
 .action-buttons {
   margin-top: 20px;
   text-align: right;
+}
+
+.action-buttons-row {
+  display: flex;
+  justify-content: flex-end;
+  gap: 15px; /* Spazio tra i pulsanti */
+}
+
+.action-button {
+  min-width: 160px; /* Larghezza minima per uniformità */
+  height: 44px; /* Altezza fissa per tutti i pulsanti */
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .btn {

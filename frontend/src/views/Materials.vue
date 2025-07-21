@@ -1,33 +1,28 @@
 <template>
   <div class="materials">
     <h1>Gestione Materiali</h1>
-    
+
     <div class="actions">
       <router-link to="/materials/new" class="btn btn-primary">Nuovo Materiale</router-link>
     </div>
-    
+
     <div v-if="loading" class="loading">
       Caricamento in corso...
     </div>
-    
+
     <div v-else-if="error" class="error">
       {{ error }}
     </div>
-    
+
     <div v-else-if="materials.length === 0" class="empty-state">
       Nessun materiale trovato. Aggiungi il tuo primo materiale!
     </div>
-    
+
     <div v-else class="materials-list">
       <!-- Filtri e opzioni di paginazione -->
       <div class="table-controls">
         <div class="search-filter">
-          <input 
-            type="text" 
-            v-model="searchQuery" 
-            placeholder="Cerca materiali..." 
-            @input="filterMaterials"
-          >
+          <input type="text" v-model="searchQuery" placeholder="Cerca materiali..." @input="filterMaterials">
         </div>
         <div class="pagination-controls">
           <label for="itemsPerPage">Elementi per pagina:</label>
@@ -39,7 +34,7 @@
           </select>
         </div>
       </div>
-      
+
       <table>
         <thead>
           <tr>
@@ -88,7 +83,8 @@
             <td>{{ material.name }}</td>
             <td>{{ material.unitOfMeasure }}</td>
             <td>€ {{ formatCost(material.costPerUnit) }}</td>
-            <td>{{ material.currentStock !== undefined && material.currentStock !== null ? material.currentStock : '0' }} {{ material.unitOfMeasure }}</td>
+            <td>{{ material.currentStock !== undefined && material.currentStock !== null ? material.currentStock : '0'
+              }} {{ material.unitOfMeasure }}</td>
             <td>{{ material.minStockLevel || 'N/A' }}</td>
             <td class="actions">
               <button @click="editMaterial(material.id)" class="btn btn-sm btn-edit">Modifica</button>
@@ -97,37 +93,25 @@
           </tr>
         </tbody>
       </table>
-      
+
       <!-- Paginazione -->
       <div class="pagination">
-        <button 
-          @click="goToPage(currentPage - 1)" 
-          :disabled="currentPage === 1" 
-          class="btn btn-sm"
-        >
+        <button @click="goToPage(currentPage - 1)" :disabled="currentPage === 1" class="btn btn-sm">
           Precedente
         </button>
-        
+
         <div class="page-numbers">
-          <button 
-            v-for="page in totalPages" 
-            :key="page" 
-            @click="goToPage(page)" 
-            :class="['btn', 'btn-sm', currentPage === page ? 'btn-active' : '']"
-          >
+          <button v-for="page in totalPages" :key="page" @click="goToPage(page)"
+            :class="['btn', 'btn-sm', currentPage === page ? 'btn-active' : '']">
             {{ page }}
           </button>
         </div>
-        
-        <button 
-          @click="goToPage(currentPage + 1)" 
-          :disabled="currentPage === totalPages" 
-          class="btn btn-sm"
-        >
+
+        <button @click="goToPage(currentPage + 1)" :disabled="currentPage === totalPages" class="btn btn-sm">
           Successivo
         </button>
       </div>
-      
+
       <div class="pagination-info">
         Visualizzazione {{ startIndex + 1 }}-{{ endIndex }} di {{ filteredMaterials.length }} elementi
       </div>
@@ -175,11 +159,11 @@ export default {
     async fetchMaterials() {
       this.loading = true;
       this.error = null;
-      
+
       try {
         const response = await materialService.getAllMaterials();
         this.materials = response.data;
-        
+
         // Compatibilità con i nomi dei campi
         this.materials = this.materials.map(material => {
           return {
@@ -191,7 +175,7 @@ export default {
             minStockLevel: material.minStockLevel || material.min_stock_level || null
           };
         });
-        
+
         this.filterMaterials();
       } catch (error) {
         console.error('Error fetching materials:', error);
@@ -200,48 +184,48 @@ export default {
         this.loading = false;
       }
     },
-    
+
     filterMaterials() {
       if (!this.searchQuery) {
         this.filteredMaterials = [...this.materials];
       } else {
         const query = this.searchQuery.toLowerCase();
-        this.filteredMaterials = this.materials.filter(material => 
+        this.filteredMaterials = this.materials.filter(material =>
           material.name.toLowerCase().includes(query) ||
           material.description?.toLowerCase().includes(query) ||
           (material.unitOfMeasure && material.unitOfMeasure.toLowerCase().includes(query))
         );
       }
-      
+
       this.sortMaterials();
       this.currentPage = 1;
     },
-    
+
     sortMaterials() {
       const key = this.sortKey;
       const order = this.sortOrder;
-      
+
       this.filteredMaterials.sort((a, b) => {
         let valueA = a[key];
         let valueB = b[key];
-        
+
         // Handle null/undefined values
         if (valueA === null || valueA === undefined) valueA = '';
         if (valueB === null || valueB === undefined) valueB = '';
-        
+
         // Compare based on type
         if (typeof valueA === 'string' && typeof valueB === 'string') {
-          return order === 'asc' 
-            ? valueA.localeCompare(valueB) 
+          return order === 'asc'
+            ? valueA.localeCompare(valueB)
             : valueB.localeCompare(valueA);
         } else {
-          return order === 'asc' 
-            ? valueA - valueB 
+          return order === 'asc'
+            ? valueA - valueB
             : valueB - valueA;
         }
       });
     },
-    
+
     sortBy(key) {
       if (this.sortKey === key) {
         this.sortOrder = this.sortOrder === 'asc' ? 'desc' : 'asc';
@@ -249,41 +233,50 @@ export default {
         this.sortKey = key;
         this.sortOrder = 'asc';
       }
-      
+
       this.sortMaterials();
     },
-    
+
     updatePagination() {
       this.currentPage = 1;
     },
-    
+
     goToPage(page) {
       if (page >= 1 && page <= this.totalPages) {
         this.currentPage = page;
       }
     },
-    
+
     formatCost(cost) {
       // Ensure cost is a number
       if (cost === undefined || cost === null) return '0.00';
       const numCost = typeof cost === 'number' ? cost : parseFloat(cost);
       return isNaN(numCost) ? '0.00' : numCost.toFixed(2);
     },
-    
+
     isLowStock(material) {
       if (!material.minStockLevel) return false;
-      return material.currentStock <= material.minStockLevel;
+      
+      // Converti i valori in numeri per assicurarsi che il confronto sia numerico
+      const currentStock = parseFloat(material.currentStock);
+      const minStockLevel = parseFloat(material.minStockLevel);
+      
+      // Verifica che entrambi i valori siano numeri validi
+      if (isNaN(currentStock) || isNaN(minStockLevel)) return false;
+      
+      // Un materiale è considerato "low stock" solo quando la quantità disponibile è INFERIORE al livello minimo
+      return currentStock < minStockLevel;
     },
-    
+
     editMaterial(id) {
       this.$router.push(`/materials/${id}`);
     },
-    
+
     async deleteMaterial(id) {
       if (!confirm('Sei sicuro di voler eliminare questo materiale?')) {
         return;
       }
-      
+
       try {
         await materialService.deleteMaterial(id);
         this.materials = this.materials.filter(m => m.id !== id);
@@ -328,8 +321,10 @@ h1 {
 .btn-sm {
   padding: 4px 8px;
   font-size: 12px;
-  height: 28px; /* Altezza fissa per i pulsanti */
-  line-height: 20px; /* Allineamento verticale del testo */
+  height: 28px;
+  /* Altezza fissa per i pulsanti */
+  line-height: 20px;
+  /* Allineamento verticale del testo */
 }
 
 .btn-danger {
@@ -347,7 +342,9 @@ h1 {
   color: white;
 }
 
-.loading, .error, .empty-state {
+.loading,
+.error,
+.empty-state {
   text-align: center;
   padding: 20px;
   background-color: #f8f9fa;
@@ -393,12 +390,15 @@ table {
   margin-bottom: 20px;
 }
 
-th, td {
+th,
+td {
   padding: 8px 12px;
   text-align: left;
   border-bottom: 1px solid #ddd;
-  vertical-align: middle; /* Allineamento verticale al centro */
-  height: 44px; /* Altezza fissa per tutte le celle */
+  vertical-align: middle;
+  /* Allineamento verticale al centro */
+  height: 44px;
+  /* Altezza fissa per tutte le celle */
 }
 
 th {
@@ -427,10 +427,14 @@ th.sortable:hover {
 .actions {
   display: flex;
   gap: 8px;
-  margin: 0; /* Reset del margine */
-  padding: 0; /* Reset del padding */
-  justify-content: center; /* Centra orizzontalmente */
-  align-items: center; /* Allineamento verticale */
+  margin: 0;
+  /* Reset del margine */
+  padding: 0;
+  /* Reset del padding */
+  justify-content: center;
+  /* Centra orizzontalmente */
+  align-items: center;
+  /* Allineamento verticale */
 }
 
 .pagination {
