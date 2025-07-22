@@ -51,7 +51,7 @@
             </div>
             <div class="info-item">
               <span class="label">Tipo:</span>
-              <span class="value">{{ formatType(transaction.transaction_type) }}</span>
+              <span class="value">{{ formatType(transaction.transactionType) }}</span>
             </div>
             <div class="info-item">
               <span class="label">Data:</span>
@@ -65,15 +65,15 @@
             </div>
             <div class="info-item">
               <span class="label">Importo Totale:</span>
-              <span class="value">€ {{ transaction.total_amount !== undefined ? transaction.total_amount.toFixed(2) : '0.00' }}</span>
+              <span class="value">€ {{ formatCost(transaction.totalAmount) }}</span>
             </div>
-            <div class="info-item" v-if="transaction.transaction_type === 'purchase'">
+            <div class="info-item" v-if="transaction.transactionType === 'purchase'">
               <span class="label">Fornitore:</span>
-              <span class="value">{{ getSupplierName(transaction.supplier_id) }}</span>
+              <span class="value">{{ getSupplierName(transaction.supplierId) }}</span>
             </div>
             <div class="info-item" v-else>
               <span class="label">Cliente:</span>
-              <span class="value">{{ getCustomerName(transaction.customer_id) }}</span>
+              <span class="value">{{ getCustomerName(transaction.customerId) }}</span>
             </div>
             <div class="info-item" v-if="transaction.notes">
               <span class="label">Note:</span>
@@ -97,23 +97,23 @@
           <tbody>
             <tr v-for="item in items" :key="item.id">
               <td>
-                <span v-if="item.product_model_id">
-                  {{ getModelName(item.product_model_id) }}
+                <span v-if="item.productModelId">
+                  {{ getModelName(item.productModelId) }}
                 </span>
-                <span v-else-if="item.material_id">
-                  {{ getMaterialName(item.material_id) }}
+                <span v-else-if="item.materialId">
+                  {{ getMaterialName(item.materialId) }}
                 </span>
                 <span v-else>Articolo sconosciuto</span>
               </td>
               <td>{{ item.quantity }}</td>
-              <td>€ {{ item.unit_price !== undefined ? item.unit_price.toFixed(2) : '0.00' }}</td>
-              <td>€ {{ (item.quantity !== undefined && item.unit_price !== undefined) ? (item.quantity * item.unit_price).toFixed(2) : '0.00' }}</td>
+              <td>€ {{ formatCost(item.unitPrice) }}</td>
+              <td>€ {{ formatCost(item.quantity * item.unitPrice) }}</td>
             </tr>
           </tbody>
           <tfoot>
             <tr>
               <td colspan="3" class="total-label">Totale</td>
-              <td class="total-value">€ {{ transaction.total_amount !== undefined ? transaction.total_amount.toFixed(2) : '0.00' }}</td>
+              <td class="total-value">€ {{ formatCost(transaction.totalAmount) }}</td>
             </tr>
           </tfoot>
         </table>
@@ -270,6 +270,12 @@ export default {
         default:
           return '';
       }
+    },
+    
+    formatCost(cost) {
+      if (cost === undefined || cost === null) return '0.00';
+      const numCost = typeof cost === 'number' ? cost : parseFloat(cost);
+      return isNaN(numCost) ? '0.00' : numCost.toFixed(2);
     },
     
     async updateStatus(newStatus) {
