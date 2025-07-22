@@ -50,7 +50,7 @@ export default function testDataRoutes(_, __) {
 
       // Prima svuotiamo tutte le tabelle esistenti
       console.log('Truncating existing tables...');
-      
+
       // Ottieni l'elenco delle tabelle
       const listTablesProcess = spawn('psql', [
         '-h', host,
@@ -62,13 +62,13 @@ export default function testDataRoutes(_, __) {
       ], {
         env: { ...process.env, PGPASSWORD: password }
       });
-      
+
       let tablesList = '';
-      
+
       listTablesProcess.stdout.on('data', (data) => {
         tablesList += data.toString();
       });
-      
+
       listTablesProcess.on('close', (code) => {
         if (code === 0) {
           // Estrai i nomi delle tabelle
@@ -76,19 +76,19 @@ export default function testDataRoutes(_, __) {
             .split('\n')
             .map(table => table.trim())
             .filter(table => table);
-          
+
           const truncateTables = () => {
             if (tables.length === 0) {
               console.log('No tables found, proceeding with initialization...');
               initializeDatabase();
               return;
             }
-            
+
             console.log('Tables to truncate:', tables);
-            
+
             // Crea un comando per svuotare tutte le tabelle
             const truncateCommand = `TRUNCATE TABLE ${tables.join(', ')} CASCADE;`;
-            
+
             const truncateProcess = spawn('psql', [
               '-h', host,
               '-p', port,
@@ -98,7 +98,7 @@ export default function testDataRoutes(_, __) {
             ], {
               env: { ...process.env, PGPASSWORD: password }
             });
-            
+
             truncateProcess.on('close', (truncateCode) => {
               if (truncateCode === 0) {
                 console.log('Tables truncated successfully');
@@ -112,7 +112,7 @@ export default function testDataRoutes(_, __) {
               }
             });
           };
-          
+
           const initializeDatabase = () => {
             // Ora esegui il file di inizializzazione se necessario
             const checkTablesProcess = spawn('psql', [
@@ -125,21 +125,21 @@ export default function testDataRoutes(_, __) {
             ], {
               env: { ...process.env, PGPASSWORD: password }
             });
-            
+
             let tablesCount = '';
-            
+
             checkTablesProcess.stdout.on('data', (data) => {
               tablesCount += data.toString();
             });
-            
+
             checkTablesProcess.on('close', (checkCode) => {
               if (checkCode === 0) {
                 const count = parseInt(tablesCount.trim(), 10);
-                
+
                 if (count === 0) {
                   // Non ci sono tabelle, esegui il file di inizializzazione
                   console.log('No tables found, executing init script...');
-                  
+
                   const initProcess = spawn('psql', [
                     '-h', host,
                     '-p', port,
@@ -149,14 +149,14 @@ export default function testDataRoutes(_, __) {
                   ], {
                     env: { ...process.env, PGPASSWORD: password }
                   });
-                  
+
                   let initStderr = '';
-                  
+
                   initProcess.stderr.on('data', (data) => {
                     initStderr += data.toString();
                     console.error(`psql init stderr: ${data}`);
                   });
-                  
+
                   initProcess.on('close', (initCode) => {
                     if (initCode === 0) {
                       console.log('Database schema initialized successfully');
@@ -183,11 +183,11 @@ export default function testDataRoutes(_, __) {
               }
             });
           };
-          
+
           const seedDatabase = () => {
             // Esegui il file di seed
             console.log('Seeding database...');
-            
+
             const seedProcess = spawn('psql', [
               '-h', host,
               '-p', port,
@@ -197,18 +197,28 @@ export default function testDataRoutes(_, __) {
             ], {
               env: { ...process.env, PGPASSWORD: password }
             });
-            
+
             let seedStderr = '';
-            
+
             seedProcess.stderr.on('data', (data) => {
               seedStderr += data.toString();
               console.error(`psql seed stderr: ${data}`);
             });
-            
+
             seedProcess.on('close', (seedCode) => {
               if (seedCode === 0) {
                 console.log('Database seeded successfully');
-                res.json({ message: 'Dati di test inizializzati con successo' });
+                // Aggiungi i conteggi dei dati inseriti per il frontend
+                res.json({
+                  message: 'Dati di test inizializzati con successo',
+                  data: {
+                    suppliers: 3,
+                    materials: 5,
+                    components: 4,
+                    models: 8,
+                    inventoryItems: 8
+                  }
+                });
               } else {
                 console.error(`psql seed process exited with code ${seedCode}`);
                 res.status(500).json({
@@ -218,7 +228,7 @@ export default function testDataRoutes(_, __) {
               }
             });
           };
-          
+
           // Avvia il processo
           truncateTables();
         } else {
