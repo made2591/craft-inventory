@@ -65,6 +65,16 @@
       </div>
       
       <div class="form-group">
+        <label for="link">Link</label>
+        <input 
+          type="url" 
+          id="link" 
+          v-model="supplier.link" 
+          placeholder="URL del fornitore (es. https://esempio.com)"
+        >
+      </div>
+      
+      <div class="form-group">
         <label for="notes">Note</label>
         <textarea 
           id="notes" 
@@ -101,6 +111,7 @@ export default {
         email: '',
         phone: '',
         address: '',
+        link: '',
         notes: ''
       },
       loading: false,

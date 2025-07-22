@@ -42,13 +42,13 @@ export default function suppliersRoutes(pool, toCamelCase) {
   router.post('/', async (req, res) => {
     try {
       // Usa solo contactPerson in camelCase
-      const { name, contactPerson, email, phone, address, notes } = req.body;
+      const { name, contactPerson, email, phone, address, notes, link } = req.body;
       const id = uuidv4();
       const now = new Date();
 
       const result = await pool.query(
-        'INSERT INTO suppliers (id, name, contact_person, email, phone, address, notes, created_at, updated_at) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING *',
-        [id, name, contactPerson, email, phone, address, notes, now, now]
+        'INSERT INTO suppliers (id, name, contact_person, email, phone, address, notes, link, created_at, updated_at) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10) RETURNING *',
+        [id, name, contactPerson, email, phone, address, notes, link, now, now]
       );
 
       res.status(201).json(toCamelCase(result.rows[0]));
@@ -62,12 +62,12 @@ export default function suppliersRoutes(pool, toCamelCase) {
   router.put('/:id', async (req, res) => {
     try {
       const { id } = req.params;
-      const { name, contactPerson, email, phone, address, notes } = req.body;
+      const { name, contactPerson, email, phone, address, notes, link } = req.body;
       const now = new Date();
 
       const result = await pool.query(
-        'UPDATE suppliers SET name = $1, contact_person = $2, email = $3, phone = $4, address = $5, notes = $6, updated_at = $7 WHERE id = $8 RETURNING *',
-        [name, contactPerson, email, phone, address, notes, now, id]
+        'UPDATE suppliers SET name = $1, contact_person = $2, email = $3, phone = $4, address = $5, notes = $6, link = $7, updated_at = $8 WHERE id = $9 RETURNING *',
+        [name, contactPerson, email, phone, address, notes, link, now, id]
       );
 
       if (result.rows.length === 0) {

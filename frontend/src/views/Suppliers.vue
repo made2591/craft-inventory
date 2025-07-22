@@ -78,12 +78,17 @@
         </thead>
         <tbody>
           <tr v-for="supplier in paginatedSuppliers" :key="supplier.id">
-            <td>{{ supplier.name }}</td>
+            <td>
+              <router-link :to="`/suppliers/${supplier.id}/view`" class="name-link">
+                {{ supplier.name }}
+              </router-link>
+            </td>
             <td>{{ supplier.contactPerson || 'N/A' }}</td>
             <td>{{ supplier.email || 'N/A' }}</td>
             <td>{{ supplier.phone || 'N/A' }}</td>
             <td>{{ supplier.address || 'N/A' }}</td>
             <td class="actions">
+              <button @click="viewSupplier(supplier.id)" class="btn btn-sm btn-view">Visualizza</button>
               <button @click="editSupplier(supplier.id)" class="btn btn-sm btn-edit">Modifica</button>
               <button @click="deleteSupplier(supplier.id)" class="btn btn-sm btn-danger">Elimina</button>
             </td>
@@ -245,6 +250,10 @@ export default {
       }
     },
     
+    viewSupplier(id) {
+      this.$router.push(`/suppliers/${id}/view`);
+    },
+    
     editSupplier(id) {
       this.$router.push(`/suppliers/${id}`);
     },
@@ -316,9 +325,23 @@ h1 {
   color: white;
 }
 
+.btn-view {
+  background-color: #17a2b8;
+  color: white;
+}
+
 .btn-active {
   background-color: #42b983;
   color: white;
+}
+
+.name-link {
+  color: #3498db;
+  text-decoration: none;
+}
+
+.name-link:hover {
+  text-decoration: underline;
 }
 
 .loading, .error, .empty-state {

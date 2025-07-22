@@ -60,6 +60,12 @@
                 {{ sortOrder === 'asc' ? '▲' : '▼' }}
               </span>
             </th>
+            <th @click="sortBy('modelSku')" class="sortable">
+              SKU Modello
+              <span v-if="sortKey === 'modelSku'" class="sort-icon">
+                {{ sortOrder === 'asc' ? '▲' : '▼' }}
+              </span>
+            </th>
             <th @click="sortBy('quantity')" class="sortable">
               Quantità
               <span v-if="sortKey === 'quantity'" class="sort-icon">
@@ -84,10 +90,17 @@
         <tbody>
           <tr v-for="item in paginatedItems" :key="item.id">
             <td>{{ item.modelName || 'N/A' }}</td>
+            <td>
+              <router-link v-if="item.modelSku" :to="`/models/${item.modelId}/view`" class="sku-link">
+                {{ item.modelSku }}
+              </router-link>
+              <span v-else>N/A</span>
+            </td>
             <td>{{ item.quantity }}</td>
             <td>{{ formatDate(item.productionDate) }}</td>
             <td>{{ item.notes || 'N/A' }}</td>
             <td class="actions">
+              <button @click="viewItem(item.id)" class="btn btn-sm btn-view">Visualizza</button>
               <button @click="editItem(item.id)" class="btn btn-sm btn-edit">Modifica</button>
               <button @click="deleteItem(item.id)" class="btn btn-sm btn-danger">Elimina</button>
             </td>
@@ -295,6 +308,10 @@ export default {
       }
     },
     
+    viewItem(id) {
+      this.$router.push(`/inventory/${id}/view`);
+    },
+    
     editItem(id) {
       this.$router.push(`/inventory/${id}`);
     },
@@ -413,9 +430,23 @@ h1 {
   color: white;
 }
 
+.btn-view {
+  background-color: #17a2b8;
+  color: white;
+}
+
 .btn-active {
   background-color: #42b983;
   color: white;
+}
+
+.sku-link {
+  color: #3498db;
+  text-decoration: none;
+}
+
+.sku-link:hover {
+  text-decoration: underline;
 }
 
 .loading, .error, .empty-state {

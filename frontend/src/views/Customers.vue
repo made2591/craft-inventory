@@ -89,12 +89,17 @@
         </thead>
         <tbody>
           <tr v-for="customer in paginatedCustomers" :key="customer.id">
-            <td>{{ customer.name }}</td>
+            <td>
+              <router-link :to="`/customers/${customer.id}/view`" class="customer-link">
+                {{ customer.name }}
+              </router-link>
+            </td>
             <td>{{ formatCustomerType(customer.customerType) }}</td>
             <td>{{ customer.contactPerson || 'N/A' }}</td>
             <td>{{ customer.email || 'N/A' }}</td>
             <td>{{ customer.phone || 'N/A' }}</td>
             <td class="actions">
+              <button @click="viewCustomer(customer.id)" class="btn btn-sm btn-view">Visualizza</button>
               <button @click="editCustomer(customer.id)" class="btn btn-sm btn-edit">Modifica</button>
               <button @click="deleteCustomer(customer.id)" class="btn btn-sm btn-danger">Elimina</button>
             </td>
@@ -276,6 +281,10 @@ export default {
       }
     },
     
+    viewCustomer(id) {
+      this.$router.push(`/customers/${id}/view`);
+    },
+    
     editCustomer(id) {
       this.$router.push(`/customers/${id}`);
     },
@@ -393,6 +402,11 @@ h1 {
   color: white;
 }
 
+.btn-view {
+  background-color: #17a2b8;
+  color: white;
+}
+
 .btn-edit {
   background-color: #3498db;
   color: white;
@@ -401,6 +415,15 @@ h1 {
 .btn-active {
   background-color: #42b983;
   color: white;
+}
+
+.customer-link {
+  color: #3498db;
+  text-decoration: none;
+}
+
+.customer-link:hover {
+  text-decoration: underline;
 }
 
 .loading, .error, .empty-state {

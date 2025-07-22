@@ -94,6 +94,12 @@ const routes = [
     props: true
   },
   {
+    path: '/inventory/:id/view',
+    name: 'ViewInventoryItem',
+    component: () => import('../views/InventoryView.vue'),
+    props: true
+  },
+  {
     path: '/suppliers',
     name: 'Suppliers',
     component: () => import('../views/Suppliers.vue')
@@ -110,6 +116,12 @@ const routes = [
     props: true
   },
   {
+    path: '/suppliers/:id/view',
+    name: 'ViewSupplier',
+    component: () => import('../views/SupplierView.vue'),
+    props: true
+  },
+  {
     path: '/customers',
     name: 'Customers',
     component: () => import('../views/Customers.vue')
@@ -123,6 +135,12 @@ const routes = [
     path: '/customers/:id',
     name: 'EditCustomer',
     component: () => import('../views/CustomerForm.vue'),
+    props: true
+  },
+  {
+    path: '/customers/:id/view',
+    name: 'ViewCustomer',
+    component: () => import('../views/CustomerView.vue'),
     props: true
   },
   {
