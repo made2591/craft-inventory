@@ -85,7 +85,11 @@
         </thead>
         <tbody>
           <tr v-for="model in paginatedModels" :key="model.id">
-            <td><strong>{{ model.sku || 'N/A' }}</strong></td>
+            <td>
+              <router-link :to="`/models/${model.id}/view`" class="sku-link">
+                <strong>{{ model.sku || 'N/A' }}</strong>
+              </router-link>
+            </td>
             <td>{{ model.name }}</td>
             <td>{{ model.description || 'N/A' }}</td>
             <td>€ {{ formatCost(model.productionCost || model.production_cost) }}</td>
@@ -93,6 +97,7 @@
             <td>{{ formatTime(model.laborTimeMinutes || model.labor_time_minutes) }}</td>
             <td>{{ calculateMargin(model) }}%</td>
             <td class="actions">
+              <button @click="viewModel(model.id)" class="btn btn-sm btn-view">Visualizza</button>
               <button @click="editModel(model.id)" class="btn btn-sm btn-edit">Modifica</button>
               <button @click="deleteModel(model.id)" class="btn btn-sm btn-danger">Elimina</button>
             </td>
@@ -293,6 +298,10 @@ export default {
       return margin.toFixed(1);
     },
     
+    viewModel(id) {
+      this.$router.push(`/models/${id}/view`);
+    },
+    
     editModel(id) {
       this.$router.push(`/models/${id}`);
     },
@@ -360,9 +369,23 @@ h1 {
   color: white;
 }
 
+.btn-view {
+  background-color: #17a2b8;
+  color: white;
+}
+
 .btn-active {
   background-color: #42b983;
   color: white;
+}
+
+.sku-link {
+  color: #3498db;
+  text-decoration: none;
+}
+
+.sku-link:hover {
+  text-decoration: underline;
 }
 
 .loading, .error, .empty-state {

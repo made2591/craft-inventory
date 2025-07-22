@@ -72,6 +72,12 @@ const routes = [
     props: true
   },
   {
+    path: '/models/:id/view',
+    name: 'ViewModel',
+    component: () => import('../views/ModelView.vue'),
+    props: true
+  },
+  {
     path: '/inventory',
     name: 'Inventory',
     component: () => import('../views/Inventory.vue')
