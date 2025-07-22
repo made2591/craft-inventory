@@ -112,12 +112,12 @@
               <td>
                 <template v-if="transaction.items && transaction.items.length > 0">
                   <div v-for="item in transaction.items" :key="item.id">
-                    € {{ formatCost(item.unitPrice) }}
+                    {{ $formatCost(item.unitPrice) }}
                   </div>
                 </template>
                 <span v-else>{{ $t('common.notAvailable') }}</span>
               </td>
-              <td>€ {{ formatCost(transaction.totalAmount) }}</td>
+              <td>{{ $formatCost(transaction.totalAmount) }}</td>
             </tr>
           </tbody>
         </table>
@@ -185,12 +185,6 @@ export default {
         'retail': this.$t('customers.retail')
       };
       return types[type] || type;
-    },
-    
-    formatCost(cost) {
-      if (cost === undefined || cost === null) return '0.00';
-      const numCost = typeof cost === 'number' ? cost : parseFloat(cost);
-      return isNaN(numCost) ? '0.00' : numCost.toFixed(2);
     },
     
     formatDate(dateString) {

@@ -95,11 +95,11 @@
             <div v-if="material.materialId && material.quantity" class="cost-summary">
               <p>
                 <strong>{{ $t('common.totalCost') }}:</strong>
-                € {{ (calculateMaterialCost(material) || 0).toFixed(2) }}
-                ({{ material.quantity }} ×
+                {{ $formatCost(calculateMaterialCost(material) || 0) }}
+                ({{ $formatQuantity(material.quantity) }} ×
                 {{ material.useMaterialCost
-                  ? `$t('common.currency') ${(this.getMaterialCost(material.materialId) || 0).toFixed(2)}`
-                  : `$t('common.currency') ${material.customCost ? material.customCost.toFixed(2) : '0.00'}`
+                  ? $formatCost(this.getMaterialCost(material.materialId) || 0)
+                  : $formatCost(material.customCost || 0)
                 }})
               </p>
             </div>
@@ -112,7 +112,7 @@
       </div>
 
       <div class="total-cost" v-if="component.materials && component.materials.length > 0">
-        <h3>{{ $t('components.totalComponentCost') }}: € {{ (calculateTotalCost() || 0).toFixed(2) }}</h3>
+        <h3>{{ $t('components.totalComponentCost') }}: {{ $formatCost(calculateTotalCost() || 0) }}</h3>
       </div>
 
       <div class="form-actions">

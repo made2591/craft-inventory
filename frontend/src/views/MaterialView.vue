@@ -45,19 +45,19 @@
         
         <div class="detail-row">
           <div class="detail-label">{{ $t('materials.costPerUnit') }}:</div>
-          <div class="detail-value">€ {{ formatCost(material.costPerUnit) }}</div>
+          <div class="detail-value">{{ $formatCost(material.costPerUnit) }}</div>
         </div>
         
         <div class="detail-row">
           <div class="detail-label">{{ $t('materials.currentStock') }}:</div>
           <div class="detail-value" :class="{ 'low-stock': isLowStock(material) }">
-            {{ material.currentStock }} {{ material.unitOfMeasure }}
+            {{ $formatQuantity(material.currentStock) }} {{ material.unitOfMeasure }}
           </div>
         </div>
         
         <div class="detail-row">
           <div class="detail-label">{{ $t('materials.minStockLevel') }}:</div>
-          <div class="detail-value">{{ material.minStockLevel || $t('common.notSet') }}</div>
+          <div class="detail-value">{{ material.minStockLevel ? $formatQuantity(material.minStockLevel) : $t('common.notSet') }}</div>
         </div>
         
         <div class="detail-row">
@@ -102,9 +102,9 @@
             <tr v-for="transaction in paginatedPurchases" :key="transaction.id" :class="getStatusClass(transaction.status)">
               <td>{{ formatDate(transaction.date) }}</td>
               <td>{{ transaction.supplierName || 'N/A' }}</td>
-              <td>{{ transaction.quantity }} {{ material.unitOfMeasure }}</td>
-              <td>€ {{ formatCost(transaction.unitPrice) }}</td>
-              <td>€ {{ formatCost(transaction.totalPrice) }}</td>
+              <td>{{ $formatQuantity(transaction.quantity) }} {{ material.unitOfMeasure }}</td>
+              <td>{{ $formatCost(transaction.unitPrice) }}</td>
+              <td>{{ $formatCost(transaction.totalPrice) }}</td>
               <td>{{ formatStatus(transaction.status) }}</td>
               <td>
                 <router-link :to="`/transactions/${transaction.transactionId}`" class="btn btn-sm">{{ $t('common.details') }}</router-link>
@@ -228,12 +228,6 @@ export default {
       } catch (error) {
         console.error('Error fetching supplier:', error);
       }
-    },
-    
-    formatCost(cost) {
-      if (cost === undefined || cost === null) return '0.00';
-      const numCost = typeof cost === 'number' ? cost : parseFloat(cost);
-      return isNaN(numCost) ? '0.00' : numCost.toFixed(2);
     },
     
     formatDate(dateString) {

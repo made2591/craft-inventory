@@ -32,7 +32,7 @@
         
         <div class="detail-row">
           <div class="detail-label">{{ $t('components.quantity') }}:</div>
-          <div class="detail-value">{{ component.quantity || 0 }}</div>
+          <div class="detail-value">{{ $formatQuantity(component.quantity || 0) }}</div>
         </div>
         
         <div class="detail-row">
@@ -41,7 +41,7 @@
             <span v-if="loadingCost" class="loading-cost">
               <i class="loading-spinner"></i> {{ $t('common.calculating') }}
             </span>
-            <span v-else>€ {{ formatCost(totalCost) }}</span>
+            <span v-else>{{ $formatCost(totalCost) }}</span>
           </div>
         </div>
         
@@ -77,15 +77,15 @@
                   {{ material.materialName }}
                 </router-link>
               </td>
-              <td>{{ material.quantity }}</td>
-              <td>€ {{ formatCost(material.useMaterialCost ? material.materialCostPerUnit : material.customCost) }}</td>
-              <td>€ {{ formatCost(material.totalCost) }}</td>
+              <td>{{ $formatQuantity(material.quantity) }}</td>
+              <td>{{ $formatCost(material.useMaterialCost ? material.materialCostPerUnit : material.customCost) }}</td>
+              <td>{{ $formatCost(material.totalCost) }}</td>
             </tr>
           </tbody>
           <tfoot>
             <tr>
               <td colspan="3" class="total-label">{{ $t('common.totalCost') }}:</td>
-              <td class="total-value">€ {{ formatCost(totalCost) }}</td>
+              <td class="total-value">{{ $formatCost(totalCost) }}</td>
             </tr>
           </tfoot>
         </table>
@@ -154,12 +154,6 @@ export default {
       } finally {
         this.loadingCost = false;
       }
-    },
-    
-    formatCost(cost) {
-      if (cost === undefined || cost === null) return '0.00';
-      const numCost = typeof cost === 'number' ? cost : parseFloat(cost);
-      return isNaN(numCost) ? '0.00' : numCost.toFixed(2);
     },
     
     formatDate(dateString) {

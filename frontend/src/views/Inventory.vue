@@ -91,7 +91,7 @@
               <span v-else>N/A</span>
             </td>
             <td>{{ item.modelName || 'N/A' }}</td>
-            <td>{{ item.quantity }}</td>
+            <td>{{ $formatQuantity(item.quantity) }}</td>
             <td>{{ formatDate(item.productionDate) }}</td>
             <td>{{ item.notes || 'N/A' }}</td>
             <td class="actions">

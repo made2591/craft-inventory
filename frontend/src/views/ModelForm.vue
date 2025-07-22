@@ -140,8 +140,8 @@
               <div v-if="component.useCalculatedCost && componentCosts[component.componentId]">
                 <p>
                   <strong>{{ $t('common.totalCost') }}:</strong> 
-                  € {{ (componentCosts[component.componentId] * component.quantity).toFixed(2) }}
-                  ({{ component.quantity }} × € {{ componentCosts[component.componentId].toFixed(2) }})
+                  {{ $formatCost(componentCosts[component.componentId] * component.quantity) }}
+                  ({{ $formatQuantity(component.quantity) }} × {{ $formatCost(componentCosts[component.componentId]) }})
                 </p>
               </div>
               <div v-else-if="component.useCalculatedCost">
@@ -152,8 +152,8 @@
               <div v-else>
                 <p>
                   <strong>{{ $t('common.totalCost') }} ({{ $t('common.custom') }}):</strong> 
-                  € {{ ((component.customCost || 0) * component.quantity).toFixed(2) }}
-                  ({{ component.quantity }} × € {{ (component.customCost || 0).toFixed(2) }})
+                  {{ $formatCost((component.customCost || 0) * component.quantity) }}
+                  ({{ $formatQuantity(component.quantity) }} × {{ $formatCost(component.customCost || 0) }})
                 </p>
               </div>
             </div>
@@ -166,7 +166,7 @@
       </div>
       
       <div class="production-cost" v-if="calculateTotalCost() > 0">
-        <h3>{{ $t('models.productionCost') }}: € {{ calculateTotalCost().toFixed(2) }}</h3>
+        <h3>{{ $t('models.productionCost') }}: {{ $formatCost(calculateTotalCost()) }}</h3>
         <p v-if="model.sellingPrice">
           {{ $t('models.margin') }}: {{ calculateMargin().toFixed(1) }}%
         </p>

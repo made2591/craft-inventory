@@ -37,7 +37,7 @@
         
         <div class="detail-row">
           <div class="detail-label">{{ $t('inventory.quantity') }}:</div>
-          <div class="detail-value">{{ item.quantity }}</div>
+          <div class="detail-value">{{ $formatQuantity(item.quantity) }}</div>
         </div>
         
         <div class="detail-row">
@@ -82,7 +82,7 @@
                 </router-link>
               </td>
               <td>{{ component.componentName }}</td>
-              <td>{{ component.quantity }}</td>
+              <td>{{ $formatQuantity(component.quantity) }}</td>
             </tr>
           </tbody>
         </table>
@@ -115,7 +115,7 @@
               <td>
                 € {{ transaction.items && transaction.items.length > 0 ? formatCost(transaction.items[0].unitPrice) : '0.00' }}
               </td>
-              <td>€ {{ formatCost(transaction.totalAmount) }}</td>
+              <td>{{ $formatCost(transaction.totalAmount) }}</td>
               <td>{{ formatStatus(transaction.status) }}</td>
               <td>
                 <router-link :to="`/transactions/${transaction.id}`" class="btn btn-sm">{{ $t('common.details') }}</router-link>

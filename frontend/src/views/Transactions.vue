@@ -73,7 +73,7 @@
                 {{ getCustomerName(transaction.customerId) }}
               </span>
             </td>
-            <td>€ {{ formatCost(transaction.totalAmount) }}</td>
+            <td>{{ $formatCost(transaction.totalAmount) }}</td>
             <td>{{ formatStatus(transaction.status) }}</td>
             <td class="actions">
               <div class="dropdown" :class="{ 'dropdown-open': openDropdown === transaction.id }">
@@ -164,16 +164,16 @@
         </div>
         <div class="summary-card">
           <h3>{{ $t('transactions.totalPurchases') }}</h3>
-          <p class="summary-value">€ {{ formatCost(totalPurchases) }}</p>
+          <p class="summary-value">{{ $formatCost(totalPurchases) }}</p>
         </div>
         <div class="summary-card">
           <h3>{{ $t('transactions.totalSales') }}</h3>
-          <p class="summary-value">€ {{ formatCost(totalSales) }}</p>
+          <p class="summary-value">{{ $formatCost(totalSales) }}</p>
         </div>
         <div class="summary-card">
           <h3>{{ $t('transactions.balance') }}</h3>
           <p class="summary-value" :class="{ 'positive': totalSales - totalPurchases > 0, 'negative': totalSales - totalPurchases < 0 }">
-            € {{ formatCost(totalSales - totalPurchases) }}
+            {{ $formatCost(totalSales - totalPurchases) }}
           </p>
         </div>
       </div>
@@ -383,12 +383,6 @@ export default {
         default:
           return '';
       }
-    },
-    
-    formatCost(cost) {
-      if (cost === undefined || cost === null) return '0.00';
-      const numCost = typeof cost === 'number' ? cost : parseFloat(cost);
-      return isNaN(numCost) ? '0.00' : numCost.toFixed(2);
     },
     
     async updateStatus(id, newStatus) {

@@ -89,10 +89,10 @@
             </td>
             <td>{{ material.name }}</td>
             <td>{{ material.unitOfMeasure }}</td>
-            <td>€ {{ formatCost(material.costPerUnit) }}</td>
-            <td>{{ material.currentStock !== undefined && material.currentStock !== null ? material.currentStock : '0'
+            <td>{{ $formatCost(material.costPerUnit) }}</td>
+            <td>{{ $formatQuantity(material.currentStock !== undefined && material.currentStock !== null ? material.currentStock : 0)
             }} {{ material.unitOfMeasure }}</td>
-            <td>{{ material.minStockLevel || 'N/A' }}</td>
+            <td>{{ material.minStockLevel ? $formatQuantity(material.minStockLevel) : 'N/A' }}</td>
             <td class="actions">
               <button @click="viewMaterial(material.id)" class="btn btn-sm btn-view">{{ $t('common.view') }}</button>
               <button @click="editMaterial(material.id)" class="btn btn-sm btn-edit">{{ $t('common.edit') }}</button>
@@ -253,13 +253,6 @@ export default {
       if (page >= 1 && page <= this.totalPages) {
         this.currentPage = page;
       }
-    },
-
-    formatCost(cost) {
-      // Ensure cost is a number
-      if (cost === undefined || cost === null) return '0.00';
-      const numCost = typeof cost === 'number' ? cost : parseFloat(cost);
-      return isNaN(numCost) ? '0.00' : numCost.toFixed(2);
     },
 
     isLowStock(material) {

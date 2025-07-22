@@ -83,13 +83,13 @@
             </td>
             <td>{{ component.name }}</td>
             <td>{{ component.description || 'N/A' }}</td>
-            <td>{{ component.quantity || 0 }}</td>
+            <td>{{ $formatQuantity(component.quantity || 0) }}</td>
             <td>
               <span v-if="loadingCosts[component.id]" class="loading-cost">
                 <i class="loading-spinner"></i> {{ $t('common.calculating') }}...
               </span>
               <span v-else-if="componentCosts[component.id] !== undefined">
-                € {{ typeof componentCosts[component.id] === 'number' ? componentCosts[component.id].toFixed(2) : componentCosts[component.id] }}
+                {{ $formatCost(componentCosts[component.id]) }}
               </span>
               <span v-else>
                 <button @click="loadComponentCost(component.id)" class="btn btn-sm btn-secondary">

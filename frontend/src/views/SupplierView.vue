@@ -88,7 +88,7 @@
               </td>
               <td>{{ material.name }}</td>
               <td>{{ material.unitOfMeasure }}</td>
-              <td>€ {{ formatCost(material.costPerUnit) }}</td>
+              <td>{{ $formatCost(material.costPerUnit) }}</td>
               <td>{{ material.currentStock }} {{ material.unitOfMeasure }}</td>
             </tr>
           </tbody>
@@ -147,12 +147,6 @@ export default {
       } catch (error) {
         console.error('Error fetching materials:', error);
       }
-    },
-    
-    formatCost(cost) {
-      if (cost === undefined || cost === null) return '0.00';
-      const numCost = typeof cost === 'number' ? cost : parseFloat(cost);
-      return isNaN(numCost) ? '0.00' : numCost.toFixed(2);
     },
     
     formatDate(dateString) {

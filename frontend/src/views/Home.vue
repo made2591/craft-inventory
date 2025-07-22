@@ -105,8 +105,8 @@
         <tbody>
           <tr v-for="material in lowStockMaterials" :key="material.id">
             <td>{{ material.name }}</td>
-            <td>{{ material.current_stock }} {{ material.unit_of_measure }}</td>
-            <td>{{ material.min_stock_level }} {{ material.unit_of_measure }}</td>
+            <td>{{ $formatQuantity(material.current_stock) }} {{ material.unit_of_measure }}</td>
+            <td>{{ $formatQuantity(material.min_stock_level) }} {{ material.unit_of_measure }}</td>
             <td>
               <router-link :to="`/materials/${material.id}`" class="btn btn-sm">
                 {{ $t('common.edit') }}

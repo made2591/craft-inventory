@@ -32,12 +32,12 @@
         
         <div class="detail-row">
           <div class="detail-label">{{ $t('models.productionCost') }}:</div>
-          <div class="detail-value">€ {{ formatCost(model.productionCost) }}</div>
+          <div class="detail-value">{{ $formatCost(model.productionCost) }}</div>
         </div>
         
         <div class="detail-row">
           <div class="detail-label">{{ $t('models.sellingPrice') }}:</div>
-          <div class="detail-value">€ {{ formatCost(model.sellingPrice) }}</div>
+          <div class="detail-value">{{ $formatCost(model.sellingPrice) }}</div>
         </div>
         
         <div class="detail-row">
@@ -82,15 +82,15 @@
                   {{ component.componentName }}
                 </router-link>
               </td>
-              <td>{{ component.quantity }}</td>
-              <td>€ {{ formatCost(component.componentCost) }}</td>
-              <td>€ {{ formatCost(component.totalCost) }}</td>
+              <td>{{ $formatQuantity(component.quantity) }}</td>
+              <td>{{ $formatCost(component.componentCost) }}</td>
+              <td>{{ $formatCost(component.totalCost) }}</td>
             </tr>
           </tbody>
           <tfoot>
             <tr>
               <td colspan="3" class="total-label">{{ $t('models.totalComponentsCost') }}:</td>
-              <td class="total-value">€ {{ formatCost(totalComponentsCost) }}</td>
+              <td class="total-value">{{ $formatCost(totalComponentsCost) }}</td>
             </tr>
           </tfoot>
         </table>
@@ -117,7 +117,7 @@
                   {{ item.id.substring(0, 8) }}...
                 </router-link>
               </td>
-              <td>{{ item.quantity }}</td>
+              <td>{{ $formatQuantity(item.quantity) }}</td>
               <td>{{ formatDate(item.productionDate) }}</td>
               <td>{{ item.notes || $t('common.noNotes') }}</td>
             </tr>
@@ -226,12 +226,6 @@ export default {
       } catch (error) {
         console.error(this.$t('errors.fetchInventoryItems'), error);
       }
-    },
-    
-    formatCost(cost) {
-      if (cost === undefined || cost === null) return '0.00';
-      const numCost = typeof cost === 'number' ? cost : parseFloat(cost);
-      return isNaN(numCost) ? '0.00' : numCost.toFixed(2);
     },
     
     formatTime(minutes) {

@@ -92,8 +92,8 @@
             </td>
             <td>{{ model.name }}</td>
             <td>{{ model.description || 'N/A' }}</td>
-            <td>€ {{ formatCost(model.productionCost || model.production_cost) }}</td>
-            <td>€ {{ formatCost(model.sellingPrice || model.selling_price) }}</td>
+            <td>{{ $formatCost(model.productionCost || model.production_cost) }}</td>
+            <td>{{ $formatCost(model.sellingPrice || model.selling_price) }}</td>
             <td>{{ formatTime(model.laborTimeMinutes || model.labor_time_minutes) }}</td>
             <td>{{ calculateMargin(model) }}%</td>
             <td class="actions">
@@ -270,20 +270,6 @@ export default {
         return `${hours}h ${remainingMins}m`;
       }
       return `${remainingMins}m`;
-    },
-    
-    formatCost(cost) {
-      // Assicurati che cost sia un numero
-      if (cost === undefined || cost === null) return '0.00';
-      
-      // Converti in numero se è una stringa
-      const numCost = typeof cost === 'number' ? cost : Number(cost);
-      
-      // Verifica se è un numero valido
-      if (isNaN(numCost)) return '0.00';
-      
-      // Formatta con due decimali
-      return numCost.toFixed(2);
     },
     
     calculateMargin(model) {
