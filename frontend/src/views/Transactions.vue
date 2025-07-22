@@ -62,7 +62,7 @@
           </tr>
         </thead>
         <tbody>
-          <tr v-for="transaction in filteredTransactions" :key="transaction.id" :class="getStatusClass(transaction.status)">
+          <tr v-for="transaction in paginatedTransactions" :key="transaction.id" :class="getStatusClass(transaction.status)">
             <td>{{ formatDate(transaction.date) }}</td>
             <td>{{ formatType(transaction.transactionType) }}</td>
             <td>
@@ -102,6 +102,40 @@
           </tr>
         </tbody>
       </table>
+      
+      <!-- Paginazione -->
+      <div class="pagination">
+        <button 
+          @click="goToPage(currentPage - 1)" 
+          :disabled="currentPage === 1" 
+          class="btn btn-sm"
+        >
+          Precedente
+        </button>
+        
+        <div class="page-numbers">
+          <button 
+            v-for="page in totalPages" 
+            :key="page" 
+            @click="goToPage(page)" 
+            :class="['btn', 'btn-sm', currentPage === page ? 'btn-active' : '']"
+          >
+            {{ page }}
+          </button>
+        </div>
+        
+        <button 
+          @click="goToPage(currentPage + 1)" 
+          :disabled="currentPage === totalPages" 
+          class="btn btn-sm"
+        >
+          Successivo
+        </button>
+      </div>
+      
+      <div class="pagination-info">
+        Visualizzazione {{ startIndex + 1 }}-{{ endIndex }} di {{ totalItems }} elementi
+      </div>
     </div>
     
     <div class="summary" v-if="filteredTransactions.length > 0">
@@ -146,37 +180,28 @@ export default {
       typeFilter: '',
       statusFilter: '',
       dateFromFilter: '',
-      dateToFilter: ''
+      dateToFilter: '',
+      currentPage: 1,
+      itemsPerPage: 10,
+      totalItems: 0,
+      totalPages: 0
     };
   },
   computed: {
     filteredTransactions() {
-      let filtered = [...this.transactions];
-      
-      // Filtra per tipo
-      if (this.typeFilter) {
-        filtered = filtered.filter(t => t.transactionType === this.typeFilter);
-      }
-      
-      // Filtra per stato
-      if (this.statusFilter) {
-        filtered = filtered.filter(t => t.status === this.statusFilter);
-      }
-      
-      // Filtra per data di inizio
-      if (this.dateFromFilter) {
-        const fromDate = new Date(this.dateFromFilter);
-        filtered = filtered.filter(t => new Date(t.date) >= fromDate);
-      }
-      
-      // Filtra per data di fine
-      if (this.dateToFilter) {
-        const toDate = new Date(this.dateToFilter);
-        toDate.setHours(23, 59, 59, 999); // Imposta alla fine della giornata
-        filtered = filtered.filter(t => new Date(t.date) <= toDate);
-      }
-      
-      return filtered;
+      // Ora i dati sono già filtrati dal server
+      return this.transactions;
+    },
+    paginatedTransactions() {
+      // I dati sono già paginati dal server
+      return this.transactions;
+    },
+    startIndex() {
+      return (this.currentPage - 1) * this.itemsPerPage;
+    },
+    endIndex() {
+      const end = this.startIndex + this.itemsPerPage;
+      return end > this.totalItems ? this.totalItems : end;
     },
     totalPurchases() {
       return this.filteredTransactions
@@ -194,14 +219,50 @@ export default {
     this.fetchSuppliers();
     this.fetchCustomers();
   },
+  watch: {
+    typeFilter() {
+      this.currentPage = 1;
+      this.fetchTransactions();
+    },
+    statusFilter() {
+      this.currentPage = 1;
+      this.fetchTransactions();
+    },
+    dateFromFilter() {
+      this.currentPage = 1;
+      this.fetchTransactions();
+    },
+    dateToFilter() {
+      this.currentPage = 1;
+      this.fetchTransactions();
+    }
+  },
   methods: {
     async fetchTransactions() {
       this.loading = true;
       this.error = null;
       
       try {
-        const response = await transactionService.getAllTransactions();
-        this.transactions = response.data;
+        const options = {
+          page: this.currentPage,
+          limit: this.itemsPerPage,
+          type: this.typeFilter || undefined,
+          status: this.statusFilter || undefined
+        };
+        
+        // Aggiungi i filtri di data se presenti
+        if (this.dateFromFilter) {
+          options.dateFrom = this.dateFromFilter;
+        }
+        
+        if (this.dateToFilter) {
+          options.dateTo = this.dateToFilter;
+        }
+        
+        const response = await transactionService.getAllTransactions(options);
+        this.transactions = response.data.transactions;
+        this.totalItems = response.data.pagination.totalItems;
+        this.totalPages = response.data.pagination.totalPages;
       } catch (error) {
         console.error('Error fetching transactions:', error);
         this.error = 'Si è verificato un errore durante il recupero delle transazioni. Riprova più tardi.';
@@ -317,6 +378,13 @@ export default {
         } else {
           alert('Si è verificato un errore durante l\'eliminazione della transazione.');
         }
+      }
+    },
+    
+    goToPage(page) {
+      if (page >= 1 && page <= this.totalPages) {
+        this.currentPage = page;
+        this.fetchTransactions();
       }
     }
   }

@@ -10,10 +10,11 @@ const router = express.Router();
  * @returns {express.Router} Router configurato
  */
 export default function transactionsRoutes(pool, toCamelCase) {
-  // GET /api/transactions - Ottieni tutte le transazioni
+  // GET /api/transactions - Ottieni tutte le transazioni con paginazione
   router.get('/', async (req, res) => {
     try {
-      const { customerId, supplierId, type } = req.query;
+      const { customerId, supplierId, type, page = 1, limit = 10, modelId } = req.query;
+      const offset = (page - 1) * limit;
       
       let query = `
         SELECT t.*, 
@@ -24,34 +25,84 @@ export default function transactionsRoutes(pool, toCamelCase) {
         LEFT JOIN customers c ON t.customer_id = c.id 
       `;
       
+      let countQuery = `
+        SELECT COUNT(*) FROM transactions t
+      `;
+      
       const params = [];
+      const countParams = [];
       const conditions = [];
+      const countConditions = [];
       
       if (customerId) {
-        conditions.push(`t.customer_id = $${params.length + 1}`);
+        conditions.push(`t.customer_id = ${params.length + 1}`);
+        countConditions.push(`t.customer_id = ${countParams.length + 1}`);
         params.push(customerId);
+        countParams.push(customerId);
       }
       
       if (supplierId) {
-        conditions.push(`t.supplier_id = $${params.length + 1}`);
+        conditions.push(`t.supplier_id = ${params.length + 1}`);
+        countConditions.push(`t.supplier_id = ${countParams.length + 1}`);
         params.push(supplierId);
+        countParams.push(supplierId);
       }
       
       if (type) {
-        conditions.push(`t.transaction_type = $${params.length + 1}`);
+        conditions.push(`t.transaction_type = ${params.length + 1}`);
+        countConditions.push(`t.transaction_type = ${countParams.length + 1}`);
         params.push(type);
+        countParams.push(type);
       }
       
-      if (conditions.length > 0) {
+      // Se è specificato un modelId, filtra per le transazioni che contengono quel modello
+      if (modelId) {
+        query = `
+          SELECT DISTINCT t.*, 
+            s.name as supplier_name, 
+            c.name as customer_name
+          FROM transactions t 
+          LEFT JOIN suppliers s ON t.supplier_id = s.id 
+          LEFT JOIN customers c ON t.customer_id = c.id 
+          JOIN transaction_items ti ON t.id = ti.transaction_id
+          WHERE ti.product_model_id = ${params.length + 1}
+        `;
+        
+        countQuery = `
+          SELECT COUNT(DISTINCT t.id) FROM transactions t
+          JOIN transaction_items ti ON t.id = ti.transaction_id
+          WHERE ti.product_model_id = ${countParams.length + 1}
+        `;
+        
+        params.push(modelId);
+        countParams.push(modelId);
+        
+        // Aggiungi altre condizioni se presenti
+        if (conditions.length > 0) {
+          query += ' AND ' + conditions.join(' AND ');
+          countQuery += ' AND ' + countConditions.join(' AND ');
+        }
+      } else if (conditions.length > 0) {
         query += ' WHERE ' + conditions.join(' AND ');
+        countQuery += ' WHERE ' + countConditions.join(' AND ');
       }
       
       query += ' ORDER BY t.date DESC';
       
-      const transactionsResult = await pool.query(query, params);
+      // Aggiungi paginazione
+      query += ` LIMIT ${limit} OFFSET ${offset}`;
       
-      // Se abbiamo transazioni e c'è un customerId o supplierId, otteniamo anche i dettagli degli elementi
-      if (transactionsResult.rows.length > 0 && (customerId || supplierId)) {
+      // Esegui le query
+      const [transactionsResult, countResult] = await Promise.all([
+        pool.query(query, params),
+        pool.query(countQuery, countParams)
+      ]);
+      
+      const totalItems = parseInt(countResult.rows[0].count);
+      const totalPages = Math.ceil(totalItems / limit);
+      
+      // Se abbiamo transazioni e c'è un customerId, supplierId o modelId, otteniamo anche i dettagli degli elementi
+      if (transactionsResult.rows.length > 0 && (customerId || supplierId || modelId)) {
         const transactionIds = transactionsResult.rows.map(t => t.id);
         
         const itemsQuery = `
@@ -77,9 +128,25 @@ export default function transactionsRoutes(pool, toCamelCase) {
           };
         });
         
-        res.json(toCamelCase(transactionsWithItems));
+        res.json({
+          transactions: toCamelCase(transactionsWithItems),
+          pagination: {
+            page: parseInt(page),
+            limit: parseInt(limit),
+            totalItems,
+            totalPages
+          }
+        });
       } else {
-        res.json(toCamelCase(transactionsResult.rows));
+        res.json({
+          transactions: toCamelCase(transactionsResult.rows),
+          pagination: {
+            page: parseInt(page),
+            limit: parseInt(limit),
+            totalItems,
+            totalPages
+          }
+        });
       }
     } catch (err) {
       console.error('Error fetching transactions:', err);

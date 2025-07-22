@@ -93,6 +93,106 @@ export default function inventoryRoutes(pool, toCamelCase) {
       res.status(500).json({ error: 'Internal server error' });
     }
   });
+  
+  // GET /api/inventory/:id/sales - Ottieni le vendite relative a un articolo specifico dell'inventario
+  router.get('/:id/sales', async (req, res) => {
+    try {
+      const { id } = req.params;
+      const { page = 1, limit = 10 } = req.query;
+      const offset = (page - 1) * limit;
+      
+      // Prima ottieni l'articolo di inventario per ottenere il model_id
+      const inventoryResult = await pool.query(
+        'SELECT model_id FROM inventory_items WHERE id = $1',
+        [id]
+      );
+
+      if (inventoryResult.rows.length === 0) {
+        return res.status(404).json({ error: 'Inventory item not found' });
+      }
+      
+      const modelId = inventoryResult.rows[0].model_id;
+      
+      // Ottieni le transazioni di vendita per questo modello
+      const query = `
+        SELECT DISTINCT t.*, 
+          c.name as customer_name
+        FROM transactions t 
+        JOIN transaction_items ti ON t.id = ti.transaction_id
+        LEFT JOIN customers c ON t.customer_id = c.id 
+        WHERE ti.product_model_id = $1
+        AND t.transaction_type = 'sale'
+        ORDER BY t.date DESC
+        LIMIT $2 OFFSET $3
+      `;
+      
+      const countQuery = `
+        SELECT COUNT(DISTINCT t.id) 
+        FROM transactions t
+        JOIN transaction_items ti ON t.id = ti.transaction_id
+        WHERE ti.product_model_id = $1
+        AND t.transaction_type = 'sale'
+      `;
+      
+      // Esegui le query
+      const [salesResult, countResult] = await Promise.all([
+        pool.query(query, [modelId, limit, offset]),
+        pool.query(countQuery, [modelId])
+      ]);
+      
+      const totalItems = parseInt(countResult.rows[0].count);
+      const totalPages = Math.ceil(totalItems / limit);
+      
+      // Se abbiamo transazioni, ottieni anche i dettagli degli elementi
+      if (salesResult.rows.length > 0) {
+        const transactionIds = salesResult.rows.map(t => t.id);
+        
+        const itemsQuery = `
+          SELECT ti.*, 
+            ti.transaction_id,
+            pm.name as model_name
+          FROM transaction_items ti 
+          LEFT JOIN product_models pm ON ti.product_model_id = pm.id
+          WHERE ti.transaction_id = ANY($1)
+          AND ti.product_model_id = $2
+        `;
+        
+        const itemsResult = await pool.query(itemsQuery, [transactionIds, modelId]);
+        
+        // Mappa gli elementi alle loro transazioni
+        const salesWithItems = salesResult.rows.map(transaction => {
+          const items = itemsResult.rows.filter(item => item.transaction_id === transaction.id);
+          return {
+            ...transaction,
+            items: items
+          };
+        });
+        
+        res.json({
+          sales: toCamelCase(salesWithItems),
+          pagination: {
+            page: parseInt(page),
+            limit: parseInt(limit),
+            totalItems,
+            totalPages
+          }
+        });
+      } else {
+        res.json({
+          sales: [],
+          pagination: {
+            page: parseInt(page),
+            limit: parseInt(limit),
+            totalItems: 0,
+            totalPages: 0
+          }
+        });
+      }
+    } catch (err) {
+      console.error('Error fetching inventory sales:', err);
+      res.status(500).json({ error: 'Internal server error' });
+    }
+  });
 
   // POST /api/inventory - Crea un nuovo articolo in inventario
   router.post('/', async (req, res) => {

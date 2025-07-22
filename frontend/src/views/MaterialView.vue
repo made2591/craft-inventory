@@ -80,6 +80,73 @@
           <div class="detail-value">{{ formatDate(material.updatedAt) }}</div>
         </div>
       </div>
+      
+      <h2>Storico Acquisti</h2>
+      <div v-if="purchaseTransactions.length === 0" class="empty-transactions">
+        Nessun acquisto registrato per questo materiale.
+      </div>
+      <div v-else class="transactions-table">
+        <table>
+          <thead>
+            <tr>
+              <th>Data</th>
+              <th>Fornitore</th>
+              <th>Quantità</th>
+              <th>Prezzo Unitario</th>
+              <th>Totale</th>
+              <th>Stato</th>
+              <th>Azioni</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-for="transaction in paginatedPurchases" :key="transaction.id" :class="getStatusClass(transaction.status)">
+              <td>{{ formatDate(transaction.date) }}</td>
+              <td>{{ transaction.supplierName || 'N/A' }}</td>
+              <td>{{ transaction.quantity }} {{ material.unitOfMeasure }}</td>
+              <td>€ {{ formatCost(transaction.unitPrice) }}</td>
+              <td>€ {{ formatCost(transaction.totalPrice) }}</td>
+              <td>{{ formatStatus(transaction.status) }}</td>
+              <td>
+                <router-link :to="`/transactions/${transaction.transactionId}`" class="btn btn-sm">Dettagli</router-link>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+        
+        <!-- Paginazione -->
+        <div class="pagination" v-if="purchaseTransactions.length > itemsPerPage">
+          <button 
+            @click="goToPage(currentPage - 1)" 
+            :disabled="currentPage === 1" 
+            class="btn btn-sm"
+          >
+            Precedente
+          </button>
+          
+          <div class="page-numbers">
+            <button 
+              v-for="page in totalPages" 
+              :key="page" 
+              @click="goToPage(page)" 
+              :class="['btn', 'btn-sm', currentPage === page ? 'btn-active' : '']"
+            >
+              {{ page }}
+            </button>
+          </div>
+          
+          <button 
+            @click="goToPage(currentPage + 1)" 
+            :disabled="currentPage === totalPages" 
+            class="btn btn-sm"
+          >
+            Successivo
+          </button>
+        </div>
+        
+        <div class="pagination-info" v-if="purchaseTransactions.length > 0">
+          Visualizzazione {{ startIndex + 1 }}-{{ endIndex }} di {{ purchaseTransactions.length }} elementi
+        </div>
+      </div>
     </div>
   </div>
 </template>
@@ -100,17 +167,34 @@ export default {
     return {
       material: {},
       supplier: null,
+      purchaseTransactions: [],
       loading: true,
-      error: null
+      error: null,
+      currentPage: 1,
+      itemsPerPage: 5
     };
   },
   computed: {
     supplierName() {
       return this.supplier ? this.supplier.name : 'Nessun fornitore';
+    },
+    paginatedPurchases() {
+      return this.purchaseTransactions.slice(this.startIndex, this.endIndex);
+    },
+    totalPages() {
+      return Math.ceil(this.purchaseTransactions.length / this.itemsPerPage);
+    },
+    startIndex() {
+      return (this.currentPage - 1) * this.itemsPerPage;
+    },
+    endIndex() {
+      const end = this.startIndex + this.itemsPerPage;
+      return end > this.purchaseTransactions.length ? this.purchaseTransactions.length : end;
     }
   },
   created() {
     this.fetchMaterial();
+    this.fetchPurchaseTransactions();
   },
   methods: {
     async fetchMaterial() {
@@ -182,6 +266,67 @@ export default {
     
     goBack() {
       this.$router.push('/materials');
+    },
+    
+    async fetchPurchaseTransactions() {
+      try {
+        // Ottieni le transazioni di acquisto per questo materiale
+        const response = await fetch(`/api/transactions?type=purchase&materialId=${this.id}`);
+        const data = await response.json();
+        
+        // Trasforma i dati per adattarli alla visualizzazione
+        this.purchaseTransactions = data.map(transaction => {
+          // Cerca gli elementi della transazione relativi a questo materiale
+          const items = transaction.items ? transaction.items.filter(item => item.materialId === this.id) : [];
+          const item = items.length > 0 ? items[0] : {};
+          
+          return {
+            id: transaction.id,
+            transactionId: transaction.id,
+            date: transaction.date,
+            supplierName: transaction.supplierName,
+            supplierId: transaction.supplierId,
+            quantity: item.quantity || 0,
+            unitPrice: item.unitPrice || 0,
+            totalPrice: (item.quantity || 0) * (item.unitPrice || 0),
+            status: transaction.status
+          };
+        });
+      } catch (error) {
+        console.error('Error fetching purchase transactions:', error);
+      }
+    },
+    
+    formatStatus(status) {
+      switch (status) {
+        case 'pending':
+          return 'In attesa';
+        case 'completed':
+          return 'Completata';
+        case 'cancelled':
+          return 'Annullata';
+        default:
+          return status;
+      }
+    },
+    
+    getStatusClass(status) {
+      switch (status) {
+        case 'pending':
+          return 'status-pending';
+        case 'completed':
+          return 'status-completed';
+        case 'cancelled':
+          return 'status-cancelled';
+        default:
+          return '';
+      }
+    },
+    
+    goToPage(page) {
+      if (page >= 1 && page <= this.totalPages) {
+        this.currentPage = page;
+      }
     }
   }
 };

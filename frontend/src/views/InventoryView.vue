@@ -87,6 +87,77 @@
           </tbody>
         </table>
       </div>
+      
+      <h2>Storico Vendite</h2>
+      <div v-if="saleTransactions.length === 0" class="empty-transactions">
+        Nessuna vendita registrata per questo articolo.
+      </div>
+      <div v-else class="transactions-table">
+        <table>
+          <thead>
+            <tr>
+              <th>Data</th>
+              <th>Cliente</th>
+              <th>Quantità</th>
+              <th>Prezzo Unitario</th>
+              <th>Totale</th>
+              <th>Stato</th>
+              <th>Azioni</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-for="transaction in paginatedSales" :key="transaction.id" :class="getStatusClass(transaction.status)">
+              <td>{{ formatDate(transaction.date) }}</td>
+              <td>{{ transaction.customerName || 'N/A' }}</td>
+              <td>
+                {{ transaction.items && transaction.items.length > 0 ? transaction.items[0].quantity : 'N/A' }}
+              </td>
+              <td>
+                € {{ transaction.items && transaction.items.length > 0 ? formatCost(transaction.items[0].unitPrice) : '0.00' }}
+              </td>
+              <td>€ {{ formatCost(transaction.totalAmount) }}</td>
+              <td>{{ formatStatus(transaction.status) }}</td>
+              <td>
+                <router-link :to="`/transactions/${transaction.id}`" class="btn btn-sm">Dettagli</router-link>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+        
+        <!-- Paginazione -->
+        <div class="pagination" v-if="saleTransactions.length > itemsPerPage">
+          <button 
+            @click="goToPage(currentPage - 1)" 
+            :disabled="currentPage === 1" 
+            class="btn btn-sm"
+          >
+            Precedente
+          </button>
+          
+          <div class="page-numbers">
+            <button 
+              v-for="page in totalPages" 
+              :key="page" 
+              @click="goToPage(page)" 
+              :class="['btn', 'btn-sm', currentPage === page ? 'btn-active' : '']"
+            >
+              {{ page }}
+            </button>
+          </div>
+          
+          <button 
+            @click="goToPage(currentPage + 1)" 
+            :disabled="currentPage === totalPages" 
+            class="btn btn-sm"
+          >
+            Successivo
+          </button>
+        </div>
+        
+        <div class="pagination-info" v-if="saleTransactions.length > 0">
+          Visualizzazione {{ startIndex + 1 }}-{{ endIndex }} di {{ saleTransactions.length }} elementi
+        </div>
+      </div>
     </div>
   </div>
 </template>
@@ -107,11 +178,36 @@ export default {
       item: {},
       components: [],
       loading: true,
-      error: null
+      error: null,
+      sales: [],
+      salesLoading: false,
+      salesError: null,
+      currentPage: 1,
+      itemsPerPage: 5,
+      totalSalesItems: 0,
+      totalSalesPages: 0
     };
   },
   created() {
     this.fetchInventoryItem();
+  },
+  computed: {
+    saleTransactions() {
+      return this.sales;
+    },
+    totalPages() {
+      return this.totalSalesPages;
+    },
+    startIndex() {
+      return (this.currentPage - 1) * this.itemsPerPage;
+    },
+    endIndex() {
+      const end = this.startIndex + this.itemsPerPage;
+      return end > this.totalSalesItems ? this.totalSalesItems : end;
+    },
+    paginatedSales() {
+      return this.sales;
+    }
   },
   methods: {
     async fetchInventoryItem() {
@@ -126,12 +222,38 @@ export default {
         // Fetch model details to get the SKU
         if (this.item.modelId) {
           await this.fetchModelDetails();
+          // Dopo aver ottenuto i dettagli del modello, recupera le vendite
+          this.fetchSalesHistory();
         }
       } catch (error) {
         console.error('Error fetching inventory item:', error);
         this.error = 'Si è verificato un errore durante il recupero dell\'articolo. Riprova più tardi.';
       } finally {
         this.loading = false;
+      }
+    },
+    
+    async fetchSalesHistory(page = 1) {
+      this.salesLoading = true;
+      this.salesError = null;
+      
+      try {
+        const response = await api.get(`/api/inventory/${this.id}/sales`, {
+          params: {
+            page: page,
+            limit: this.itemsPerPage
+          }
+        });
+        
+        this.sales = response.data.sales;
+        this.totalSalesItems = response.data.pagination.totalItems;
+        this.totalSalesPages = response.data.pagination.totalPages;
+        this.currentPage = response.data.pagination.page;
+      } catch (error) {
+        console.error('Error fetching sales history:', error);
+        this.salesError = 'Si è verificato un errore durante il recupero dello storico vendite.';
+      } finally {
+        this.salesLoading = false;
       }
     },
     
@@ -168,6 +290,41 @@ export default {
     
     goBack() {
       this.$router.push('/inventory');
+    },
+    
+    goToPage(page) {
+      if (page >= 1 && page <= this.totalPages) {
+        this.fetchSalesHistory(page);
+      }
+    },
+    
+    formatCost(value) {
+      if (value === undefined || value === null) return '0.00';
+      return parseFloat(value).toFixed(2);
+    },
+    
+    formatStatus(status) {
+      if (!status) return 'N/A';
+      
+      const statusMap = {
+        'pending': 'In attesa',
+        'completed': 'Completato',
+        'cancelled': 'Annullato'
+      };
+      
+      return statusMap[status] || status;
+    },
+    
+    getStatusClass(status) {
+      if (!status) return '';
+      
+      const statusClassMap = {
+        'pending': 'status-pending',
+        'completed': 'status-completed',
+        'cancelled': 'status-cancelled'
+      };
+      
+      return statusClassMap[status] || '';
     }
   }
 };
@@ -307,5 +464,64 @@ th {
   background-color: #f8f9fa;
   font-weight: bold;
   color: #555;
+}
+
+.empty-transactions {
+  text-align: center;
+  padding: 20px;
+  background-color: #f8f9fa;
+  border-radius: 4px;
+  color: #6c757d;
+  margin-bottom: 20px;
+}
+
+.transactions-table {
+  margin-top: 10px;
+  margin-bottom: 20px;
+}
+
+.pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-top: 20px;
+  margin-bottom: 10px;
+}
+
+.page-numbers {
+  display: flex;
+  gap: 5px;
+  margin: 0 10px;
+}
+
+.pagination-info {
+  text-align: center;
+  color: #6c757d;
+  font-size: 14px;
+  margin-top: 10px;
+}
+
+.btn-sm {
+  padding: 4px 8px;
+  font-size: 12px;
+  height: 28px;
+  line-height: 20px;
+}
+
+.btn-active {
+  background-color: #42b983;
+  color: white;
+}
+
+.status-pending {
+  background-color: #fff3cd;
+}
+
+.status-completed {
+  background-color: #d4edda;
+}
+
+.status-cancelled {
+  background-color: #f8d7da;
 }
 </style>

@@ -2,11 +2,18 @@ import api from './api';
 
 export default {
   /**
-   * Ottiene tutte le transazioni
-   * @returns {Promise} Promise con la lista delle transazioni
+   * Ottiene tutte le transazioni con paginazione
+   * @param {Object} options - Opzioni di paginazione e filtri
+   * @param {number} options.page - Numero di pagina
+   * @param {number} options.limit - Elementi per pagina
+   * @param {string} options.type - Tipo di transazione (opzionale)
+   * @param {string} options.customerId - ID cliente (opzionale)
+   * @param {string} options.supplierId - ID fornitore (opzionale)
+   * @param {string} options.modelId - ID modello (opzionale)
+   * @returns {Promise} Promise con la lista delle transazioni e info di paginazione
    */
-  getAllTransactions() {
-    return api.get('/api/transactions');
+  getAllTransactions(options = {}) {
+    return api.get('/api/transactions', { params: options });
   },
 
   /**
