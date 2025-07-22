@@ -181,33 +181,8 @@ export default function transactionsRoutes(pool, toCamelCase) {
             'INSERT INTO transaction_items (id, transaction_id, material_id, product_model_id, quantity, unit_price, created_at, updated_at) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)',
             [itemId, id, item.material_id, item.product_model_id, item.quantity, item.unit_price, now, now]
           );
-
-          // Update inventory based on transaction type
-          if (transaction_type === 'purchase' && item.material_id) {
-            // Increase material stock for purchases
-            await pool.query(
-              'UPDATE materials SET current_stock = current_stock + $1, updated_at = $2 WHERE id = $3',
-              [item.quantity, now, item.material_id]
-            );
-          } else if (transaction_type === 'sale' && item.product_model_id) {
-            // Decrease inventory for sales
-            // First, find the inventory item with enough quantity
-            const inventoryResult = await pool.query(
-              'SELECT id FROM inventory_items WHERE model_id = $1 AND quantity >= $2 ORDER BY created_at ASC LIMIT 1',
-              [item.product_model_id, item.quantity]
-            );
-            
-            if (inventoryResult.rows.length > 0) {
-              // Update the found inventory item
-              await pool.query(
-                'UPDATE inventory_items SET quantity = quantity - $1, updated_at = $2 WHERE id = $3',
-                [item.quantity, now, inventoryResult.rows[0].id]
-              );
-            } else {
-              // Handle case where there's not enough inventory
-              console.warn(`Not enough inventory for model ${item.product_model_id}`);
-            }
-          }
+          
+          // Non aggiorniamo più l'inventario qui, ma solo quando la transazione viene completata
         }
       }
 
@@ -217,6 +192,83 @@ export default function transactionsRoutes(pool, toCamelCase) {
     } catch (err) {
       await pool.query('ROLLBACK');
       console.error('Error creating transaction:', err);
+      res.status(500).json({ error: 'Internal server error' });
+    }
+  });
+
+  // PUT /api/transactions/:id - Aggiorna una transazione esistente
+  router.put('/:id', async (req, res) => {
+    try {
+      const { id } = req.params;
+      const { status } = req.body;
+      const now = new Date();
+      
+      // Start a transaction
+      await pool.query('BEGIN');
+      
+      // Ottieni i dettagli della transazione corrente
+      const currentTransactionResult = await pool.query('SELECT * FROM transactions WHERE id = $1', [id]);
+      
+      if (currentTransactionResult.rows.length === 0) {
+        await pool.query('ROLLBACK');
+        return res.status(404).json({ error: 'Transaction not found' });
+      }
+      
+      const currentTransaction = currentTransactionResult.rows[0];
+      const oldStatus = currentTransaction.status;
+      
+      // Se lo stato sta cambiando da "pending" a "completed", aggiorna l'inventario
+      if (oldStatus === 'pending' && status === 'completed') {
+        // Ottieni gli elementi della transazione
+        const itemsResult = await pool.query('SELECT * FROM transaction_items WHERE transaction_id = $1', [id]);
+        const items = itemsResult.rows;
+        
+        // Aggiorna l'inventario in base al tipo di transazione
+        for (const item of items) {
+          // Converti la quantità in un numero intero
+          const quantity = parseInt(item.quantity, 10);
+          
+          if (currentTransaction.transaction_type === 'purchase' && item.material_id) {
+            // Per gli acquisti completati, aumenta lo stock del materiale
+            await pool.query(
+              'UPDATE materials SET current_stock = current_stock + $1, updated_at = $2 WHERE id = $3',
+              [quantity, now, item.material_id]
+            );
+          } else if (currentTransaction.transaction_type === 'sale' && item.product_model_id) {
+            // Per le vendite completate, diminuisci lo stock dell'inventario
+            // Trova un articolo di inventario per questo modello
+            const inventoryResult = await pool.query(
+              'SELECT id FROM inventory_items WHERE model_id = $1 ORDER BY created_at ASC LIMIT 1',
+              [item.product_model_id]
+            );
+            
+            if (inventoryResult.rows.length > 0) {
+              // Aggiorna l'articolo di inventario trovato
+              await pool.query(
+                'UPDATE inventory_items SET quantity = quantity - $1, updated_at = $2 WHERE id = $3',
+                [quantity, now, inventoryResult.rows[0].id]
+              );
+            } else {
+              // Se non esiste un articolo di inventario per questo modello, segnala un errore
+              await pool.query('ROLLBACK');
+              return res.status(400).json({ error: `Non c'è abbastanza inventario per il modello ${item.product_model_id}` });
+            }
+          }
+        }
+      }
+      
+      // Aggiorna lo stato della transazione
+      const result = await pool.query(
+        'UPDATE transactions SET status = $1, updated_at = $2 WHERE id = $3 RETURNING *',
+        [status, now, id]
+      );
+      
+      await pool.query('COMMIT');
+      
+      res.json(toCamelCase(result.rows[0]));
+    } catch (err) {
+      await pool.query('ROLLBACK');
+      console.error('Error updating transaction:', err);
       res.status(500).json({ error: 'Internal server error' });
     }
   });

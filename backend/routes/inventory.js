@@ -112,7 +112,6 @@ export default function inventoryRoutes(pool, toCamelCase) {
         return res.status(400).json({ error: 'La quantità deve essere maggiore di zero' });
       }
 
-      const id = uuidv4();
       const now = new Date();
 
       // Verifica che il modello esista
@@ -136,13 +135,41 @@ export default function inventoryRoutes(pool, toCamelCase) {
         }
       }
 
-      const result = await pool.query(
-        'INSERT INTO inventory_items (id, model_id, quantity, production_date, notes, created_at, updated_at) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *',
-        [id, model_id, quantity, formattedProductionDate, notes, now, now]
+      // Start a transaction
+      await pool.query('BEGIN');
+
+      // Verifica se esiste già un articolo per questo modello
+      const existingItemResult = await pool.query(
+        'SELECT * FROM inventory_items WHERE model_id = $1 LIMIT 1',
+        [model_id]
       );
 
+      let result;
+      
+      if (existingItemResult.rows.length > 0) {
+        // Se esiste già un articolo per questo modello, aggiorna la quantità e la data di produzione
+        const existingItem = existingItemResult.rows[0];
+        const newQuantity = parseInt(existingItem.quantity, 10) + parseInt(quantity, 10);
+        
+        result = await pool.query(
+          'UPDATE inventory_items SET quantity = $1, production_date = $2, notes = $3, updated_at = $4 WHERE id = $5 RETURNING *',
+          [newQuantity, formattedProductionDate || existingItem.production_date, notes || existingItem.notes, now, existingItem.id]
+        );
+      } else {
+        // Se non esiste un articolo per questo modello, creane uno nuovo
+        const id = uuidv4();
+        
+        result = await pool.query(
+          'INSERT INTO inventory_items (id, model_id, quantity, production_date, notes, created_at, updated_at) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *',
+          [id, model_id, quantity, formattedProductionDate, notes, now, now]
+        );
+      }
+
+      await pool.query('COMMIT');
+      
       res.status(201).json(toCamelCase(result.rows[0]));
     } catch (err) {
+      await pool.query('ROLLBACK');
       console.error('Error creating inventory item:', err);
       res.status(500).json({ error: 'Internal server error' });
     }
