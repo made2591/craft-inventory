@@ -334,20 +334,49 @@ export default {
       item.total = 0;
     },
     
-    updateUnitPrice(item, type) {
+    async updateUnitPrice(item, type) {
       if (type === 'material') {
-        const material = this.materials.find(m => m.id === item.material_id);
-        if (material) {
-          // Per gli acquisti, usa il costo del materiale
-          // Per le vendite, aggiungi un margine (es. 20%)
-          item.unit_price = this.transaction.transaction_type === 'purchase' 
-            ? material.cost_per_unit 
-            : material.cost_per_unit * 1.2;
+        try {
+          // Ottieni i dettagli aggiornati del materiale direttamente dall'API
+          const response = await api.get(`/api/materials/${item.material_id}`);
+          const material = response.data;
+          
+          if (material) {
+            // Per gli acquisti, usa il costo del materiale
+            // Per le vendite, aggiungi un margine (es. 20%)
+            item.unit_price = this.transaction.transaction_type === 'purchase' 
+              ? material.costPerUnit 
+              : material.costPerUnit * 1.2;
+            
+            // Aggiorna anche l'unità di misura per riferimento
+            item.unit_of_measure = material.unitOfMeasure;
+          }
+        } catch (error) {
+          console.error('Error fetching material details:', error);
+          // Fallback al metodo precedente
+          const material = this.materials.find(m => m.id === item.material_id);
+          if (material) {
+            item.unit_price = this.transaction.transaction_type === 'purchase' 
+              ? material.cost_per_unit 
+              : material.cost_per_unit * 1.2;
+          }
         }
       } else if (type === 'model') {
-        const model = this.models.find(m => m.id === item.product_model_id);
-        if (model) {
-          item.unit_price = model.selling_price;
+        try {
+          // Ottieni i dettagli aggiornati del modello direttamente dall'API
+          const response = await api.get(`/api/models/${item.product_model_id}`);
+          const model = response.data.model;
+          
+          if (model) {
+            item.unit_price = model.sellingPrice;
+          }
+        } catch (error) {
+          console.error('Error fetching model details:', error);
+          // Fallback al metodo precedente
+          const model = this.models.find(m => m.id === item.product_model_id);
+          if (model) {
+            item.unit_price = model.selling_price;
+          }
         }
       }
       

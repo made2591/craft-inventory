@@ -26,7 +26,19 @@ export default function materialsRoutes(pool, toCamelCase) {
   // GET /api/materials - Ottieni tutti i materiali
   router.get('/', async (req, res) => {
     try {
-      const result = await pool.query('SELECT * FROM materials ORDER BY name');
+      const { supplierId } = req.query;
+      
+      let query = 'SELECT * FROM materials';
+      const params = [];
+      
+      if (supplierId) {
+        query += ' WHERE supplier_id = $1';
+        params.push(supplierId);
+      }
+      
+      query += ' ORDER BY name';
+      
+      const result = await pool.query(query, params);
       res.json(toCamelCase(result.rows));
     } catch (err) {
       console.error('Error fetching materials:', err);

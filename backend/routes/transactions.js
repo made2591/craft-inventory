@@ -13,16 +13,74 @@ export default function transactionsRoutes(pool, toCamelCase) {
   // GET /api/transactions - Ottieni tutte le transazioni
   router.get('/', async (req, res) => {
     try {
-      const result = await pool.query(`
+      const { customerId, supplierId, type } = req.query;
+      
+      let query = `
         SELECT t.*, 
           s.name as supplier_name, 
-          c.name as customer_name 
+          c.name as customer_name
         FROM transactions t 
         LEFT JOIN suppliers s ON t.supplier_id = s.id 
         LEFT JOIN customers c ON t.customer_id = c.id 
-        ORDER BY t.date DESC
-      `);
-      res.json(toCamelCase(result.rows));
+      `;
+      
+      const params = [];
+      const conditions = [];
+      
+      if (customerId) {
+        conditions.push(`t.customer_id = $${params.length + 1}`);
+        params.push(customerId);
+      }
+      
+      if (supplierId) {
+        conditions.push(`t.supplier_id = $${params.length + 1}`);
+        params.push(supplierId);
+      }
+      
+      if (type) {
+        conditions.push(`t.transaction_type = $${params.length + 1}`);
+        params.push(type);
+      }
+      
+      if (conditions.length > 0) {
+        query += ' WHERE ' + conditions.join(' AND ');
+      }
+      
+      query += ' ORDER BY t.date DESC';
+      
+      const transactionsResult = await pool.query(query, params);
+      
+      // Se abbiamo transazioni e c'è un customerId o supplierId, otteniamo anche i dettagli degli elementi
+      if (transactionsResult.rows.length > 0 && (customerId || supplierId)) {
+        const transactionIds = transactionsResult.rows.map(t => t.id);
+        
+        const itemsQuery = `
+          SELECT ti.*, 
+            ti.transaction_id,
+            m.name as material_name, 
+            m.unit_of_measure,
+            pm.name as model_name
+          FROM transaction_items ti 
+          LEFT JOIN materials m ON ti.material_id = m.id 
+          LEFT JOIN product_models pm ON ti.product_model_id = pm.id
+          WHERE ti.transaction_id = ANY($1)
+        `;
+        
+        const itemsResult = await pool.query(itemsQuery, [transactionIds]);
+        
+        // Mappa gli elementi alle loro transazioni
+        const transactionsWithItems = transactionsResult.rows.map(transaction => {
+          const items = itemsResult.rows.filter(item => item.transaction_id === transaction.id);
+          return {
+            ...transaction,
+            items: items
+          };
+        });
+        
+        res.json(toCamelCase(transactionsWithItems));
+      } else {
+        res.json(toCamelCase(transactionsResult.rows));
+      }
     } catch (err) {
       console.error('Error fetching transactions:', err);
       res.status(500).json({ error: 'Internal server error' });

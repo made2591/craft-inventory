@@ -86,15 +86,38 @@
           </thead>
           <tbody>
             <tr v-for="transaction in transactions" :key="transaction.id">
-              <td>{{ formatDate(transaction.transactionDate) }}</td>
+              <td>{{ formatDate(transaction.date) }}</td>
               <td>
-                <router-link :to="`/materials/${transaction.materialId}/view`" class="material-link">
-                  {{ transaction.materialName }}
-                </router-link>
+                <template v-if="transaction.items && transaction.items.length > 0">
+                  <div v-for="item in transaction.items" :key="item.id">
+                    <router-link v-if="item.materialId" :to="`/materials/${item.materialId}/view`" class="material-link">
+                      {{ item.materialName || 'N/A' }}
+                    </router-link>
+                    <router-link v-else-if="item.productModelId" :to="`/models/${item.productModelId}/view`" class="material-link">
+                      {{ item.modelName || 'N/A' }}
+                    </router-link>
+                    <span v-else>N/A</span>
+                  </div>
+                </template>
+                <span v-else>N/A</span>
               </td>
-              <td>{{ transaction.quantity }} {{ transaction.unitOfMeasure }}</td>
-              <td>€ {{ formatCost(transaction.unitPrice) }}</td>
-              <td>€ {{ formatCost(transaction.totalPrice) }}</td>
+              <td>
+                <template v-if="transaction.items && transaction.items.length > 0">
+                  <div v-for="item in transaction.items" :key="item.id">
+                    {{ item.quantity }} {{ item.unitOfMeasure || '' }}
+                  </div>
+                </template>
+                <span v-else>N/A</span>
+              </td>
+              <td>
+                <template v-if="transaction.items && transaction.items.length > 0">
+                  <div v-for="item in transaction.items" :key="item.id">
+                    € {{ formatCost(item.unitPrice) }}
+                  </div>
+                </template>
+                <span v-else>N/A</span>
+              </td>
+              <td>€ {{ formatCost(transaction.totalAmount) }}</td>
             </tr>
           </tbody>
         </table>
