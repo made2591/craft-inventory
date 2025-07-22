@@ -1,9 +1,9 @@
 <template>
   <div class="material-form">
-    <h1>{{ isEditing ? 'Modifica Materiale' : 'Nuovo Materiale' }}</h1>
+    <h1>{{ isEditing ? $t('materials.editMaterial') : $t('materials.newMaterial') }}</h1>
     
     <div v-if="loading" class="loading">
-      Caricamento in corso...
+      {{ $t('common.loading') }}
     </div>
     
     <div v-else-if="error" class="error">
@@ -12,50 +12,50 @@
     
     <form v-else @submit.prevent="saveMaterial">
       <div class="form-group">
-        <label for="name">Nome *</label>
+        <label for="name">{{ $t('materials.name') }} *</label>
         <input 
           type="text" 
           id="name" 
           v-model="material.name" 
           required
-          placeholder="Nome del materiale"
+          :placeholder="$t('materials.namePlaceholder')"
         >
       </div>
       
       <div class="form-group">
-        <label for="description">Descrizione</label>
+        <label for="description">{{ $t('materials.description') }}</label>
         <textarea 
           id="description" 
           v-model="material.description" 
-          placeholder="Descrizione del materiale"
+          :placeholder="$t('materials.descriptionPlaceholder')"
           rows="3"
         ></textarea>
       </div>
       
       <div class="form-group">
-        <label for="link">Link</label>
+        <label for="link">{{ $t('materials.link') }}</label>
         <input 
           type="url" 
           id="link" 
           v-model="material.link" 
-          placeholder="URL del materiale (es. https://esempio.com/materiale)"
+          :placeholder="$t('materials.linkPlaceholder')"
         >
       </div>
       
       <div class="form-row">
         <div class="form-group">
-          <label for="unitOfMeasure">Unità di Misura *</label>
+          <label for="unitOfMeasure">{{ $t('materials.unitOfMeasure') }} *</label>
           <input 
             type="text" 
             id="unitOfMeasure" 
             v-model="material.unitOfMeasure" 
             required
-            placeholder="es. metri, kg, pezzi"
+            :placeholder="$t('materials.unitOfMeasurePlaceholder')"
           >
         </div>
         
         <div class="form-group">
-          <label for="costPerUnit">Costo per Unità *</label>
+          <label for="costPerUnit">{{ $t('materials.costPerUnit') }} *</label>
           <input 
             type="number" 
             id="costPerUnit" 
@@ -70,7 +70,7 @@
       
       <div class="form-row">
         <div class="form-group">
-          <label for="currentStock">Quantità Disponibile *</label>
+          <label for="currentStock">{{ $t('materials.currentStock') }} *</label>
           <input 
             type="number" 
             id="currentStock" 
@@ -83,7 +83,7 @@
         </div>
         
         <div class="form-group">
-          <label for="minStockLevel">Livello Minimo di Scorta</label>
+          <label for="minStockLevel">{{ $t('materials.minStockLevel') }}</label>
           <input 
             type="number" 
             id="minStockLevel" 
@@ -96,9 +96,9 @@
       </div>
       
       <div class="form-group">
-        <label for="supplierId">Fornitore</label>
+        <label for="supplierId">{{ $t('materials.supplier') }}</label>
         <select id="supplierId" v-model="material.supplierId">
-          <option value="">-- Seleziona un fornitore --</option>
+          <option value="">-- {{ $t('common.selectSupplier') }} --</option>
           <option v-for="supplier in suppliers" :key="supplier.id" :value="supplier.id">
             {{ supplier.name }}
           </option>
@@ -106,8 +106,8 @@
       </div>
       
       <div class="form-actions">
-        <button type="button" class="btn btn-secondary" @click="goBack">Annulla</button>
-        <button type="submit" class="btn btn-primary">{{ isEditing ? 'Aggiorna' : 'Salva' }}</button>
+        <button type="button" class="btn btn-secondary" @click="goBack">{{ $t('common.cancel') }}</button>
+        <button type="submit" class="btn btn-primary">{{ isEditing ? $t('common.update') : $t('common.save') }}</button>
       </div>
     </form>
   </div>
@@ -160,7 +160,7 @@ export default {
         this.suppliers = response.data;
       } catch (error) {
         console.error('Error fetching suppliers:', error);
-        this.error = 'Si è verificato un errore durante il recupero dei fornitori. Riprova più tardi.';
+        this.error = this.$t('errors.fetchSuppliers');
       }
     },
     
@@ -173,7 +173,7 @@ export default {
         this.material = response.data;
       } catch (error) {
         console.error('Error fetching material:', error);
-        this.error = 'Si è verificato un errore durante il recupero del materiale. Riprova più tardi.';
+        this.error = this.$t('errors.fetchMaterial');
       } finally {
         this.loading = false;
       }
@@ -193,7 +193,7 @@ export default {
         this.$router.push('/materials');
       } catch (error) {
         console.error('Error saving material:', error);
-        this.error = 'Si è verificato un errore durante il salvataggio del materiale. Riprova più tardi.';
+        this.error = this.$t('errors.saveMaterial');
       } finally {
         this.loading = false;
       }

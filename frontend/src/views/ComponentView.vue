@@ -1,9 +1,9 @@
 <template>
   <div class="component-view">
-    <h1>Dettaglio Componente</h1>
+    <h1>{{ $t('components.viewTitle') }}</h1>
     
     <div v-if="loading" class="loading">
-      Caricamento in corso...
+      {{ $t('common.loading') }}
     </div>
     
     <div v-else-if="error" class="error">
@@ -12,62 +12,62 @@
     
     <div v-else class="component-details">
       <div class="detail-header">
-        <div class="sku-badge">SKU: {{ component.sku || 'N/A' }}</div>
+        <div class="sku-badge">{{ $t('components.sku') }}: {{ component.sku || 'N/A' }}</div>
         <div class="actions">
-          <button @click="editComponent" class="btn btn-primary">Modifica</button>
-          <button @click="goBack" class="btn btn-secondary">Indietro</button>
+          <button @click="editComponent" class="btn btn-primary">{{ $t('common.edit') }}</button>
+          <button @click="goBack" class="btn btn-secondary">{{ $t('common.back') }}</button>
         </div>
       </div>
       
       <div class="detail-card">
         <div class="detail-row">
-          <div class="detail-label">Nome:</div>
+          <div class="detail-label">{{ $t('components.name') }}:</div>
           <div class="detail-value">{{ component.name }}</div>
         </div>
         
         <div class="detail-row">
-          <div class="detail-label">Descrizione:</div>
-          <div class="detail-value">{{ component.description || 'Nessuna descrizione' }}</div>
+          <div class="detail-label">{{ $t('components.description') }}:</div>
+          <div class="detail-value">{{ component.description || $t('common.noDescription') }}</div>
         </div>
         
         <div class="detail-row">
-          <div class="detail-label">Quantità:</div>
+          <div class="detail-label">{{ $t('components.quantity') }}:</div>
           <div class="detail-value">{{ component.quantity || 0 }}</div>
         </div>
         
         <div class="detail-row">
-          <div class="detail-label">Costo Totale:</div>
+          <div class="detail-label">{{ $t('common.totalCost') }}:</div>
           <div class="detail-value">
             <span v-if="loadingCost" class="loading-cost">
-              <i class="loading-spinner"></i> Calcolo in corso...
+              <i class="loading-spinner"></i> {{ $t('common.calculating') }}
             </span>
             <span v-else>€ {{ formatCost(totalCost) }}</span>
           </div>
         </div>
         
         <div class="detail-row">
-          <div class="detail-label">Data Creazione:</div>
+          <div class="detail-label">{{ $t('common.createdAt') }}:</div>
           <div class="detail-value">{{ formatDate(component.createdAt) }}</div>
         </div>
         
         <div class="detail-row">
-          <div class="detail-label">Ultimo Aggiornamento:</div>
+          <div class="detail-label">{{ $t('common.updatedAt') }}:</div>
           <div class="detail-value">{{ formatDate(component.updatedAt) }}</div>
         </div>
       </div>
       
-      <h2>Materiali utilizzati</h2>
+      <h2>{{ $t('components.materialsUsed') }}</h2>
       <div v-if="materials.length === 0" class="empty-materials">
-        Nessun materiale associato a questo componente.
+        {{ $t('components.noMaterialsAssociated') }}
       </div>
       <div v-else class="materials-table">
         <table>
           <thead>
             <tr>
-              <th>Materiale</th>
-              <th>Quantità</th>
-              <th>Costo Unitario</th>
-              <th>Costo Totale</th>
+              <th>{{ $t('materials.title') }}</th>
+              <th>{{ $t('common.quantity') }}</th>
+              <th>{{ $t('common.unitCost') }}</th>
+              <th>{{ $t('common.totalCost') }}</th>
             </tr>
           </thead>
           <tbody>
@@ -84,7 +84,7 @@
           </tbody>
           <tfoot>
             <tr>
-              <td colspan="3" class="total-label">Costo Totale:</td>
+              <td colspan="3" class="total-label">{{ $t('common.totalCost') }}:</td>
               <td class="total-value">€ {{ formatCost(totalCost) }}</td>
             </tr>
           </tfoot>
@@ -132,7 +132,7 @@ export default {
         await this.fetchComponentCost();
       } catch (error) {
         console.error('Error fetching component:', error);
-        this.error = 'Si è verificato un errore durante il recupero del componente. Riprova più tardi.';
+        this.error = this.$t('errors.fetchComponent');
       } finally {
         this.loading = false;
       }
@@ -150,7 +150,7 @@ export default {
           this.materials = response.data.materials;
         }
       } catch (error) {
-        console.error('Error fetching component cost:', error);
+        console.error(this.$t('errors.fetchComponentCost'), error);
       } finally {
         this.loadingCost = false;
       }

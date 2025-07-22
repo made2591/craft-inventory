@@ -1,9 +1,9 @@
 <template>
   <div class="customer-form">
-    <h1>{{ isEditing ? 'Modifica Cliente' : 'Nuovo Cliente' }}</h1>
+    <h1>{{ isEditing ? $t('customers.editCustomer') : $t('customers.newCustomer') }}</h1>
     
     <div v-if="loading" class="loading">
-      Caricamento in corso...
+      {{ $t('common.loading') }}
     </div>
     
     <div v-else-if="error" class="error">
@@ -12,95 +12,95 @@
     
     <form v-else @submit.prevent="saveCustomer">
       <div class="form-group">
-        <label for="name">Nome *</label>
+        <label for="name">{{ $t('customers.name') }} *</label>
         <input 
           type="text" 
           id="name" 
           v-model="customer.name" 
           required
-          placeholder="Nome del cliente"
+          :placeholder="$t('customers.namePlaceholder')"
         >
       </div>
       
       <div class="form-group">
-        <label for="customerType">Tipo Cliente *</label>
+        <label for="customerType">{{ $t('customers.customerType') }} *</label>
         <select 
           id="customerType" 
           v-model="customer.customerType" 
           required
         >
-          <option value="">-- Seleziona un tipo --</option>
-          <option value="private">Privato</option>
-          <option value="online">Online</option>
-          <option value="store">Negozio</option>
+          <option value="">-- {{ $t('common.selectType') }} --</option>
+          <option value="private">{{ $t('customers.private') }}</option>
+          <option value="online">{{ $t('customers.online') }}</option>
+          <option value="store">{{ $t('customers.store') }}</option>
         </select>
       </div>
       
       <div class="form-group">
-        <label for="contactPerson">Persona di Contatto</label>
+        <label for="contactPerson">{{ $t('customers.contactPerson') }}</label>
         <input 
           type="text" 
           id="contactPerson" 
           v-model="customer.contactPerson" 
-          placeholder="Nome della persona di contatto"
+          :placeholder="$t('customers.contactPersonPlaceholder')"
         >
       </div>
       
       <div class="form-row">
         <div class="form-group">
-          <label for="email">Email</label>
+          <label for="email">{{ $t('customers.email') }}</label>
           <input 
             type="email" 
             id="email" 
             v-model="customer.email" 
-            placeholder="Email"
+            :placeholder="$t('customers.emailPlaceholder')"
           >
         </div>
         
         <div class="form-group">
-          <label for="phone">Telefono</label>
+          <label for="phone">{{ $t('customers.phone') }}</label>
           <input 
             type="tel" 
             id="phone" 
             v-model="customer.phone" 
-            placeholder="Numero di telefono"
+            :placeholder="$t('customers.phonePlaceholder')"
           >
         </div>
       </div>
       
       <div class="form-group">
-        <label for="address">Indirizzo</label>
+        <label for="address">{{ $t('customers.address') }}</label>
         <textarea 
           id="address" 
           v-model="customer.address" 
-          placeholder="Indirizzo completo"
+          :placeholder="$t('customers.addressPlaceholder')"
           rows="3"
         ></textarea>
       </div>
       
       <div class="form-group">
-        <label for="link">Link</label>
+        <label for="link">{{ $t('common.link') }}</label>
         <input 
           type="url" 
           id="link" 
           v-model="customer.link" 
-          placeholder="https://esempio.com"
+          :placeholder="$t('common.linkPlaceholder')"
         >
       </div>
       
       <div class="form-group">
-        <label for="notes">Note</label>
+        <label for="notes">{{ $t('common.notes') }}</label>
         <textarea 
           id="notes" 
           v-model="customer.notes" 
-          placeholder="Note aggiuntive"
+          :placeholder="$t('common.additionalNotesPlaceholder')"
           rows="3"
         ></textarea>
       </div>
       
       <div class="form-actions">
-        <button type="button" class="btn btn-secondary" @click="goBack">Annulla</button>
-        <button type="submit" class="btn btn-primary">{{ isEditing ? 'Aggiorna' : 'Salva' }}</button>
+        <button type="button" class="btn btn-secondary" @click="goBack">{{ $t('common.cancel') }}</button>
+        <button type="submit" class="btn btn-primary">{{ isEditing ? $t('common.update') : $t('common.save') }}</button>
       </div>
     </form>
   </div>

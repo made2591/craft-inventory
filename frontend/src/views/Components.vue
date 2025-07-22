@@ -1,16 +1,16 @@
 <template>
   <div class="components">
-    <h1>Gestione Componenti</h1>
+    <h1>{{ $t('components.title') }}</h1>
     
     <div class="actions">
-      <router-link to="/components/new" class="btn btn-primary">Nuovo Componente</router-link>
+      <router-link to="/components/new" class="btn btn-primary">{{ $t('components.newComponent') }}</router-link>
       <button @click="recalculateAllCosts" class="btn btn-secondary" :disabled="isRecalculating">
-        {{ isRecalculating ? 'Ricalcolo in corso...' : 'Ricalcola tutti i costi' }}
+        {{ isRecalculating ? $t('components.recalculating') : $t('components.recalculateAllCosts') }}
       </button>
     </div>
     
     <div v-if="loading" class="loading">
-      Caricamento in corso...
+      {{ $t('common.loading') }}
     </div>
     
     <div v-else-if="error" class="error">
@@ -18,7 +18,7 @@
     </div>
     
     <div v-else-if="components.length === 0" class="empty-state">
-      Nessun componente trovato. Aggiungi il tuo primo componente!
+      {{ $t('components.noComponentsFound') }}
     </div>
     
     <div v-else class="components-list">
@@ -28,12 +28,12 @@
           <input 
             type="text" 
             v-model="searchQuery" 
-            placeholder="Cerca componenti..." 
+            :placeholder="$t('components.searchPlaceholder')" 
             @input="filterComponents"
           >
         </div>
         <div class="pagination-controls">
-          <label for="itemsPerPage">Elementi per pagina:</label>
+          <label for="itemsPerPage">{{ $t('common.itemsPerPage') }}:</label>
           <select id="itemsPerPage" v-model="itemsPerPage" @change="updatePagination">
             <option value="5">5</option>
             <option value="10">10</option>
@@ -47,31 +47,31 @@
         <thead>
           <tr>
             <th @click="sortBy('sku')" class="sortable">
-              SKU
+              {{ $t('components.sku') }}
               <span v-if="sortKey === 'sku'" class="sort-icon">
                 {{ sortOrder === 'asc' ? '▲' : '▼' }}
               </span>
             </th>
             <th @click="sortBy('name')" class="sortable">
-              Nome
+              {{ $t('components.name') }}
               <span v-if="sortKey === 'name'" class="sort-icon">
                 {{ sortOrder === 'asc' ? '▲' : '▼' }}
               </span>
             </th>
             <th @click="sortBy('description')" class="sortable">
-              Descrizione
+              {{ $t('components.description') }}
               <span v-if="sortKey === 'description'" class="sort-icon">
                 {{ sortOrder === 'asc' ? '▲' : '▼' }}
               </span>
             </th>
             <th @click="sortBy('quantity')" class="sortable">
-              Quantità
+              {{ $t('components.quantity') }}
               <span v-if="sortKey === 'quantity'" class="sort-icon">
                 {{ sortOrder === 'asc' ? '▲' : '▼' }}
               </span>
             </th>
-            <th>Costo Totale</th>
-            <th>Azioni</th>
+            <th>{{ $t('common.totalCost') }}</th>
+            <th>{{ $t('common.actions') }}</th>
           </tr>
         </thead>
         <tbody>
@@ -86,21 +86,21 @@
             <td>{{ component.quantity || 0 }}</td>
             <td>
               <span v-if="loadingCosts[component.id]" class="loading-cost">
-                <i class="loading-spinner"></i> Calcolo...
+                <i class="loading-spinner"></i> {{ $t('common.calculating') }}...
               </span>
               <span v-else-if="componentCosts[component.id] !== undefined">
                 € {{ typeof componentCosts[component.id] === 'number' ? componentCosts[component.id].toFixed(2) : componentCosts[component.id] }}
               </span>
               <span v-else>
                 <button @click="loadComponentCost(component.id)" class="btn btn-sm btn-secondary">
-                  Calcola costo
+                  {{ $t('common.calculateCost') }}
                 </button>
               </span>
             </td>
             <td class="actions">
-              <button @click="viewComponent(component.id)" class="btn btn-sm btn-view">Visualizza</button>
-              <button @click="editComponent(component.id)" class="btn btn-sm btn-edit">Modifica</button>
-              <button @click="deleteComponent(component.id)" class="btn btn-sm btn-danger">Elimina</button>
+              <button @click="viewComponent(component.id)" class="btn btn-sm btn-view">{{ $t('common.view') }}</button>
+              <button @click="editComponent(component.id)" class="btn btn-sm btn-edit">{{ $t('common.edit') }}</button>
+              <button @click="deleteComponent(component.id)" class="btn btn-sm btn-danger">{{ $t('common.delete') }}</button>
             </td>
           </tr>
         </tbody>
@@ -113,7 +113,7 @@
           :disabled="currentPage === 1" 
           class="btn btn-sm"
         >
-          Precedente
+          {{ $t('common.previous') }}
         </button>
         
         <div class="page-numbers">
@@ -132,12 +132,12 @@
           :disabled="currentPage === totalPages" 
           class="btn btn-sm"
         >
-          Successivo
+          {{ $t('common.next') }}
         </button>
       </div>
       
       <div class="pagination-info">
-        Visualizzazione {{ startIndex + 1 }}-{{ endIndex }} di {{ filteredComponents.length }} elementi
+        {{ $t('common.paginationInfo', { start: startIndex + 1, end: endIndex, total: filteredComponents.length }) }}
       </div>
     </div>
   </div>

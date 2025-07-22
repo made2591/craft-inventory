@@ -1,13 +1,13 @@
 <template>
   <div class="suppliers">
-    <h1>Gestione Fornitori</h1>
+    <h1>{{ $t('suppliers.title') }}</h1>
     
     <div class="actions">
-      <router-link to="/suppliers/new" class="btn btn-primary">Nuovo Fornitore</router-link>
+      <router-link to="/suppliers/new" class="btn btn-primary">{{ $t('suppliers.newSupplier') }}</router-link>
     </div>
     
     <div v-if="loading" class="loading">
-      Caricamento in corso...
+      {{ $t('common.loading') }}
     </div>
     
     <div v-else-if="error" class="error">
@@ -15,7 +15,7 @@
     </div>
     
     <div v-else-if="suppliers.length === 0" class="empty-state">
-      Nessun fornitore trovato. Aggiungi il tuo primo fornitore!
+      {{ $t('suppliers.noSuppliersFound') }}
     </div>
     
     <div v-else class="suppliers-list">
@@ -25,12 +25,12 @@
           <input 
             type="text" 
             v-model="searchQuery" 
-            placeholder="Cerca fornitori..." 
+            :placeholder="$t('suppliers.searchPlaceholder')" 
             @input="filterSuppliers"
           >
         </div>
         <div class="pagination-controls">
-          <label for="itemsPerPage">Elementi per pagina:</label>
+          <label for="itemsPerPage">{{ $t('common.itemsPerPage') }}:</label>
           <select id="itemsPerPage" v-model="itemsPerPage" @change="updatePagination">
             <option value="5">5</option>
             <option value="10">10</option>
@@ -44,36 +44,36 @@
         <thead>
           <tr>
             <th @click="sortBy('name')" class="sortable">
-              Nome
+              {{ $t('suppliers.name') }}
               <span v-if="sortKey === 'name'" class="sort-icon">
                 {{ sortOrder === 'asc' ? '▲' : '▼' }}
               </span>
             </th>
             <th @click="sortBy('contactPerson')" class="sortable">
-              Contatto
+              {{ $t('suppliers.contact') }}
               <span v-if="sortKey === 'contactPerson'" class="sort-icon">
                 {{ sortOrder === 'asc' ? '▲' : '▼' }}
               </span>
             </th>
             <th @click="sortBy('email')" class="sortable">
-              Email
+              {{ $t('suppliers.email') }}
               <span v-if="sortKey === 'email'" class="sort-icon">
                 {{ sortOrder === 'asc' ? '▲' : '▼' }}
               </span>
             </th>
             <th @click="sortBy('phone')" class="sortable">
-              Telefono
+              {{ $t('suppliers.phone') }}
               <span v-if="sortKey === 'phone'" class="sort-icon">
                 {{ sortOrder === 'asc' ? '▲' : '▼' }}
               </span>
             </th>
             <th @click="sortBy('address')" class="sortable">
-              Indirizzo
+              {{ $t('suppliers.address') }}
               <span v-if="sortKey === 'address'" class="sort-icon">
                 {{ sortOrder === 'asc' ? '▲' : '▼' }}
               </span>
             </th>
-            <th>Azioni</th>
+            <th>{{ $t('common.actions') }}</th>
           </tr>
         </thead>
         <tbody>
@@ -88,9 +88,9 @@
             <td>{{ supplier.phone || 'N/A' }}</td>
             <td>{{ supplier.address || 'N/A' }}</td>
             <td class="actions">
-              <button @click="viewSupplier(supplier.id)" class="btn btn-sm btn-view">Visualizza</button>
-              <button @click="editSupplier(supplier.id)" class="btn btn-sm btn-edit">Modifica</button>
-              <button @click="deleteSupplier(supplier.id)" class="btn btn-sm btn-danger">Elimina</button>
+              <button @click="viewSupplier(supplier.id)" class="btn btn-sm btn-view">{{ $t('common.view') }}</button>
+              <button @click="editSupplier(supplier.id)" class="btn btn-sm btn-edit">{{ $t('common.edit') }}</button>
+              <button @click="deleteSupplier(supplier.id)" class="btn btn-sm btn-danger">{{ $t('common.delete') }}</button>
             </td>
           </tr>
         </tbody>
@@ -103,7 +103,7 @@
           :disabled="currentPage === 1" 
           class="btn btn-sm"
         >
-          Precedente
+          {{ $t('common.previous') }}
         </button>
         
         <div class="page-numbers">
@@ -122,12 +122,12 @@
           :disabled="currentPage === totalPages" 
           class="btn btn-sm"
         >
-          Successivo
+          {{ $t('common.next') }}
         </button>
       </div>
       
       <div class="pagination-info">
-        Visualizzazione {{ startIndex + 1 }}-{{ endIndex }} di {{ filteredSuppliers.length }} elementi
+        {{ $t('common.paginationInfo', { start: startIndex + 1, end: endIndex, total: filteredSuppliers.length }) }}
       </div>
     </div>
   </div>
@@ -180,7 +180,7 @@ export default {
         this.filterSuppliers();
       } catch (error) {
         console.error('Error fetching suppliers:', error);
-        this.error = 'Si è verificato un errore durante il recupero dei fornitori. Riprova più tardi.';
+        this.error = this.$t('errors.fetchSuppliers');
       } finally {
         this.loading = false;
       }
@@ -259,7 +259,7 @@ export default {
     },
     
     async deleteSupplier(id) {
-      if (!confirm('Sei sicuro di voler eliminare questo fornitore?')) {
+      if (!confirm(this.$t('suppliers.confirmDelete'))) {
         return;
       }
       
@@ -270,9 +270,9 @@ export default {
       } catch (error) {
         console.error('Error deleting supplier:', error);
         if (error.response && error.response.status === 400) {
-          alert('Impossibile eliminare il fornitore: ci sono materiali associati.');
+          alert(this.$t('errors.deleteSupplierMaterials'));
         } else {
-          alert('Si è verificato un errore durante l\'eliminazione del fornitore.');
+          alert(this.$t('errors.deleteSupplier'));
         }
       }
     }

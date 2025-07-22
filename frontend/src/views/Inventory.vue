@@ -1,21 +1,21 @@
 <template>
   <div class="inventory">
-    <h1>Gestione Magazzino</h1>
+    <h1>{{ $t('inventory.title') }}</h1>
 
     <div class="actions">
-      <router-link to="/inventory/new" class="btn btn-primary">Nuovo Articolo</router-link>
+      <router-link to="/inventory/new" class="btn btn-primary">{{ $t('inventory.newItem') }}</router-link>
     </div>
 
     <!-- Filtri e opzioni di paginazione -->
     <div class="table-controls">
       <div class="search-filter">
-        <input type="text" v-model="searchQuery" placeholder="Cerca articoli..." @input="filterItems">
+        <input type="text" v-model="searchQuery" :placeholder="$t('inventory.searchPlaceholder')" @input="filterItems">
       </div>
 
       <div class="filter-group">
-        <label for="model-filter">Filtra per modello:</label>
+        <label for="model-filter">{{ $t('inventory.filterByModel') }}:</label>
         <select id="model-filter" v-model="modelFilter" @change="filterItems">
-          <option value="">Tutti i modelli</option>
+          <option value="">{{ $t('inventory.allModels') }}</option>
           <option v-for="model in models" :key="model.id" :value="model.id">
             {{ model.name }}
           </option>
@@ -23,7 +23,7 @@
       </div>
 
       <div class="pagination-controls">
-        <label for="itemsPerPage">Elementi per pagina:</label>
+        <label for="itemsPerPage">{{ $t('common.itemsPerPage') }}:</label>
         <select id="itemsPerPage" v-model="itemsPerPage" @change="updatePagination">
           <option value="5">5</option>
           <option value="10">10</option>
@@ -34,7 +34,7 @@
     </div>
 
     <div v-if="loading" class="loading">
-      Caricamento in corso...
+      {{ $t('common.loading') }}
     </div>
 
     <div v-else-if="error" class="error">
@@ -42,7 +42,7 @@
     </div>
 
     <div v-else-if="filteredItems.length === 0" class="empty-state">
-      Nessun articolo trovato in magazzino. Aggiungi il tuo primo articolo!
+      {{ $t('inventory.noItemsFound') }}
     </div>
 
     <div v-else class="inventory-list">
@@ -50,36 +50,36 @@
         <thead>
           <tr>
             <th @click="sortBy('modelSku')" class="sortable">
-              SKU Modello
+              {{ $t('inventory.modelSku') }}
               <span v-if="sortKey === 'modelSku'" class="sort-icon">
                 {{ sortOrder === 'asc' ? '▲' : '▼' }}
               </span>
             </th>
             <th @click="sortBy('modelName')" class="sortable">
-              Modello
+              {{ $t('inventory.model') }}
               <span v-if="sortKey === 'modelName'" class="sort-icon">
                 {{ sortOrder === 'asc' ? '▲' : '▼' }}
               </span>
             </th>
             <th @click="sortBy('quantity')" class="sortable">
-              Quantità
+              {{ $t('inventory.quantity') }}
               <span v-if="sortKey === 'quantity'" class="sort-icon">
                 {{ sortOrder === 'asc' ? '▲' : '▼' }}
               </span>
             </th>
             <th @click="sortBy('productionDate')" class="sortable">
-              Data Produzione
+              {{ $t('inventory.productionDate') }}
               <span v-if="sortKey === 'productionDate'" class="sort-icon">
                 {{ sortOrder === 'asc' ? '▲' : '▼' }}
               </span>
             </th>
             <th @click="sortBy('notes')" class="sortable">
-              Note
+              {{ $t('inventory.notes') }}
               <span v-if="sortKey === 'notes'" class="sort-icon">
                 {{ sortOrder === 'asc' ? '▲' : '▼' }}
               </span>
             </th>
-            <th>Azioni</th>
+            <th>{{ $t('common.actions') }}</th>
           </tr>
         </thead>
         <tbody>
@@ -95,9 +95,9 @@
             <td>{{ formatDate(item.productionDate) }}</td>
             <td>{{ item.notes || 'N/A' }}</td>
             <td class="actions">
-              <button @click="viewItem(item.id)" class="btn btn-sm btn-view">Visualizza</button>
-              <button @click="editItem(item.id)" class="btn btn-sm btn-edit">Modifica</button>
-              <button @click="deleteItem(item.id)" class="btn btn-sm btn-danger">Elimina</button>
+              <button @click="viewItem(item.id)" class="btn btn-sm btn-view">{{ $t('common.view') }}</button>
+              <button @click="editItem(item.id)" class="btn btn-sm btn-edit">{{ $t('common.edit') }}</button>
+              <button @click="deleteItem(item.id)" class="btn btn-sm btn-danger">{{ $t('common.delete') }}</button>
             </td>
           </tr>
         </tbody>
@@ -106,7 +106,7 @@
       <!-- Paginazione -->
       <div class="pagination">
         <button @click="goToPage(currentPage - 1)" :disabled="currentPage === 1" class="btn btn-sm">
-          Precedente
+          {{ $t('common.previous') }}
         </button>
 
         <div class="page-numbers">
@@ -117,12 +117,12 @@
         </div>
 
         <button @click="goToPage(currentPage + 1)" :disabled="currentPage === totalPages" class="btn btn-sm">
-          Successivo
+          {{ $t('common.next') }}
         </button>
       </div>
 
       <div class="pagination-info">
-        Visualizzazione {{ startIndex + 1 }}-{{ endIndex }} di {{ filteredItems.length }} elementi
+        {{ $t('common.paginationInfo', { start: startIndex + 1, end: endIndex, total: filteredItems.length }) }}
       </div>
     </div>
   </div>
@@ -178,7 +178,7 @@ export default {
         this.filterItems();
       } catch (error) {
         console.error('Error fetching inventory:', error);
-        this.error = 'Si è verificato un errore durante il recupero degli articoli. Riprova più tardi.';
+        this.error = this.$t('errors.fetchInventoryItems');
       } finally {
         this.loading = false;
       }
@@ -300,7 +300,7 @@ export default {
     },
 
     async deleteItem(id) {
-      if (!confirm('Sei sicuro di voler eliminare questo articolo dal magazzino?')) {
+      if (!confirm(this.$t('inventory.confirmDeleteItem'))) {
         return;
       }
 
@@ -310,7 +310,7 @@ export default {
         this.filterItems();
       } catch (error) {
         console.error('Error deleting inventory item:', error);
-        alert('Si è verificato un errore durante l\'eliminazione dell\'articolo.');
+        alert(this.$t('errors.deleteInventoryItem'));
       }
     }
   }

@@ -1,32 +1,32 @@
 <template>
   <div class="database-management">
-    <h1>Gestione Database</h1>
+    <h1>{{ $t('database.title') }}</h1>
     
     <!-- Sezione Backup e Ripristino -->
     <div class="card">
       <div class="card-header">
-        <h2>Backup e Ripristino</h2>
+        <h2>{{ $t('database.backup') }}</h2>
       </div>
       <div class="card-body">
         <p>
-          Esporta il database come file SQL per il backup o importa un file SQL per ripristinare il database.
+          {{ $t('database.backupDescription') }}
         </p>
         
         <div class="export-options">
-          <h3>Opzioni di esportazione</h3>
+          <h3>{{ $t('database.exportOptions') }}</h3>
           <div class="checkbox-group">
             <input type="checkbox" id="dataOnly" v-model="exportOptions.dataOnly">
-            <label for="dataOnly">Solo dati (senza schema)</label>
-            <span class="tooltip" title="Esporta solo i dati senza la struttura del database">ℹ️</span>
+            <label for="dataOnly">{{ $t('database.dataOnly') }}</label>
+            <span class="tooltip" :title="$t('database.dataOnlyTooltip')">ℹ️</span>
           </div>
         </div>
         
         <div class="import-options">
-          <h3>Opzioni di importazione</h3>
+          <h3>{{ $t('database.importOptions') }}</h3>
           <div class="checkbox-group">
             <input type="checkbox" id="preserveSchema" v-model="importOptions.preserveSchema">
-            <label for="preserveSchema">Preserva schema esistente</label>
-            <span class="tooltip" title="Mantiene la struttura attuale del database e aggiorna solo i dati">ℹ️</span>
+            <label for="preserveSchema">{{ $t('database.preserveSchema') }}</label>
+            <span class="tooltip" :title="$t('database.preserveSchemaTooltip')">ℹ️</span>
           </div>
         </div>
         
@@ -36,11 +36,11 @@
             class="btn btn-primary action-button" 
             :disabled="loading"
           >
-            {{ loading && operation === 'export' ? 'Esportazione in corso...' : 'Esporta Database' }}
+            {{ loading && operation === 'export' ? $t('database.exporting') : $t('database.export') }}
           </button>
           
           <label for="import-file" class="btn btn-secondary action-button" :class="{ disabled: loading }">
-            {{ loading && operation === 'import' ? 'Importazione in corso...' : 'Importa Database' }}
+            {{ loading && operation === 'import' ? $t('database.importing') : $t('database.import') }}
           </label>
           <input 
             type="file" 
@@ -57,12 +57,11 @@
     <!-- Sezione Reset Database -->
     <div class="card">
       <div class="card-header">
-        <h2>Reset Database</h2>
+        <h2>{{ $t('database.reset') }}</h2>
       </div>
       <div class="card-body">
         <p>
-          Ripristina il database allo stato iniziale, eliminando tutti i dati esistenti.
-          <strong>Attenzione:</strong> Questa operazione è irreversibile.
+          {{ $t('database.resetWarningFull') }}
         </p>
         
         <div class="action-buttons action-buttons-row">
@@ -71,7 +70,7 @@
             class="btn btn-danger action-button" 
             :disabled="loading"
           >
-            {{ loading && operation === 'reset' ? 'Reset in corso...' : 'Reset Database' }}
+            {{ loading && operation === 'reset' ? $t('database.resetting') : $t('database.reset') }}
           </button>
         </div>
       </div>
@@ -80,22 +79,21 @@
     <!-- Sezione Inizializzazione Dati di Test -->
     <div class="card">
       <div class="card-header">
-        <h2>Inizializzazione Dati di Test</h2>
+        <h2>{{ $t('database.testData') }}</h2>
       </div>
       <div class="card-body">
         <p>
-          Questa funzione inizializza il database con dati di test per facilitare lo sviluppo e il testing dell'applicazione.
-          <strong>Attenzione:</strong> Questa operazione eliminerà tutti i dati esistenti nel database e li sostituirà con dati di test.
+          {{ $t('database.testDataWarningFull') }}
         </p>
         
         <div class="test-data-summary">
-          <h3>Dati che verranno creati:</h3>
+          <h3>{{ $t('database.dataToCreate') }}:</h3>
           <ul>
-            <li><strong>3 Fornitori</strong>: Fornitore Legno, Fornitore Metalli, Fornitore Tessuti</li>
-            <li><strong>3 Materiali</strong>: Legno di Quercia, Acciaio Inox, Tessuto Cotone</li>
-            <li><strong>2 Componenti</strong>: Gamba Tavolo, Piano Tavolo</li>
-            <li><strong>2 Modelli</strong>: Tavolo Moderno, Tavolo Rustico</li>
-            <li><strong>4 Articoli in Magazzino</strong>: 2 per ogni modello</li>
+            <li><strong>{{ $t('database.suppliersCount', { count: 3 }) }}</strong>: {{ $t('database.supplierNames') }}</li>
+            <li><strong>{{ $t('database.materialsCount', { count: 3 }) }}</strong>: {{ $t('database.materialNames') }}</li>
+            <li><strong>{{ $t('database.componentsCount', { count: 2 }) }}</strong>: {{ $t('database.componentNames') }}</li>
+            <li><strong>{{ $t('database.modelsCount', { count: 2 }) }}</strong>: {{ $t('database.modelNames') }}</li>
+            <li><strong>{{ $t('database.inventoryItemsCount', { count: 4 }) }}</strong>: {{ $t('database.inventoryItemDetails') }}</li>
           </ul>
         </div>
         
@@ -105,7 +103,7 @@
             class="btn btn-warning action-button" 
             :disabled="loading"
           >
-            {{ loading && operation === 'init' ? 'Inizializzazione in corso...' : 'Inizializza Dati di Test' }}
+            {{ loading && operation === 'init' ? $t('database.initializing') : $t('database.initTestData') }}
           </button>
         </div>
       </div>
@@ -155,11 +153,11 @@ export default {
         window.location.href = exportUrl;
         
         const exportType = this.exportOptions.dataOnly ? 'solo dati' : 'completa';
-        this.message = `Esportazione ${exportType} del database avviata. Il download dovrebbe iniziare a breve.`;
+        this.message = this.$t('database.exportStarted', { exportType: exportType });
         this.messageType = 'success';
       } catch (error) {
         console.error('Error exporting database:', error);
-        this.message = 'Si è verificato un errore durante l\'esportazione del database. Riprova più tardi.';
+        this.message = this.$t('errors.exportDatabase');
         this.messageType = 'error';
       } finally {
         this.loading = false;
@@ -176,15 +174,15 @@ export default {
     
     async importDatabase() {
       if (!this.selectedFile) {
-        this.message = 'Nessun file selezionato.';
+        this.message = this.$t('errors.noFileSelected');
         this.messageType = 'error';
         return;
       }
       
       // Personalizza il messaggio di conferma in base all'opzione selezionata
       let confirmMessage = this.importOptions.preserveSchema 
-        ? 'Sei sicuro di voler importare questo file SQL? I dati esistenti verranno aggiornati mantenendo la struttura attuale del database.'
-        : 'Sei sicuro di voler importare questo file SQL? Tutti i dati e la struttura esistenti verranno sovrascritti.';
+        ? this.$t('database.confirmImportPreserveSchema')
+        : this.$t('database.confirmImportOverwrite');
       
       if (!confirm(confirmMessage)) {
         this.$refs.fileInput.value = null;
@@ -213,11 +211,11 @@ export default {
         
         // Personalizza il messaggio di successo in base all'opzione selezionata
         const importType = this.importOptions.preserveSchema ? 'con preservazione dello schema' : 'completa';
-        this.message = response.data.message || `Importazione ${importType} del database completata con successo.`;
+        this.message = response.data.message || this.$t('database.importCompleted', { importType: importType });
         this.messageType = 'success';
       } catch (error) {
         console.error('Error importing database:', error);
-        this.message = 'Si è verificato un errore durante l\'importazione del database. Riprova più tardi.';
+        this.message = this.$t('errors.importDatabase');
         this.messageType = 'error';
       } finally {
         this.loading = false;
@@ -228,7 +226,7 @@ export default {
     },
     
     async resetDatabase() {
-      if (!confirm('Sei sicuro di voler ripristinare il database allo stato iniziale? Tutti i dati esistenti verranno eliminati.')) {
+      if (!confirm(this.$t('database.confirmReset'))) {
         return;
       }
       
@@ -238,11 +236,11 @@ export default {
       
       try {
         const response = await api.post('/api/database/reset');
-        this.message = response.data.message || 'Database ripristinato con successo.';
+        this.message = response.data.message || this.$t('database.resetSuccess');
         this.messageType = 'success';
       } catch (error) {
         console.error('Error resetting database:', error);
-        this.message = 'Si è verificato un errore durante il ripristino del database. Riprova più tardi.';
+        this.message = this.$t('errors.resetDatabase');
         this.messageType = 'error';
       } finally {
         this.loading = false;
@@ -251,7 +249,7 @@ export default {
     },
     
     async initTestData() {
-      if (!confirm('Sei sicuro di voler inizializzare il database con dati di test? Tutti i dati esistenti verranno eliminati.')) {
+      if (!confirm(this.$t('database.confirmInitTestData'))) {
         return;
       }
       
@@ -261,11 +259,11 @@ export default {
       
       try {
         const response = await api.post('/api/test-data/init');
-        this.message = `Inizializzazione completata con successo! Creati: ${response.data.data.suppliers} fornitori, ${response.data.data.materials} materiali, ${response.data.data.components} componenti, ${response.data.data.models} modelli e ${response.data.data.inventoryItems} articoli in magazzino.`;
+        this.message = this.$t('database.initSuccess', { suppliers: response.data.data.suppliers, materials: response.data.data.materials, components: response.data.data.components, models: response.data.data.models, inventoryItems: response.data.data.inventoryItems });
         this.messageType = 'success';
       } catch (error) {
         console.error('Error initializing test data:', error);
-        this.message = 'Si è verificato un errore durante l\'inizializzazione dei dati di test. Riprova più tardi.';
+        this.message = this.$t('errors.initTestData');
         this.messageType = 'error';
       } finally {
         this.loading = false;

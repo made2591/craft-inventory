@@ -1,9 +1,9 @@
 <template>
   <div class="supplier-view">
-    <h1>Dettaglio Fornitore</h1>
+    <h1>{{ $t('suppliers.viewTitle') }}</h1>
     
     <div v-if="loading" class="loading">
-      Caricamento in corso...
+      {{ $t('common.loading') }}
     </div>
     
     <div v-else-if="error" class="error">
@@ -14,69 +14,69 @@
       <div class="detail-header">
         <h2>{{ supplier.name }}</h2>
         <div class="actions">
-          <button @click="editSupplier" class="btn btn-primary">Modifica</button>
-          <button @click="goBack" class="btn btn-secondary">Indietro</button>
+          <button @click="editSupplier" class="btn btn-primary">{{ $t('common.edit') }}</button>
+          <button @click="goBack" class="btn btn-secondary">{{ $t('common.back') }}</button>
         </div>
       </div>
       
       <div class="detail-card">
         <div class="detail-row">
-          <div class="detail-label">Persona di Contatto:</div>
-          <div class="detail-value">{{ supplier.contactPerson || 'Non specificato' }}</div>
+          <div class="detail-label">{{ $t('suppliers.contactPerson') }}:</div>
+          <div class="detail-value">{{ supplier.contactPerson || $t('common.notSpecified') }}</div>
         </div>
         
         <div class="detail-row">
-          <div class="detail-label">Email:</div>
-          <div class="detail-value">{{ supplier.email || 'Non specificato' }}</div>
+          <div class="detail-label">{{ $t('suppliers.email') }}:</div>
+          <div class="detail-value">{{ supplier.email || $t('common.notSpecified') }}</div>
         </div>
         
         <div class="detail-row">
-          <div class="detail-label">Telefono:</div>
-          <div class="detail-value">{{ supplier.phone || 'Non specificato' }}</div>
+          <div class="detail-label">{{ $t('suppliers.phone') }}:</div>
+          <div class="detail-value">{{ supplier.phone || $t('common.notSpecified') }}</div>
         </div>
         
         <div class="detail-row">
-          <div class="detail-label">Indirizzo:</div>
-          <div class="detail-value">{{ supplier.address || 'Non specificato' }}</div>
+          <div class="detail-label">{{ $t('suppliers.address') }}:</div>
+          <div class="detail-value">{{ supplier.address || $t('common.notSpecified') }}</div>
         </div>
         
         <div class="detail-row">
-          <div class="detail-label">Link:</div>
+          <div class="detail-label">{{ $t('common.link') }}:</div>
           <div class="detail-value">
             <a v-if="supplier.link" :href="supplier.link" target="_blank" rel="noopener noreferrer">{{ supplier.link }}</a>
-            <span v-else>Non specificato</span>
+            <span v-else>{{ $t('common.notSpecified') }}</span>
           </div>
         </div>
         
         <div class="detail-row">
-          <div class="detail-label">Note:</div>
-          <div class="detail-value">{{ supplier.notes || 'Nessuna nota' }}</div>
+          <div class="detail-label">{{ $t('common.notes') }}:</div>
+          <div class="detail-value">{{ supplier.notes || $t('common.noNotes') }}</div>
         </div>
         
         <div class="detail-row">
-          <div class="detail-label">Data Creazione:</div>
+          <div class="detail-label">{{ $t('common.createdAt') }}:</div>
           <div class="detail-value">{{ formatDate(supplier.createdAt) }}</div>
         </div>
         
         <div class="detail-row">
-          <div class="detail-label">Ultimo Aggiornamento:</div>
+          <div class="detail-label">{{ $t('common.updatedAt') }}:</div>
           <div class="detail-value">{{ formatDate(supplier.updatedAt) }}</div>
         </div>
       </div>
       
-      <h2>Materiali forniti</h2>
+      <h2>{{ $t('suppliers.materialsSupplied') }}</h2>
       <div v-if="materials.length === 0" class="empty-materials">
-        Nessun materiale fornito da questo fornitore.
+        {{ $t('suppliers.noMaterialsSupplied') }}
       </div>
       <div v-else class="materials-table">
         <table>
           <thead>
             <tr>
-              <th>SKU</th>
-              <th>Nome</th>
-              <th>Unità di Misura</th>
-              <th>Costo per Unità</th>
-              <th>Quantità Disponibile</th>
+              <th>{{ $t('materials.sku') }}</th>
+              <th>{{ $t('materials.name') }}</th>
+              <th>{{ $t('materials.unitOfMeasure') }}</th>
+              <th>{{ $t('materials.costPerUnit') }}</th>
+              <th>{{ $t('materials.currentStock') }}</th>
             </tr>
           </thead>
           <tbody>
@@ -134,7 +134,7 @@ export default {
         await this.fetchMaterials();
       } catch (error) {
         console.error('Error fetching supplier:', error);
-        this.error = 'Si è verificato un errore durante il recupero del fornitore. Riprova più tardi.';
+        this.error = this.$t('errors.fetchMaterials');
       } finally {
         this.loading = false;
       }

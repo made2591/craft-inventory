@@ -1,9 +1,9 @@
 <template>
   <div class="inventory-view">
-    <h1>Dettaglio Articolo in Magazzino</h1>
+    <h1>{{ $t('inventory.viewTitle') }}</h1>
     
     <div v-if="loading" class="loading">
-      Caricamento in corso...
+      {{ $t('common.loading') }}
     </div>
     
     <div v-else-if="error" class="error">
@@ -14,19 +14,19 @@
       <div class="detail-header">
         <h2>{{ item.modelName }}</h2>
         <div class="actions">
-          <button @click="editItem" class="btn btn-primary">Modifica</button>
-          <button @click="goBack" class="btn btn-secondary">Indietro</button>
+          <button @click="editItem" class="btn btn-primary">{{ $t('common.edit') }}</button>
+          <button @click="goBack" class="btn btn-secondary">{{ $t('common.back') }}</button>
         </div>
       </div>
       
       <div class="detail-card">
         <div class="detail-row">
-          <div class="detail-label">Modello:</div>
+          <div class="detail-label">{{ $t('inventory.model') }}:</div>
           <div class="detail-value">{{ item.modelName }}</div>
         </div>
         
         <div class="detail-row">
-          <div class="detail-label">SKU Modello:</div>
+          <div class="detail-label">{{ $t('inventory.modelSku') }}:</div>
           <div class="detail-value">
             <router-link v-if="item.modelSku" :to="`/models/${item.modelId}/view`" class="sku-link">
               {{ item.modelSku }}
@@ -36,42 +36,42 @@
         </div>
         
         <div class="detail-row">
-          <div class="detail-label">Quantità:</div>
+          <div class="detail-label">{{ $t('inventory.quantity') }}:</div>
           <div class="detail-value">{{ item.quantity }}</div>
         </div>
         
         <div class="detail-row">
-          <div class="detail-label">Data di Produzione:</div>
+          <div class="detail-label">{{ $t('inventory.productionDate') }}:</div>
           <div class="detail-value">{{ formatDate(item.productionDate) }}</div>
         </div>
         
         <div class="detail-row">
-          <div class="detail-label">Note:</div>
-          <div class="detail-value">{{ item.notes || 'Nessuna nota' }}</div>
+          <div class="detail-label">{{ $t('inventory.notes') }}:</div>
+          <div class="detail-value">{{ item.notes || $t('common.noNotes') }}</div>
         </div>
         
         <div class="detail-row">
-          <div class="detail-label">Data Creazione:</div>
+          <div class="detail-label">{{ $t('common.createdAt') }}:</div>
           <div class="detail-value">{{ formatDate(item.createdAt) }}</div>
         </div>
         
         <div class="detail-row">
-          <div class="detail-label">Ultimo Aggiornamento:</div>
+          <div class="detail-label">{{ $t('common.updatedAt') }}:</div>
           <div class="detail-value">{{ formatDate(item.updatedAt) }}</div>
         </div>
       </div>
       
-      <h2>Componenti del Modello</h2>
+      <h2>{{ $t('inventory.modelComponents') }}</h2>
       <div v-if="components.length === 0" class="empty-components">
-        Nessun componente associato a questo modello.
+        {{ $t('inventory.noComponents') }}
       </div>
       <div v-else class="components-table">
         <table>
           <thead>
             <tr>
-              <th>SKU</th>
-              <th>Nome</th>
-              <th>Quantità</th>
+              <th>{{ $t('components.sku') }}</th>
+              <th>{{ $t('components.name') }}</th>
+              <th>{{ $t('components.quantity') }}</th>
             </tr>
           </thead>
           <tbody>
@@ -88,21 +88,21 @@
         </table>
       </div>
       
-      <h2>Storico Vendite</h2>
+      <h2>{{ $t('inventory.salesHistory') }}</h2>
       <div v-if="saleTransactions.length === 0" class="empty-transactions">
-        Nessuna vendita registrata per questo articolo.
+        {{ $t('inventory.noSales') }}
       </div>
       <div v-else class="transactions-table">
         <table>
           <thead>
             <tr>
-              <th>Data</th>
-              <th>Cliente</th>
-              <th>Quantità</th>
-              <th>Prezzo Unitario</th>
-              <th>Totale</th>
-              <th>Stato</th>
-              <th>Azioni</th>
+              <th>{{ $t('transactions.date') }}</th>
+              <th>{{ $t('transactions.customer') }}</th>
+              <th>{{ $t('transactions.quantity') }}</th>
+              <th>{{ $t('transactions.unitPrice') }}</th>
+              <th>{{ $t('transactions.total') }}</th>
+              <th>{{ $t('transactions.status') }}</th>
+              <th>{{ $t('common.actions') }}</th>
             </tr>
           </thead>
           <tbody>
@@ -118,7 +118,7 @@
               <td>€ {{ formatCost(transaction.totalAmount) }}</td>
               <td>{{ formatStatus(transaction.status) }}</td>
               <td>
-                <router-link :to="`/transactions/${transaction.id}`" class="btn btn-sm">Dettagli</router-link>
+                <router-link :to="`/transactions/${transaction.id}`" class="btn btn-sm">{{ $t('common.details') }}</router-link>
               </td>
             </tr>
           </tbody>
@@ -131,7 +131,7 @@
             :disabled="currentPage === 1" 
             class="btn btn-sm"
           >
-            Precedente
+            {{ $t('common.previous') }}
           </button>
           
           <div class="page-numbers">
@@ -150,12 +150,12 @@
             :disabled="currentPage === totalPages" 
             class="btn btn-sm"
           >
-            Successivo
+            {{ $t('common.next') }}
           </button>
         </div>
         
         <div class="pagination-info" v-if="saleTransactions.length > 0">
-          Visualizzazione {{ startIndex + 1 }}-{{ endIndex }} di {{ saleTransactions.length }} elementi
+          {{ $t('common.paginationInfo', { start: startIndex + 1, end: endIndex, total: saleTransactions.length }) }}
         </div>
       </div>
     </div>
@@ -227,7 +227,7 @@ export default {
         }
       } catch (error) {
         console.error('Error fetching inventory item:', error);
-        this.error = 'Si è verificato un errore durante il recupero dell\'articolo. Riprova più tardi.';
+        this.error = this.$t('errors.fetchInventoryItem');
       } finally {
         this.loading = false;
       }
@@ -251,7 +251,7 @@ export default {
         this.currentPage = response.data.pagination.page;
       } catch (error) {
         console.error('Error fetching sales history:', error);
-        this.salesError = 'Si è verificato un errore durante il recupero dello storico vendite.';
+        this.salesError = this.$t('errors.fetchSalesHistory');
       } finally {
         this.salesLoading = false;
       }
@@ -307,9 +307,9 @@ export default {
       if (!status) return 'N/A';
       
       const statusMap = {
-        'pending': 'In attesa',
-        'completed': 'Completato',
-        'cancelled': 'Annullato'
+        'pending': this.$t('transactions.pending'),
+        'completed': this.$t('transactions.completed'),
+        'cancelled': this.$t('transactions.cancelled')
       };
       
       return statusMap[status] || status;

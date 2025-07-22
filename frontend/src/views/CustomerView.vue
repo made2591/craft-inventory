@@ -1,9 +1,9 @@
 <template>
   <div class="customer-view">
-    <h1>Dettaglio Cliente</h1>
+    <h1>{{ $t('customers.viewTitle') }}</h1>
     
     <div v-if="loading" class="loading">
-      Caricamento in corso...
+      {{ $t('common.loading') }}
     </div>
     
     <div v-else-if="error" class="error">
@@ -14,74 +14,74 @@
       <div class="detail-header">
         <h2>{{ customer.name }}</h2>
         <div class="actions">
-          <button @click="editCustomer" class="btn btn-primary">Modifica</button>
-          <button @click="goBack" class="btn btn-secondary">Indietro</button>
+          <button @click="editCustomer" class="btn btn-primary">{{ $t('common.edit') }}</button>
+          <button @click="goBack" class="btn btn-secondary">{{ $t('common.back') }}</button>
         </div>
       </div>
       
       <div class="detail-card">
         <div class="detail-row">
-          <div class="detail-label">Persona di Contatto:</div>
-          <div class="detail-value">{{ customer.contactPerson || 'Non specificato' }}</div>
+          <div class="detail-label">{{ $t('customers.contactPerson') }}:</div>
+          <div class="detail-value">{{ customer.contactPerson || $t('common.notSpecified') }}</div>
         </div>
         
         <div class="detail-row">
-          <div class="detail-label">Tipo Cliente:</div>
+          <div class="detail-label">{{ $t('customers.customerType') }}:</div>
           <div class="detail-value">{{ formatCustomerType(customer.customerType) }}</div>
         </div>
         
         <div class="detail-row">
-          <div class="detail-label">Email:</div>
-          <div class="detail-value">{{ customer.email || 'Non specificato' }}</div>
+          <div class="detail-label">{{ $t('customers.email') }}:</div>
+          <div class="detail-value">{{ customer.email || $t('common.notSpecified') }}</div>
         </div>
         
         <div class="detail-row">
-          <div class="detail-label">Telefono:</div>
-          <div class="detail-value">{{ customer.phone || 'Non specificato' }}</div>
+          <div class="detail-label">{{ $t('customers.phone') }}:</div>
+          <div class="detail-value">{{ customer.phone || $t('common.notSpecified') }}</div>
         </div>
         
         <div class="detail-row">
-          <div class="detail-label">Indirizzo:</div>
-          <div class="detail-value">{{ customer.address || 'Non specificato' }}</div>
+          <div class="detail-label">{{ $t('customers.address') }}:</div>
+          <div class="detail-value">{{ customer.address || $t('common.notSpecified') }}</div>
         </div>
         
         <div class="detail-row">
-          <div class="detail-label">Link:</div>
+          <div class="detail-label">{{ $t('common.link') }}:</div>
           <div class="detail-value">
             <a v-if="customer.link" :href="customer.link" target="_blank" rel="noopener noreferrer">{{ customer.link }}</a>
-            <span v-else>Non specificato</span>
+            <span v-else>{{ $t('common.notSpecified') }}</span>
           </div>
         </div>
         
         <div class="detail-row">
-          <div class="detail-label">Note:</div>
-          <div class="detail-value">{{ customer.notes || 'Nessuna nota' }}</div>
+          <div class="detail-label">{{ $t('common.notes') }}:</div>
+          <div class="detail-value">{{ customer.notes || $t('common.noNotes') }}</div>
         </div>
         
         <div class="detail-row">
-          <div class="detail-label">Data Creazione:</div>
+          <div class="detail-label">{{ $t('common.createdAt') }}:</div>
           <div class="detail-value">{{ formatDate(customer.createdAt) }}</div>
         </div>
         
         <div class="detail-row">
-          <div class="detail-label">Ultimo Aggiornamento:</div>
+          <div class="detail-label">{{ $t('common.updatedAt') }}:</div>
           <div class="detail-value">{{ formatDate(customer.updatedAt) }}</div>
         </div>
       </div>
       
-      <h2>Materiali venduti a questo cliente</h2>
+      <h2>{{ $t('customers.materialsSold') }}</h2>
       <div v-if="transactions.length === 0" class="empty-transactions">
-        Nessuna transazione con questo cliente.
+        {{ $t('customers.noTransactions') }}
       </div>
       <div v-else class="transactions-table">
         <table>
           <thead>
             <tr>
-              <th>Data</th>
-              <th>Materiale</th>
-              <th>Quantità</th>
-              <th>Prezzo Unitario</th>
-              <th>Totale</th>
+              <th>{{ $t('transactions.date') }}</th>
+              <th>{{ $t('transactions.material') }}</th>
+              <th>{{ $t('transactions.quantity') }}</th>
+              <th>{{ $t('transactions.unitPrice') }}</th>
+              <th>{{ $t('transactions.total') }}</th>
             </tr>
           </thead>
           <tbody>
@@ -91,15 +91,15 @@
                 <template v-if="transaction.items && transaction.items.length > 0">
                   <div v-for="item in transaction.items" :key="item.id">
                     <router-link v-if="item.materialId" :to="`/materials/${item.materialId}/view`" class="material-link">
-                      {{ item.materialName || 'N/A' }}
+                      {{ item.materialName || $t('common.notAvailable') }}
                     </router-link>
                     <router-link v-else-if="item.productModelId" :to="`/models/${item.productModelId}/view`" class="material-link">
-                      {{ item.modelName || 'N/A' }}
+                      {{ item.modelName || $t('common.notAvailable') }}
                     </router-link>
-                    <span v-else>N/A</span>
+                    <span v-else>{{ $t('common.notAvailable') }}</span>
                   </div>
                 </template>
-                <span v-else>N/A</span>
+                <span v-else>{{ $t('common.notAvailable') }}</span>
               </td>
               <td>
                 <template v-if="transaction.items && transaction.items.length > 0">
@@ -107,7 +107,7 @@
                     {{ item.quantity }} {{ item.unitOfMeasure || '' }}
                   </div>
                 </template>
-                <span v-else>N/A</span>
+                <span v-else>{{ $t('common.notAvailable') }}</span>
               </td>
               <td>
                 <template v-if="transaction.items && transaction.items.length > 0">
@@ -115,7 +115,7 @@
                     € {{ formatCost(item.unitPrice) }}
                   </div>
                 </template>
-                <span v-else>N/A</span>
+                <span v-else>{{ $t('common.notAvailable') }}</span>
               </td>
               <td>€ {{ formatCost(transaction.totalAmount) }}</td>
             </tr>
@@ -162,7 +162,7 @@ export default {
         await this.fetchTransactions();
       } catch (error) {
         console.error('Error fetching customer:', error);
-        this.error = 'Si è verificato un errore durante il recupero del cliente. Riprova più tardi.';
+        this.error = this.$t('errors.fetchCustomer');
       } finally {
         this.loading = false;
       }
@@ -173,16 +173,16 @@ export default {
         const response = await api.get(`/api/transactions?customerId=${this.id}&type=sale`);
         this.transactions = response.data || [];
       } catch (error) {
-        console.error('Error fetching transactions:', error);
+        this.error = this.$t('errors.fetchTransactions');
       }
     },
     
     formatCustomerType(type) {
       const types = {
-        'private': 'Privato',
-        'business': 'Azienda',
-        'wholesale': 'Grossista',
-        'retail': 'Dettaglio'
+        'private': this.$t('customers.private'),
+        'business': this.$t('customers.business'),
+        'wholesale': this.$t('customers.wholesale'),
+        'retail': this.$t('customers.retail')
       };
       return types[type] || type;
     },

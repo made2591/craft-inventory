@@ -1,7 +1,7 @@
 <template>
   <div class="login-container">
     <div class="login-card">
-      <h1>{{ isRegister ? 'Registrazione' : 'Accesso' }}</h1>
+      <h1>{{ isRegister ? $t('login.registerTitle') : $t('login.loginTitle') }}</h1>
       
       <div v-if="error" class="error-message">
         {{ error }}
@@ -9,7 +9,7 @@
       
       <form @submit.prevent="submitForm">
         <div class="form-group">
-          <label for="username">Username</label>
+          <label for="username">{{ $t('login.username') }}</label>
           <input 
             type="text" 
             id="username" 
@@ -20,7 +20,7 @@
         </div>
         
         <div v-if="isRegister" class="form-group">
-          <label for="email">Email</label>
+          <label for="email">{{ $t('login.email') }}</label>
           <input 
             type="email" 
             id="email" 
@@ -31,7 +31,7 @@
         </div>
         
         <div class="form-group">
-          <label for="password">Password</label>
+          <label for="password">{{ $t('login.password') }}</label>
           <input 
             type="password" 
             id="password" 
@@ -42,7 +42,7 @@
         </div>
         
         <div v-if="isRegister" class="form-group">
-          <label for="confirmPassword">Conferma Password</label>
+          <label for="confirmPassword">{{ $t('login.confirmPassword') }}</label>
           <input 
             type="password" 
             id="confirmPassword" 
@@ -58,7 +58,7 @@
             class="btn btn-primary" 
             :disabled="loading"
           >
-            {{ isRegister ? 'Registrati' : 'Accedi' }}
+            {{ isRegister ? $t('login.registerButton') : $t('login.loginButton') }}
           </button>
           
           <div class="loading-spinner" v-if="loading"></div>
@@ -67,12 +67,12 @@
       
       <div class="toggle-form">
         <p v-if="isRegister">
-          Hai già un account? 
-          <a href="#" @click.prevent="isRegister = false">Accedi</a>
+          {{ $t('login.alreadyHaveAccount') }} 
+          <a href="#" @click.prevent="isRegister = false">{{ $t('login.loginLink') }}</a>
         </p>
         <p v-else>
-          Non hai un account? 
-          <a href="#" @click.prevent="isRegister = true">Registrati</a>
+          {{ $t('login.noAccount') }} 
+          <a href="#" @click.prevent="isRegister = true">{{ $t('login.registerLink') }}</a>
         </p>
       </div>
     </div>
@@ -104,12 +104,12 @@ export default {
       // Validazione
       if (this.isRegister) {
         if (this.form.password !== this.form.confirmPassword) {
-          this.error = 'Le password non corrispondono';
+          this.error = this.$t('errors.passwordsMismatch');
           return;
         }
         
         if (this.form.password.length < 6) {
-          this.error = 'La password deve essere di almeno 6 caratteri';
+          this.error = this.$t('errors.passwordTooShort');
           return;
         }
       }
@@ -150,7 +150,7 @@ export default {
         if (error.response && error.response.data) {
           this.error = error.response.data;
         } else {
-          this.error = 'Si è verificato un errore durante l\'autenticazione. Riprova più tardi.';
+          this.error = this.$t('errors.authenticationError');
         }
       } finally {
         this.loading = false;

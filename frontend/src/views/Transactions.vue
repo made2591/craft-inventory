@@ -1,44 +1,44 @@
 <template>
   <div class="transactions">
-    <h1>Gestione Transazioni</h1>
+    <h1>{{ $t('transactions.title') }}</h1>
     
     <div class="actions">
-      <router-link to="/transactions/new" class="btn btn-primary">Nuova Transazione</router-link>
+      <router-link to="/transactions/new" class="btn btn-primary">{{ $t('transactions.newTransaction') }}</router-link>
     </div>
     
     <div class="filters">
       <div class="filter-group">
-        <label for="transaction-type">Tipo:</label>
+        <label for="transaction-type">{{ $t('transactions.type') }}:</label>
         <select id="transaction-type" v-model="typeFilter">
-          <option value="">Tutti</option>
-          <option value="purchase">Acquisti</option>
-          <option value="sale">Vendite</option>
+          <option value="">{{ $t('transactions.all') }}</option>
+          <option value="purchase">{{ $t('transactions.purchase') }}</option>
+          <option value="sale">{{ $t('transactions.sale') }}</option>
         </select>
       </div>
       
       <div class="filter-group">
-        <label for="transaction-status">Stato:</label>
+        <label for="transaction-status">{{ $t('transactions.status') }}:</label>
         <select id="transaction-status" v-model="statusFilter">
-          <option value="">Tutti</option>
-          <option value="pending">In attesa</option>
-          <option value="completed">Completate</option>
-          <option value="cancelled">Annullate</option>
+          <option value="">{{ $t('transactions.all') }}</option>
+          <option value="pending">{{ $t('transactions.pending') }}</option>
+          <option value="completed">{{ $t('transactions.completed') }}</option>
+          <option value="cancelled">{{ $t('transactions.cancelled') }}</option>
         </select>
       </div>
       
       <div class="filter-group">
-        <label for="date-from">Da:</label>
+        <label for="date-from">{{ $t('transactions.from') }}:</label>
         <input type="date" id="date-from" v-model="dateFromFilter">
       </div>
       
       <div class="filter-group">
-        <label for="date-to">A:</label>
+        <label for="date-to">{{ $t('transactions.to') }}:</label>
         <input type="date" id="date-to" v-model="dateToFilter">
       </div>
     </div>
     
     <div v-if="loading" class="loading">
-      Caricamento in corso...
+      {{ $t('common.loading') }}
     </div>
     
     <div v-else-if="error" class="error">
@@ -46,19 +46,19 @@
     </div>
     
     <div v-else-if="filteredTransactions.length === 0" class="empty-state">
-      Nessuna transazione trovata. Aggiungi la tua prima transazione!
+      {{ $t('transactions.noTransactions') }}
     </div>
     
     <div v-else class="transactions-list">
       <table>
         <thead>
           <tr>
-            <th>Data</th>
-            <th>Tipo</th>
-            <th>Cliente/Fornitore</th>
-            <th>Importo Totale</th>
-            <th>Stato</th>
-            <th>Azioni</th>
+            <th>{{ $t('transactions.date') }}</th>
+            <th>{{ $t('transactions.type') }}</th>
+            <th>{{ $t('transactions.clientSupplier') }}</th>
+            <th>{{ $t('transactions.totalAmount') }}</th>
+            <th>{{ $t('transactions.status') }}</th>
+            <th>{{ $t('common.actions') }}</th>
           </tr>
         </thead>
         <tbody>
@@ -76,27 +76,27 @@
             <td>€ {{ formatCost(transaction.totalAmount) }}</td>
             <td>{{ formatStatus(transaction.status) }}</td>
             <td class="actions">
-              <router-link :to="`/transactions/${transaction.id}`" class="btn btn-sm">Dettagli</router-link>
+              <router-link :to="`/transactions/${transaction.id}`" class="btn btn-sm">{{ $t('common.details') }}</router-link>
               <button 
                 v-if="transaction.status === 'pending'" 
                 @click="updateStatus(transaction.id, 'completed')" 
                 class="btn btn-sm btn-success"
               >
-                Completa
+                {{ $t('transactions.complete') }}
               </button>
               <button 
                 v-if="transaction.status === 'pending'" 
                 @click="updateStatus(transaction.id, 'cancelled')" 
                 class="btn btn-sm btn-warning"
               >
-                Annulla
+                {{ $t('transactions.cancel') }}
               </button>
               <button 
                 v-if="transaction.status !== 'completed'" 
                 @click="deleteTransaction(transaction.id)" 
                 class="btn btn-sm btn-danger"
               >
-                Elimina
+                {{ $t('common.delete') }}
               </button>
             </td>
           </tr>
@@ -110,7 +110,7 @@
           :disabled="currentPage === 1" 
           class="btn btn-sm"
         >
-          Precedente
+          {{ $t('common.previous') }}
         </button>
         
         <div class="page-numbers">
@@ -129,32 +129,32 @@
           :disabled="currentPage === totalPages" 
           class="btn btn-sm"
         >
-          Successivo
+          {{ $t('common.next') }}
         </button>
       </div>
       
       <div class="pagination-info">
-        Visualizzazione {{ startIndex + 1 }}-{{ endIndex }} di {{ totalItems }} elementi
+        {{ $t('common.paginationInfo', { start: startIndex + 1, end: endIndex, total: totalItems }) }}
       </div>
     </div>
     
     <div class="summary" v-if="filteredTransactions.length > 0">
-      <h2>Riepilogo</h2>
+      <h2>{{ $t('transactions.summary') }}</h2>
       <div class="summary-cards">
         <div class="summary-card">
-          <h3>Totale Transazioni</h3>
+          <h3>{{ $t('transactions.totalTransactions') }}</h3>
           <p class="summary-value">{{ filteredTransactions.length }}</p>
         </div>
         <div class="summary-card">
-          <h3>Totale Acquisti</h3>
+          <h3>{{ $t('transactions.totalPurchases') }}</h3>
           <p class="summary-value">€ {{ formatCost(totalPurchases) }}</p>
         </div>
         <div class="summary-card">
-          <h3>Totale Vendite</h3>
+          <h3>{{ $t('transactions.totalSales') }}</h3>
           <p class="summary-value">€ {{ formatCost(totalSales) }}</p>
         </div>
         <div class="summary-card">
-          <h3>Bilancio</h3>
+          <h3>{{ $t('transactions.balance') }}</h3>
           <p class="summary-value" :class="{ 'positive': totalSales - totalPurchases > 0, 'negative': totalSales - totalPurchases < 0 }">
             € {{ formatCost(totalSales - totalPurchases) }}
           </p>
@@ -265,7 +265,7 @@ export default {
         this.totalPages = response.data.pagination.totalPages;
       } catch (error) {
         console.error('Error fetching transactions:', error);
-        this.error = 'Si è verificato un errore durante il recupero delle transazioni. Riprova più tardi.';
+        this.error = this.$t('errors.fetchTransactions');
       } finally {
         this.loading = false;
       }
@@ -292,13 +292,13 @@ export default {
     getSupplierName(supplierId) {
       if (!supplierId) return 'N/A';
       const supplier = this.suppliers.find(s => s.id === supplierId);
-      return supplier ? supplier.name : 'Fornitore sconosciuto';
+      return supplier ? supplier.name : this.$t('common.unknownSupplier');
     },
     
     getCustomerName(customerId) {
       if (!customerId) return 'N/A';
       const customer = this.customers.find(c => c.id === customerId);
-      return customer ? customer.name : 'Cliente sconosciuto';
+      return customer ? customer.name : this.$t('common.unknownCustomer');
     },
     
     formatDate(dateString) {
@@ -309,9 +309,9 @@ export default {
     formatType(type) {
       switch (type) {
         case 'purchase':
-          return 'Acquisto';
+          return this.$t('transactions.purchase');
         case 'sale':
-          return 'Vendita';
+          return this.$t('transactions.sale');
         default:
           return type;
       }
@@ -320,11 +320,11 @@ export default {
     formatStatus(status) {
       switch (status) {
         case 'pending':
-          return 'In attesa';
+          return this.$t('transactions.pending');
         case 'completed':
-          return 'Completata';
+          return this.$t('transactions.completed');
         case 'cancelled':
-          return 'Annullata';
+          return this.$t('transactions.cancelled');
         default:
           return status;
       }
@@ -359,12 +359,12 @@ export default {
         }
       } catch (error) {
         console.error('Error updating transaction status:', error);
-        alert('Si è verificato un errore durante l\'aggiornamento dello stato della transazione.');
+        alert(this.$t('errors.updateTransactionStatus'));
       }
     },
     
     async deleteTransaction(id) {
-      if (!confirm('Sei sicuro di voler eliminare questa transazione?')) {
+      if (!confirm(this.$t('transactions.confirmDelete'))) {
         return;
       }
       
@@ -376,7 +376,7 @@ export default {
         if (error.response && error.response.status === 400) {
           alert(error.response.data);
         } else {
-          alert('Si è verificato un errore durante l\'eliminazione della transazione.');
+          alert(this.$t('errors.deleteTransaction'));
         }
       }
     },

@@ -1,9 +1,9 @@
 <template>
   <div class="material-view">
-    <h1>Dettaglio Materiale</h1>
+    <h1>{{ $t('materials.viewTitle') }}</h1>
     
     <div v-if="loading" class="loading">
-      Caricamento in corso...
+      {{ $t('common.loading') }}
     </div>
     
     <div v-else-if="error" class="error">
@@ -12,56 +12,56 @@
     
     <div v-else class="material-details">
       <div class="detail-header">
-        <div class="sku-badge">SKU: {{ material.sku || 'N/A' }}</div>
+        <div class="sku-badge">{{ $t('materials.sku') }}: {{ material.sku || 'N/A' }}</div>
         <div class="actions">
-          <button @click="editMaterial" class="btn btn-primary">Modifica</button>
-          <button @click="goBack" class="btn btn-secondary">Indietro</button>
+          <button @click="editMaterial" class="btn btn-primary">{{ $t('common.edit') }}</button>
+          <button @click="goBack" class="btn btn-secondary">{{ $t('common.back') }}</button>
         </div>
       </div>
       
       <div class="detail-card">
         <div class="detail-row">
-          <div class="detail-label">Nome:</div>
+          <div class="detail-label">{{ $t('materials.name') }}:</div>
           <div class="detail-value">{{ material.name }}</div>
         </div>
         
         <div class="detail-row">
-          <div class="detail-label">Descrizione:</div>
-          <div class="detail-value">{{ material.description || 'Nessuna descrizione' }}</div>
+          <div class="detail-label">{{ $t('materials.description') }}:</div>
+          <div class="detail-value">{{ material.description || $t('common.noDescription') }}</div>
         </div>
         
         <div class="detail-row">
-          <div class="detail-label">Link:</div>
+          <div class="detail-label">{{ $t('materials.link') }}:</div>
           <div class="detail-value">
             <a v-if="material.link" :href="material.link" target="_blank" rel="noopener noreferrer">{{ material.link }}</a>
-            <span v-else>Nessun link</span>
+            <span v-else>{{ $t('common.noLink') }}</span>
           </div>
         </div>
         
         <div class="detail-row">
-          <div class="detail-label">Unità di Misura:</div>
+          <div class="detail-label">{{ $t('materials.unitOfMeasure') }}:</div>
           <div class="detail-value">{{ material.unitOfMeasure }}</div>
         </div>
         
         <div class="detail-row">
-          <div class="detail-label">Costo per Unità:</div>
+          <div class="detail-label">{{ $t('materials.costPerUnit') }}:</div>
           <div class="detail-value">€ {{ formatCost(material.costPerUnit) }}</div>
         </div>
         
         <div class="detail-row">
-          <div class="detail-label">Quantità Disponibile:</div>
+          <div class="detail-label">{{ $t('materials.currentStock') }}:</div>
           <div class="detail-value" :class="{ 'low-stock': isLowStock(material) }">
             {{ material.currentStock }} {{ material.unitOfMeasure }}
           </div>
         </div>
         
         <div class="detail-row">
-          <div class="detail-label">Livello Minimo di Scorta:</div>
-          <div class="detail-value">{{ material.minStockLevel || 'Non impostato' }}</div>
+          <div class="detail-label">{{ $t('materials.minStockLevel') }}:</div>
+          <div class="detail-value">{{ material.minStockLevel || $t('common.notSet') }}</div>
         </div>
         
         <div class="detail-row">
-          <div class="detail-label">Fornitore:</div>
+          <div class="detail-label">{{ $t('materials.supplier') }}:</div>
           <div class="detail-value">
             <router-link v-if="supplier && supplier.id" :to="`/suppliers/${supplier.id}/view`" class="supplier-link">
               {{ supplierName }}
@@ -71,31 +71,31 @@
         </div>
         
         <div class="detail-row">
-          <div class="detail-label">Data Creazione:</div>
+          <div class="detail-label">{{ $t('common.createdAt') }}:</div>
           <div class="detail-value">{{ formatDate(material.createdAt) }}</div>
         </div>
         
         <div class="detail-row">
-          <div class="detail-label">Ultimo Aggiornamento:</div>
+          <div class="detail-label">{{ $t('common.updatedAt') }}:</div>
           <div class="detail-value">{{ formatDate(material.updatedAt) }}</div>
         </div>
       </div>
       
-      <h2 class="section-title">Storico Acquisti</h2>
+      <h2 class="section-title">{{ $t('materials.purchaseHistory') }}</h2>
       <div v-if="purchaseTransactions.length === 0" class="empty-transactions">
-        Nessun acquisto registrato per questo materiale.
+        {{ $t('materials.noPurchaseHistory') }}
       </div>
       <div v-else class="transactions-table">
         <table>
           <thead>
             <tr>
-              <th>Data</th>
-              <th>Fornitore</th>
-              <th>Quantità</th>
-              <th>Prezzo Unitario</th>
-              <th>Totale</th>
-              <th>Stato</th>
-              <th>Azioni</th>
+              <th>{{ $t('transactions.date') }}</th>
+              <th>{{ $t('transactions.supplier') }}</th>
+              <th>{{ $t('transactions.quantity') }}</th>
+              <th>{{ $t('transactions.unitPrice') }}</th>
+              <th>{{ $t('transactions.total') }}</th>
+              <th>{{ $t('transactions.status') }}</th>
+              <th>{{ $t('common.actions') }}</th>
             </tr>
           </thead>
           <tbody>
@@ -107,7 +107,7 @@
               <td>€ {{ formatCost(transaction.totalPrice) }}</td>
               <td>{{ formatStatus(transaction.status) }}</td>
               <td>
-                <router-link :to="`/transactions/${transaction.transactionId}`" class="btn btn-sm">Dettagli</router-link>
+                <router-link :to="`/transactions/${transaction.transactionId}`" class="btn btn-sm">{{ $t('common.details') }}</router-link>
               </td>
             </tr>
           </tbody>
@@ -120,7 +120,7 @@
             :disabled="currentPage === 1" 
             class="btn btn-sm"
           >
-            Precedente
+            {{ $t('common.previous') }}
           </button>
           
           <div class="page-numbers">
@@ -139,12 +139,12 @@
             :disabled="currentPage === totalPages" 
             class="btn btn-sm"
           >
-            Successivo
+            {{ $t('common.next') }}
           </button>
         </div>
         
         <div class="pagination-info" v-if="purchaseTransactions.length > 0">
-          Visualizzazione {{ startIndex + 1 }}-{{ endIndex }} di {{ totalItems || purchaseTransactions.length }} elementi
+          {{ $t('common.paginationInfo', { start: startIndex + 1, end: endIndex, total: totalItems || purchaseTransactions.length }) }}
         </div>
       </div>
     </div>
@@ -178,7 +178,7 @@ export default {
   },
   computed: {
     supplierName() {
-      return this.supplier ? this.supplier.name : 'Nessun fornitore';
+      return this.supplier ? this.supplier.name : this.$t('common.noSupplier');
     },
     paginatedPurchases() {
       // Non facciamo più lo slice qui perché i dati sono già paginati dal server
@@ -215,7 +215,7 @@ export default {
         }
       } catch (error) {
         console.error('Error fetching material:', error);
-        this.error = 'Si è verificato un errore durante il recupero del materiale. Riprova più tardi.';
+        this.error = this.$t('errors.fetchMaterial');
       } finally {
         this.loading = false;
       }
@@ -321,11 +321,11 @@ export default {
     formatStatus(status) {
       switch (status) {
         case 'pending':
-          return 'In attesa';
+          return this.$t('transactions.pending');
         case 'completed':
-          return 'Completata';
+          return this.$t('transactions.completed');
         case 'cancelled':
-          return 'Annullata';
+          return this.$t('transactions.cancelled');
         default:
           return status;
       }

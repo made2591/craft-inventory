@@ -1,16 +1,16 @@
 <template>
   <div class="materials">
-    <h1>Gestione Materiali</h1>
+    <h1>{{ $t('materials.title') }}</h1>
 
     <div class="actions">
-      <router-link to="/materials/new" class="btn btn-primary">Nuovo Materiale</router-link>
+      <router-link to="/materials/new" class="btn btn-primary">{{ $t('materials.newMaterial') }}</router-link>
       <button @click="refreshMaterials" class="btn btn-secondary" :disabled="loading">
-        {{ loading ? 'Aggiornamento in corso...' : 'Aggiorna materiali' }}
+        {{ loading ? $t('common.updating') : $t('materials.refreshMaterials') }}
       </button>
     </div>
 
     <div v-if="loading" class="loading">
-      Caricamento in corso...
+      {{ $t('common.loading') }}
     </div>
 
     <div v-else-if="error" class="error">
@@ -18,17 +18,17 @@
     </div>
 
     <div v-else-if="materials.length === 0" class="empty-state">
-      Nessun materiale trovato. Aggiungi il tuo primo materiale!
+      {{ $t('materials.noMaterialsFound') }}
     </div>
 
     <div v-else class="materials-list">
       <!-- Filtri e opzioni di paginazione -->
       <div class="table-controls">
         <div class="search-filter">
-          <input type="text" v-model="searchQuery" placeholder="Cerca materiali..." @input="filterMaterials">
+          <input type="text" v-model="searchQuery" :placeholder="$t('materials.searchPlaceholder')" @input="filterMaterials">
         </div>
         <div class="pagination-controls">
-          <label for="itemsPerPage">Elementi per pagina:</label>
+          <label for="itemsPerPage">{{ $t('common.itemsPerPage') }}:</label>
           <select id="itemsPerPage" v-model="itemsPerPage" @change="updatePagination">
             <option value="5">5</option>
             <option value="10">10</option>
@@ -42,42 +42,42 @@
         <thead>
           <tr>
             <th @click="sortBy('sku')" class="sortable">
-              SKU
+              {{ $t('materials.sku') }}
               <span v-if="sortKey === 'sku'" class="sort-icon">
                 {{ sortOrder === 'asc' ? '▲' : '▼' }}
               </span>
             </th>
             <th @click="sortBy('name')" class="sortable">
-              Nome
+              {{ $t('materials.name') }}
               <span v-if="sortKey === 'name'" class="sort-icon">
                 {{ sortOrder === 'asc' ? '▲' : '▼' }}
               </span>
             </th>
             <th @click="sortBy('unitOfMeasure')" class="sortable">
-              Unità di Misura
+              {{ $t('materials.unitOfMeasure') }}
               <span v-if="sortKey === 'unitOfMeasure'" class="sort-icon">
                 {{ sortOrder === 'asc' ? '▲' : '▼' }}
               </span>
             </th>
             <th @click="sortBy('costPerUnit')" class="sortable">
-              Costo per Unità
+              {{ $t('materials.costPerUnit') }}
               <span v-if="sortKey === 'costPerUnit'" class="sort-icon">
                 {{ sortOrder === 'asc' ? '▲' : '▼' }}
               </span>
             </th>
             <th @click="sortBy('currentStock')" class="sortable">
-              Quantità Disponibile
+              {{ $t('materials.currentStock') }}
               <span v-if="sortKey === 'currentStock'" class="sort-icon">
                 {{ sortOrder === 'asc' ? '▲' : '▼' }}
               </span>
             </th>
             <th @click="sortBy('minStockLevel')" class="sortable">
-              Livello Minimo
+              {{ $t('materials.minStockLevel') }}
               <span v-if="sortKey === 'minStockLevel'" class="sort-icon">
                 {{ sortOrder === 'asc' ? '▲' : '▼' }}
               </span>
             </th>
-            <th>Azioni</th>
+            <th>{{ $t('common.actions') }}</th>
           </tr>
         </thead>
         <tbody>
@@ -94,9 +94,9 @@
             }} {{ material.unitOfMeasure }}</td>
             <td>{{ material.minStockLevel || 'N/A' }}</td>
             <td class="actions">
-              <button @click="viewMaterial(material.id)" class="btn btn-sm btn-view">Visualizza</button>
-              <button @click="editMaterial(material.id)" class="btn btn-sm btn-edit">Modifica</button>
-              <button @click="deleteMaterial(material.id)" class="btn btn-sm btn-danger">Elimina</button>
+              <button @click="viewMaterial(material.id)" class="btn btn-sm btn-view">{{ $t('common.view') }}</button>
+              <button @click="editMaterial(material.id)" class="btn btn-sm btn-edit">{{ $t('common.edit') }}</button>
+              <button @click="deleteMaterial(material.id)" class="btn btn-sm btn-danger">{{ $t('common.delete') }}</button>
             </td>
           </tr>
         </tbody>
@@ -105,7 +105,7 @@
       <!-- Paginazione -->
       <div class="pagination">
         <button @click="goToPage(currentPage - 1)" :disabled="currentPage === 1" class="btn btn-sm">
-          Precedente
+          {{ $t('common.previous') }}
         </button>
 
         <div class="page-numbers">
@@ -116,12 +116,12 @@
         </div>
 
         <button @click="goToPage(currentPage + 1)" :disabled="currentPage === totalPages" class="btn btn-sm">
-          Successivo
+          {{ $t('common.next') }}
         </button>
       </div>
 
       <div class="pagination-info">
-        Visualizzazione {{ startIndex + 1 }}-{{ endIndex }} di {{ filteredMaterials.length }} elementi
+        {{ $t('common.paginationInfo', { start: startIndex + 1, end: endIndex, total: filteredMaterials.length }) }}
       </div>
     </div>
   </div>

@@ -1,9 +1,9 @@
 <template>
   <div class="customers">
-    <h1>Gestione Clienti</h1>
+    <h1>{{ $t('customers.title') }}</h1>
     
     <div class="actions">
-      <router-link to="/customers/new" class="btn btn-primary">Nuovo Cliente</router-link>
+      <router-link to="/customers/new" class="btn btn-primary">{{ $t('customers.newCustomer') }}</router-link>
     </div>
     
     <!-- Filtri e opzioni di paginazione -->
@@ -12,23 +12,23 @@
         <input 
           type="text" 
           v-model="searchQuery" 
-          placeholder="Cerca clienti..." 
+          :placeholder="$t('customers.searchPlaceholder')" 
           @input="filterCustomers"
         >
       </div>
       
       <div class="filter-group">
-        <label for="customer-type">Filtra per tipo:</label>
+        <label for="customer-type">{{ $t('customers.filterByType') }}:</label>
         <select id="customer-type" v-model="typeFilter" @change="filterCustomers">
-          <option value="">Tutti</option>
-          <option value="private">Privati</option>
-          <option value="online">Canali Online</option>
-          <option value="store">Negozi</option>
+          <option value="">{{ $t('common.all') }}</option>
+          <option value="private">{{ $t('customers.private') }}</option>
+          <option value="online">{{ $t('customers.onlineChannels') }}</option>
+          <option value="store">{{ $t('customers.stores') }}</option>
         </select>
       </div>
       
       <div class="pagination-controls">
-        <label for="itemsPerPage">Elementi per pagina:</label>
+        <label for="itemsPerPage">{{ $t('common.itemsPerPage') }}:</label>
         <select id="itemsPerPage" v-model="itemsPerPage" @change="updatePagination">
           <option value="5">5</option>
           <option value="10">10</option>
@@ -39,7 +39,7 @@
     </div>
     
     <div v-if="loading" class="loading">
-      Caricamento in corso...
+      {{ $t('common.loading') }}
     </div>
     
     <div v-else-if="error" class="error">
@@ -47,7 +47,7 @@
     </div>
     
     <div v-else-if="filteredCustomers.length === 0" class="empty-state">
-      Nessun cliente trovato. Aggiungi il tuo primo cliente!
+      {{ $t('customers.noCustomersFound') }}
     </div>
     
     <div v-else class="customers-list">
@@ -55,36 +55,36 @@
         <thead>
           <tr>
             <th @click="sortBy('name')" class="sortable">
-              Nome
+              {{ $t('customers.name') }}
               <span v-if="sortKey === 'name'" class="sort-icon">
                 {{ sortOrder === 'asc' ? '▲' : '▼' }}
               </span>
             </th>
             <th @click="sortBy('customerType')" class="sortable">
-              Tipo
+              {{ $t('customers.type') }}
               <span v-if="sortKey === 'customerType'" class="sort-icon">
                 {{ sortOrder === 'asc' ? '▲' : '▼' }}
               </span>
             </th>
             <th @click="sortBy('contactPerson')" class="sortable">
-              Contatto
+              {{ $t('customers.contact') }}
               <span v-if="sortKey === 'contactPerson'" class="sort-icon">
                 {{ sortOrder === 'asc' ? '▲' : '▼' }}
               </span>
             </th>
             <th @click="sortBy('email')" class="sortable">
-              Email
+              {{ $t('customers.email') }}
               <span v-if="sortKey === 'email'" class="sort-icon">
                 {{ sortOrder === 'asc' ? '▲' : '▼' }}
               </span>
             </th>
             <th @click="sortBy('phone')" class="sortable">
-              Telefono
+              {{ $t('customers.phone') }}
               <span v-if="sortKey === 'phone'" class="sort-icon">
                 {{ sortOrder === 'asc' ? '▲' : '▼' }}
               </span>
             </th>
-            <th>Azioni</th>
+            <th>{{ $t('common.actions') }}</th>
           </tr>
         </thead>
         <tbody>
@@ -99,9 +99,9 @@
             <td>{{ customer.email || 'N/A' }}</td>
             <td>{{ customer.phone || 'N/A' }}</td>
             <td class="actions">
-              <button @click="viewCustomer(customer.id)" class="btn btn-sm btn-view">Visualizza</button>
-              <button @click="editCustomer(customer.id)" class="btn btn-sm btn-edit">Modifica</button>
-              <button @click="deleteCustomer(customer.id)" class="btn btn-sm btn-danger">Elimina</button>
+              <button @click="viewCustomer(customer.id)" class="btn btn-sm btn-view">{{ $t('common.view') }}</button>
+              <button @click="editCustomer(customer.id)" class="btn btn-sm btn-edit">{{ $t('common.edit') }}</button>
+              <button @click="deleteCustomer(customer.id)" class="btn btn-sm btn-danger">{{ $t('common.delete') }}</button>
             </td>
           </tr>
         </tbody>
@@ -114,7 +114,7 @@
           :disabled="currentPage === 1" 
           class="btn btn-sm"
         >
-          Precedente
+          {{ $t('common.previous') }}
         </button>
         
         <div class="page-numbers">
@@ -133,12 +133,12 @@
           :disabled="currentPage === totalPages" 
           class="btn btn-sm"
         >
-          Successivo
+          {{ $t('common.next') }}
         </button>
       </div>
       
       <div class="pagination-info">
-        Visualizzazione {{ startIndex + 1 }}-{{ endIndex }} di {{ filteredCustomers.length }} elementi
+        {{ $t('common.paginationInfo', { start: startIndex + 1, end: endIndex, total: filteredCustomers.length }) }}
       </div>
     </div>
   </div>
@@ -192,7 +192,7 @@ export default {
         this.filterCustomers();
       } catch (error) {
         console.error('Error fetching customers:', error);
-        this.error = 'Si è verificato un errore durante il recupero dei clienti. Riprova più tardi.';
+        this.error = this.$t('errors.fetchCustomers');
       } finally {
         this.loading = false;
       }
@@ -271,11 +271,11 @@ export default {
     formatCustomerType(type) {
       switch (type) {
         case 'private':
-          return 'Privato';
+          return this.$t('customers.private');
         case 'online':
-          return 'Canale Online';
+          return this.$t('customers.onlineChannels');
         case 'store':
-          return 'Negozio';
+          return this.$t('customers.stores');
         default:
           return type;
       }
@@ -290,7 +290,7 @@ export default {
     },
     
     async deleteCustomer(id) {
-      if (!confirm('Sei sicuro di voler eliminare questo cliente?')) {
+      if (!confirm(this.$t('customers.confirmDelete'))) {
         return;
       }
       
@@ -301,9 +301,9 @@ export default {
       } catch (error) {
         console.error('Error deleting customer:', error);
         if (error.response && error.response.status === 400) {
-          alert('Impossibile eliminare il cliente: ci sono transazioni associate.');
+          alert(this.$t('errors.deleteCustomerTransactions'));
         } else {
-          alert('Si è verificato un errore durante l\'eliminazione del cliente.');
+          alert(this.$t('errors.deleteCustomer'));
         }
       }
     }

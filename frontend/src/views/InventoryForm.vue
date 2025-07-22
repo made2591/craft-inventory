@@ -1,9 +1,9 @@
 <template>
   <div class="inventory-form">
-    <h1>{{ isEditing ? 'Modifica Articolo' : 'Nuovo Articolo in Magazzino' }}</h1>
+    <h1>{{ isEditing ? $t('inventory.editItem') : $t('inventory.newItem') }}</h1>
 
     <div v-if="loading" class="loading">
-      Caricamento in corso...
+      {{ $t('common.loading') }}
     </div>
 
     <div v-else-if="error" class="error">
@@ -12,9 +12,9 @@
 
     <form v-else @submit.prevent="saveItem">
       <div class="form-group">
-        <label for="modelId">Modello *</label>
+        <label for="modelId">{{ $t('inventory.model') }} *</label>
         <select id="modelId" v-model="item.modelId" required>
-          <option value="">-- Seleziona un modello --</option>
+          <option value="">-- {{ $t('common.selectModel') }} --</option>
           <option v-for="model in models" :key="model.id" :value="model.id" :selected="model.id == item.modelId">
             {{ model.name }}
           </option>
@@ -22,23 +22,23 @@
       </div>
 
       <div class="form-group">
-        <label for="quantity">Quantità *</label>
+        <label for="quantity">{{ $t('inventory.quantity') }} *</label>
         <input type="number" id="quantity" v-model.number="item.quantity" required min="1" step="1" placeholder="1">
       </div>
 
       <div class="form-group">
-        <label for="productionDate">Data di Produzione</label>
+        <label for="productionDate">{{ $t('inventory.productionDate') }}</label>
         <input type="date" id="productionDate" v-model="formattedDate">
       </div>
 
       <div class="form-group">
-        <label for="notes">Note</label>
-        <textarea id="notes" v-model="item.notes" placeholder="Note aggiuntive sull'articolo" rows="3"></textarea>
+        <label for="notes">{{ $t('inventory.notes') }}</label>
+        <textarea id="notes" v-model="item.notes" :placeholder="$t('inventory.additionalNotes')" rows="3"></textarea>
       </div>
 
       <div class="form-actions">
-        <button type="button" class="btn btn-secondary" @click="goBack">Annulla</button>
-        <button type="submit" class="btn btn-primary">{{ isEditing ? 'Aggiorna' : 'Salva' }}</button>
+        <button type="button" class="btn btn-secondary" @click="goBack">{{ $t('common.cancel') }}</button>
+        <button type="submit" class="btn btn-primary">{{ isEditing ? $t('common.update') : $t('common.save') }}</button>
       </div>
     </form>
   </div>
@@ -110,7 +110,7 @@ export default {
         this.models = response.data;
       } catch (error) {
         console.error('Error fetching models:', error);
-        this.error = 'Si è verificato un errore durante il recupero dei modelli. Riprova più tardi.';
+        this.error = this.$t('errors.fetchModels');
       }
     },
 
@@ -123,7 +123,7 @@ export default {
         this.item = response.data;
       } catch (error) {
         console.error('Error fetching inventory item:', error);
-        this.error = 'Si è verificato un errore durante il recupero dell\'articolo. Riprova più tardi.';
+        this.error = this.$t('errors.fetchInventoryItem');
       } finally {
         this.loading = false;
       }
@@ -158,7 +158,7 @@ export default {
         this.$router.push('/inventory');
       } catch (error) {
         console.error('Error saving inventory item:', error);
-        this.error = 'Si è verificato un errore durante il salvataggio dell\'articolo. Riprova più tardi.';
+        this.error = this.$t('errors.saveInventoryItem');
       } finally {
         this.loading = false;
       }

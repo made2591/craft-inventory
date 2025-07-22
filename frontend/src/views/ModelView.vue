@@ -1,9 +1,9 @@
 <template>
   <div class="model-view">
-    <h1>Dettaglio Modello</h1>
+    <h1>{{ $t('models.viewTitle') }}</h1>
     
     <div v-if="loading" class="loading">
-      Caricamento in corso...
+      {{ $t('common.loading') }}
     </div>
     
     <div v-else-if="error" class="error">
@@ -12,67 +12,67 @@
     
     <div v-else class="model-details">
       <div class="detail-header">
-        <div class="sku-badge">SKU: {{ model.sku || 'N/A' }}</div>
+        <div class="sku-badge">{{ $t('models.sku') }}: {{ model.sku || 'N/A' }}</div>
         <div class="actions">
-          <button @click="editModel" class="btn btn-primary">Modifica</button>
-          <button @click="goBack" class="btn btn-secondary">Indietro</button>
+          <button @click="editModel" class="btn btn-primary">{{ $t('common.edit') }}</button>
+          <button @click="goBack" class="btn btn-secondary">{{ $t('common.back') }}</button>
         </div>
       </div>
       
       <div class="detail-card">
         <div class="detail-row">
-          <div class="detail-label">Nome:</div>
+          <div class="detail-label">{{ $t('models.name') }}:</div>
           <div class="detail-value">{{ model.name }}</div>
         </div>
         
         <div class="detail-row">
-          <div class="detail-label">Descrizione:</div>
-          <div class="detail-value">{{ model.description || 'Nessuna descrizione' }}</div>
+          <div class="detail-label">{{ $t('models.description') }}:</div>
+          <div class="detail-value">{{ model.description || $t('common.noDescription') }}</div>
         </div>
         
         <div class="detail-row">
-          <div class="detail-label">Costo di Produzione:</div>
+          <div class="detail-label">{{ $t('models.productionCost') }}:</div>
           <div class="detail-value">€ {{ formatCost(model.productionCost) }}</div>
         </div>
         
         <div class="detail-row">
-          <div class="detail-label">Prezzo di Vendita:</div>
+          <div class="detail-label">{{ $t('models.sellingPrice') }}:</div>
           <div class="detail-value">€ {{ formatCost(model.sellingPrice) }}</div>
         </div>
         
         <div class="detail-row">
-          <div class="detail-label">Tempo di Lavoro:</div>
+          <div class="detail-label">{{ $t('models.laborTime') }}:</div>
           <div class="detail-value">{{ formatTime(model.laborTimeMinutes) }}</div>
         </div>
         
         <div class="detail-row">
-          <div class="detail-label">Margine:</div>
+          <div class="detail-label">{{ $t('models.margin') }}:</div>
           <div class="detail-value">{{ calculateMargin(model) }}%</div>
         </div>
         
         <div class="detail-row">
-          <div class="detail-label">Data Creazione:</div>
+          <div class="detail-label">{{ $t('common.createdAt') }}:</div>
           <div class="detail-value">{{ formatDate(model.createdAt) }}</div>
         </div>
         
         <div class="detail-row">
-          <div class="detail-label">Ultimo Aggiornamento:</div>
+          <div class="detail-label">{{ $t('common.updatedAt') }}:</div>
           <div class="detail-value">{{ formatDate(model.updatedAt) }}</div>
         </div>
       </div>
       
-      <h2>Componenti utilizzati</h2>
+      <h2>{{ $t('models.componentsUsed') }}</h2>
       <div v-if="components.length === 0" class="empty-components">
-        Nessun componente associato a questo modello.
+        {{ $t('models.noComponentsAssociated') }}
       </div>
       <div v-else class="components-table">
         <table>
           <thead>
             <tr>
-              <th>Componente</th>
-              <th>Quantità</th>
-              <th>Costo Unitario</th>
-              <th>Costo Totale</th>
+              <th>{{ $t('models.component') }}</th>
+              <th>{{ $t('common.quantity') }}</th>
+              <th>{{ $t('common.unitCost') }}</th>
+              <th>{{ $t('common.totalCost') }}</th>
             </tr>
           </thead>
           <tbody>
@@ -89,25 +89,25 @@
           </tbody>
           <tfoot>
             <tr>
-              <td colspan="3" class="total-label">Costo Totale Componenti:</td>
+              <td colspan="3" class="total-label">{{ $t('models.totalComponentsCost') }}:</td>
               <td class="total-value">€ {{ formatCost(totalComponentsCost) }}</td>
             </tr>
           </tfoot>
         </table>
       </div>
       
-      <h2>Articoli in Magazzino</h2>
+      <h2>{{ $t('models.inventoryItems') }}</h2>
       <div v-if="inventoryItems.length === 0" class="empty-inventory">
-        Nessun articolo in magazzino per questo modello.
+        {{ $t('models.noInventoryItems') }}
       </div>
       <div v-else class="inventory-table">
         <table>
           <thead>
             <tr>
-              <th>ID</th>
-              <th>Quantità</th>
-              <th>Data di Produzione</th>
-              <th>Note</th>
+              <th>{{ $t('common.id') }}</th>
+              <th>{{ $t('common.quantity') }}</th>
+              <th>{{ $t('inventory.productionDate') }}</th>
+              <th>{{ $t('common.notes') }}</th>
             </tr>
           </thead>
           <tbody>
@@ -119,12 +119,12 @@
               </td>
               <td>{{ item.quantity }}</td>
               <td>{{ formatDate(item.productionDate) }}</td>
-              <td>{{ item.notes || 'Nessuna nota' }}</td>
+              <td>{{ item.notes || $t('common.noNotes') }}</td>
             </tr>
           </tbody>
           <tfoot>
             <tr>
-              <td colspan="1" class="total-label">Totale Articoli:</td>
+              <td colspan="1" class="total-label">{{ $t('models.totalItems') }}:</td>
               <td colspan="3">{{ totalInventoryItems }}</td>
             </tr>
           </tfoot>
@@ -198,7 +198,7 @@ export default {
         await this.fetchInventoryItems();
       } catch (error) {
         console.error('Error fetching model:', error);
-        this.error = 'Si è verificato un errore durante il recupero del modello. Riprova più tardi.';
+        this.error = this.$t('errors.fetchModel');
       } finally {
         this.loading = false;
       }
@@ -212,7 +212,7 @@ export default {
           component.componentCost = response.data.totalCost || 0;
           component.totalCost = component.componentCost * component.quantity;
         } catch (error) {
-          console.error(`Error fetching cost for component ${component.componentId}:`, error);
+          console.error(this.$t('errors.fetchComponentCost', { componentId: component.componentId }), error);
           component.componentCost = 0;
           component.totalCost = 0;
         }
@@ -224,7 +224,7 @@ export default {
         const response = await api.get(`/api/inventory?modelId=${this.id}`);
         this.inventoryItems = response.data || [];
       } catch (error) {
-        console.error('Error fetching inventory items:', error);
+        console.error(this.$t('errors.fetchInventoryItems'), error);
       }
     },
     

@@ -1,9 +1,9 @@
 <template>
   <div class="transaction-form">
-    <h1>Nuova Transazione</h1>
+    <h1>{{ $t('transactions.newTransaction') }}</h1>
     
     <div v-if="loading" class="loading">
-      Caricamento in corso...
+      {{ $t('common.loading') }}
     </div>
     
     <div v-else-if="error" class="error">
@@ -12,25 +12,25 @@
     
     <form v-else @submit.prevent="saveTransaction">
       <div class="form-section">
-        <h2>Informazioni Generali</h2>
+        <h2>{{ $t('transactions.generalInfo') }}</h2>
         
         <div class="form-row">
           <div class="form-group">
-            <label for="transaction_type">Tipo di Transazione *</label>
+            <label for="transaction_type">{{ $t('transactions.transactionType') }}</label>
             <select 
               id="transaction_type" 
               v-model="transaction.transaction_type" 
               required
               @change="resetRelatedFields"
             >
-              <option value="">-- Seleziona un tipo --</option>
-              <option value="purchase">Acquisto</option>
-              <option value="sale">Vendita</option>
+              <option value="">-- {{ $t('transactions.selectType') }} --</option>
+              <option value="purchase">{{ $t('transactions.purchase') }}</option>
+              <option value="sale">{{ $t('transactions.sale') }}</option>
             </select>
           </div>
           
           <div class="form-group">
-            <label for="date">Data *</label>
+            <label for="date">{{ $t('transactions.date') }} *</label>
             <input 
               type="date" 
               id="date" 
@@ -42,13 +42,13 @@
         
         <div class="form-row">
           <div class="form-group" v-if="transaction.transaction_type === 'purchase'">
-            <label for="supplier_id">Fornitore *</label>
+            <label for="supplier_id">{{ $t('transactions.supplier') }} *</label>
             <select 
               id="supplier_id" 
               v-model="transaction.supplier_id" 
               required
             >
-              <option value="">-- Seleziona un fornitore --</option>
+              <option value="">-- {{ $t('transactions.selectType') }} --</option>
               <option v-for="supplier in suppliers" :key="supplier.id" :value="supplier.id">
                 {{ supplier.name }}
               </option>
@@ -56,13 +56,13 @@
           </div>
           
           <div class="form-group" v-if="transaction.transaction_type === 'sale'">
-            <label for="customer_id">Cliente *</label>
+            <label for="customer_id">{{ $t('transactions.customer') }} *</label>
             <select 
               id="customer_id" 
               v-model="transaction.customer_id" 
               required
             >
-              <option value="">-- Seleziona un cliente --</option>
+              <option value="">-- {{ $t('transactions.selectType') }} --</option>
               <option v-for="customer in customers" :key="customer.id" :value="customer.id">
                 {{ customer.name }}
               </option>
@@ -70,32 +70,32 @@
           </div>
           
           <div class="form-group">
-            <label for="status">Stato *</label>
+            <label for="status">{{ $t('transactions.status') }} *</label>
             <select 
               id="status" 
               v-model="transaction.status" 
               required
             >
-              <option value="pending">In attesa</option>
-              <option value="completed">Completata</option>
+              <option value="pending">{{ $t('transactions.pending') }}</option>
+              <option value="completed">{{ $t('transactions.completed') }}</option>
             </select>
           </div>
         </div>
         
         <div class="form-group">
-          <label for="notes">Note</label>
+          <label for="notes">{{ $t('transactions.notes') }}</label>
           <textarea 
             id="notes" 
             v-model="transaction.notes" 
             rows="3"
-            placeholder="Note aggiuntive sulla transazione"
+            :placeholder="$t('transactions.additionalNotes')"
           ></textarea>
         </div>
       </div>
       
       <div class="form-section">
-        <h2>Elementi della Transazione</h2>
-        <p class="info">Aggiungi gli articoli inclusi in questa transazione.</p>
+        <h2>{{ $t('transactions.transactionItems') }}</h2>
+        <p class="info">{{ $t('transactions.addItemsDescription') }}</p>
         
         <div 
           v-for="(item, index) in transaction.items" 
@@ -104,28 +104,28 @@
         >
           <div class="form-row">
             <div class="form-group item-type">
-              <label :for="`item_type_${index}`">Tipo di Articolo *</label>
+              <label :for="`item_type_${index}`">{{ $t('transactions.itemType') }}</label>
               <select 
                 :id="`item_type_${index}`" 
                 v-model="item.type" 
                 required
                 @change="resetItemFields(item)"
               >
-                <option value="">-- Seleziona un tipo --</option>
-                <option value="material">Materiale</option>
-                <option value="model" v-if="transaction.transaction_type === 'sale'">Modello</option>
+                <option value="">-- {{ $t('transactions.selectType') }} --</option>
+                <option value="material">{{ $t('transactions.material') }}</option>
+                <option value="model" v-if="transaction.transaction_type === 'sale'">{{ $t('transactions.model') }}</option>
               </select>
             </div>
             
             <div class="form-group item-select" v-if="item.type === 'material'">
-              <label :for="`material_id_${index}`">Materiale *</label>
+              <label :for="`material_id_${index}`">{{ $t('transactions.material') }} *</label>
               <select 
                 :id="`material_id_${index}`" 
                 v-model="item.material_id" 
                 required
                 @change="updateUnitPrice(item, 'material')"
               >
-                <option value="">-- Seleziona un materiale --</option>
+                <option value="">-- {{ $t('transactions.selectMaterial') }} --</option>
                 <option v-for="material in materials" :key="material.id" :value="material.id">
                   {{ material.name }} ({{ material.unit_of_measure }})
                 </option>
@@ -133,14 +133,14 @@
             </div>
             
             <div class="form-group item-select" v-if="item.type === 'model'">
-              <label :for="`model_id_${index}`">Modello *</label>
+              <label :for="`model_id_${index}`">{{ $t('transactions.model') }} *</label>
               <select 
                 :id="`model_id_${index}`" 
                 v-model="item.product_model_id" 
                 required
                 @change="updateUnitPrice(item, 'model')"
               >
-                <option value="">-- Seleziona un modello --</option>
+                <option value="">-- {{ $t('transactions.selectModel') }} --</option>
                 <option v-for="model in models" :key="model.id" :value="model.id">
                   {{ model.name }}
                 </option>
@@ -148,7 +148,7 @@
             </div>
             
             <div class="form-group item-quantity">
-              <label :for="`quantity_${index}`">Quantità *</label>
+              <label :for="`quantity_${index}`">{{ $t('transactions.quantity') }} *</label>
               <input 
                 type="number" 
                 :id="`quantity_${index}`" 
@@ -161,7 +161,7 @@
             </div>
             
             <div class="form-group item-price">
-              <label :for="`unit_price_${index}`">Prezzo Unitario *</label>
+              <label :for="`unit_price_${index}`">{{ $t('transactions.unitPrice') }} *</label>
               <input 
                 type="number" 
                 :id="`unit_price_${index}`" 
@@ -174,7 +174,7 @@
             </div>
             
             <div class="item-total">
-              <label>Totale</label>
+              <label>{{ $t('transactions.total') }}</label>
               <p>€ {{ item.total !== undefined ? item.total.toFixed(2) : '0.00' }}</p>
             </div>
             
@@ -196,25 +196,25 @@
           class="btn btn-secondary" 
           @click="addItem"
         >
-          <i class="fas fa-plus"></i> Aggiungi Articolo
+          <i class="fas fa-plus"></i> {{ $t('transactions.addItem') }}
         </button>
       </div>
       
       <div class="transaction-summary">
-        <h2>Riepilogo</h2>
+        <h2>{{ $t('transactions.summary') }}</h2>
         <div class="summary-row">
-          <span>Totale Articoli:</span>
+          <span>{{ $t('transactions.totalItems') }}:</span>
           <span>{{ transaction.items.length }}</span>
         </div>
         <div class="summary-row">
-          <span>Importo Totale:</span>
+          <span>{{ $t('transactions.totalAmount') }}:</span>
           <span class="total-amount">€ {{ calculateTotal() !== undefined ? calculateTotal().toFixed(2) : '0.00' }}</span>
         </div>
       </div>
       
       <div class="form-actions">
-        <button type="button" class="btn btn-secondary" @click="goBack">Annulla</button>
-        <button type="submit" class="btn btn-primary">Salva</button>
+        <button type="button" class="btn btn-secondary" @click="goBack">{{ $t('common.cancel') }}</button>
+        <button type="submit" class="btn btn-primary">{{ $t('common.save') }}</button>
       </div>
     </form>
   </div>
@@ -280,7 +280,7 @@ export default {
         this.suppliers = response.data;
       } catch (error) {
         console.error('Error fetching suppliers:', error);
-        this.error = 'Si è verificato un errore durante il recupero dei fornitori.';
+        this.error = this.$t('errors.fetchSuppliers');
       }
     },
     
@@ -290,7 +290,7 @@ export default {
         this.customers = response.data;
       } catch (error) {
         console.error('Error fetching customers:', error);
-        this.error = 'Si è verificato un errore durante il recupero dei clienti.';
+        this.error = this.$t('errors.fetchCustomers');
       }
     },
     
@@ -300,7 +300,7 @@ export default {
         this.materials = response.data;
       } catch (error) {
         console.error('Error fetching materials:', error);
-        this.error = 'Si è verificato un errore durante il recupero dei materiali.';
+        this.error = this.$t('errors.fetchMaterials');
       }
     },
     
@@ -310,7 +310,7 @@ export default {
         this.models = response.data;
       } catch (error) {
         console.error('Error fetching models:', error);
-        this.error = 'Si è verificato un errore durante il recupero dei modelli.';
+        this.error = this.$t('errors.fetchModels');
       }
     },
     
@@ -404,44 +404,44 @@ export default {
     async saveTransaction() {
       // Validazione
       if (!this.transaction.transaction_type) {
-        this.error = 'Seleziona un tipo di transazione.';
+        this.error = this.$t('errors.selectTransactionType');
         return;
       }
       
       if (this.transaction.transaction_type === 'purchase' && !this.transaction.supplier_id) {
-        this.error = 'Seleziona un fornitore.';
+        this.error = this.$t('errors.selectSupplier');
         return;
       }
       
       if (this.transaction.transaction_type === 'sale' && !this.transaction.customer_id) {
-        this.error = 'Seleziona un cliente.';
+        this.error = this.$t('errors.selectCustomer');
         return;
       }
       
       // Verifica che tutti gli elementi abbiano un tipo e un riferimento valido
       for (const item of this.transaction.items) {
         if (!item.type) {
-          this.error = 'Seleziona un tipo di articolo per tutti gli elementi.';
+          this.error = this.$t('errors.selectItemType');
           return;
         }
         
         if (item.type === 'material' && !item.material_id) {
-          this.error = 'Seleziona un materiale per tutti gli elementi di tipo materiale.';
+          this.error = this.$t('errors.selectMaterialForItem');
           return;
         }
         
         if (item.type === 'model' && !item.product_model_id) {
-          this.error = 'Seleziona un modello per tutti gli elementi di tipo modello.';
+          this.error = this.$t('errors.selectModelForItem');
           return;
         }
         
         if (item.quantity <= 0) {
-          this.error = 'La quantità deve essere maggiore di zero per tutti gli elementi.';
+          this.error = this.$t('errors.quantityGreaterThanZero');
           return;
         }
         
         if (item.unit_price < 0) {
-          this.error = 'Il prezzo unitario non può essere negativo.';
+          this.error = this.$t('errors.unitPriceNotNegative');
           return;
         }
       }
@@ -473,7 +473,7 @@ export default {
         if (error.response && error.response.data) {
           this.error = error.response.data;
         } else {
-          this.error = 'Si è verificato un errore durante il salvataggio della transazione. Riprova più tardi.';
+          this.error = this.$t('errors.saveTransaction');
         }
       } finally {
         this.loading = false;

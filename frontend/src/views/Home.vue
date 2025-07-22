@@ -1,6 +1,6 @@
 <template>
   <div class="dashboard">
-    <h1>Dashboard</h1>
+    <h1>{{ $t('dashboard.title') }}</h1>
     
     <div class="stats-cards">
       <router-link to="/materials" class="stat-card">
@@ -8,7 +8,7 @@
           <i class="fas fa-box"></i>
         </div>
         <div class="stat-content">
-          <h3>Materiali</h3>
+          <h3>{{ $t('navigation.materials') }}</h3>
           <p class="stat-value">{{ stats.materials || 0 }}</p>
         </div>
       </router-link>
@@ -18,7 +18,7 @@
           <i class="fas fa-cubes"></i>
         </div>
         <div class="stat-content">
-          <h3>Modelli</h3>
+          <h3>{{ $t('products.models') }}</h3>
           <p class="stat-value">{{ stats.models || 0 }}</p>
         </div>
       </router-link>
@@ -28,7 +28,7 @@
           <i class="fas fa-warehouse"></i>
         </div>
         <div class="stat-content">
-          <h3>Articoli in Magazzino</h3>
+          <h3>{{ $t('navigation.inventory') }}</h3>
           <p class="stat-value">{{ stats.inventoryItems || 0 }}</p>
         </div>
       </router-link>
@@ -38,7 +38,7 @@
           <i class="fas fa-truck"></i>
         </div>
         <div class="stat-content">
-          <h3>Fornitori</h3>
+          <h3>{{ $t('navigation.suppliers') }}</h3>
           <p class="stat-value">{{ stats.suppliers || 0 }}</p>
         </div>
       </router-link>
@@ -48,7 +48,7 @@
           <i class="fas fa-users"></i>
         </div>
         <div class="stat-content">
-          <h3>Clienti</h3>
+          <h3>{{ $t('navigation.customers') }}</h3>
           <p class="stat-value">{{ stats.customers || 0 }}</p>
         </div>
       </router-link>
@@ -56,14 +56,14 @@
     
     <div class="charts-container">
       <div class="chart-card">
-        <h2>Valore Materiali per Categoria</h2>
+        <h2>{{ $t('dashboard.materialValueByCategory') }}</h2>
         <div class="chart-wrapper">
           <canvas ref="materialsChart"></canvas>
         </div>
       </div>
       
       <div class="chart-card">
-        <h2>Articoli in Magazzino per Modello</h2>
+        <h2>{{ $t('dashboard.inventoryByModel') }}</h2>
         <div class="chart-wrapper">
           <canvas ref="inventoryChart"></canvas>
         </div>
@@ -71,35 +71,35 @@
     </div>
     
     <div class="quick-actions">
-      <h2>Azioni Rapide</h2>
+      <h2>{{ $t('dashboard.quickActions') }}</h2>
       <div class="actions-grid">
         <router-link to="/materials/new" class="action-btn">
-          <i class="fas fa-plus"></i> Nuovo Materiale
+          <i class="fas fa-plus"></i> {{ $t('dashboard.newMaterial') }}
         </router-link>
         <router-link to="/models/new" class="action-btn">
-          <i class="fas fa-plus"></i> Nuovo Modello
+          <i class="fas fa-plus"></i> {{ $t('dashboard.newModel') }}
         </router-link>
         <router-link to="/inventory/new" class="action-btn">
-          <i class="fas fa-plus"></i> Nuovo Articolo
+          <i class="fas fa-plus"></i> {{ $t('dashboard.newInventoryItem') }}
         </router-link>
         <router-link to="/suppliers/new" class="action-btn">
-          <i class="fas fa-plus"></i> Nuovo Fornitore
+          <i class="fas fa-plus"></i> {{ $t('dashboard.newSupplier') }}
         </router-link>
         <router-link to="/customers/new" class="action-btn">
-          <i class="fas fa-plus"></i> Nuovo Cliente
+          <i class="fas fa-plus"></i> {{ $t('dashboard.newCustomer') }}
         </router-link>
       </div>
     </div>
     
     <div class="low-stock-alert" v-if="lowStockMaterials.length > 0">
-      <h2>Materiali con Scorte Basse</h2>
+      <h2>{{ $t('dashboard.lowStockMaterials') }}</h2>
       <table>
         <thead>
           <tr>
-            <th>Nome</th>
-            <th>Quantità Attuale</th>
-            <th>Livello Minimo</th>
-            <th>Azioni</th>
+            <th>{{ $t('materials.name') }}</th>
+            <th>{{ $t('materials.currentQuantity') }}</th>
+            <th>{{ $t('materials.minLevel') }}</th>
+            <th>{{ $t('common.actions') }}</th>
           </tr>
         </thead>
         <tbody>
@@ -109,7 +109,7 @@
             <td>{{ material.min_stock_level }} {{ material.unit_of_measure }}</td>
             <td>
               <router-link :to="`/materials/${material.id}`" class="btn btn-sm">
-                Modifica
+                {{ $t('common.edit') }}
               </router-link>
             </td>
           </tr>
@@ -220,7 +220,7 @@ export default {
         data: {
           labels: labels,
           datasets: [{
-            label: 'Valore Materiali (€)',
+            label: this.$t('charts.materialValue'),
             data: data,
             backgroundColor: [
               '#42b983', '#2c3e50', '#f87979', '#7f8c8d', '#3498db',
@@ -254,7 +254,7 @@ export default {
       this.inventoryItems.forEach(item => {
         const modelId = item.model_id;
         const model = this.models.find(m => m.id === modelId);
-        const modelName = model ? model.name : 'Sconosciuto';
+        const modelName = model ? model.name : this.$t('common.unknown');
         
         if (!inventoryByModel[modelName]) {
           inventoryByModel[modelName] = 0;
@@ -273,7 +273,7 @@ export default {
         data: {
           labels: labels,
           datasets: [{
-            label: 'Quantità',
+            label: this.$t('charts.quantity'),
             data: data,
             backgroundColor: '#42b983'
           }]

@@ -1,35 +1,35 @@
 <template>
   <div class="transaction-details">
     <div class="header">
-      <h1>Dettagli Transazione</h1>
+      <h1>{{ $t('transactions.detailsTitle') }}</h1>
       <div class="actions">
-        <router-link to="/transactions" class="btn btn-secondary">Torna alle Transazioni</router-link>
+        <router-link to="/transactions" class="btn btn-secondary">{{ $t('transactions.backToTransactions') }}</router-link>
         <button 
           v-if="transaction && transaction.status === 'pending'" 
           @click="updateStatus('completed')" 
           class="btn btn-success"
         >
-          Completa
+          {{ $t('transactions.complete') }}
         </button>
         <button 
           v-if="transaction && transaction.status === 'pending'" 
           @click="updateStatus('cancelled')" 
           class="btn btn-warning"
         >
-          Annulla
+          {{ $t('transactions.cancel') }}
         </button>
         <button 
           v-if="transaction && transaction.status !== 'completed'" 
           @click="deleteTransaction" 
           class="btn btn-danger"
         >
-          Elimina
+          {{ $t('common.delete') }}
         </button>
       </div>
     </div>
     
     <div v-if="loading" class="loading">
-      Caricamento in corso...
+      {{ $t('common.loading') }}
     </div>
     
     <div v-else-if="error" class="error">
@@ -37,46 +37,46 @@
     </div>
     
     <div v-else-if="!transaction" class="empty-state">
-      Transazione non trovata.
+      {{ $t('transactions.notFound') }}
     </div>
     
     <div v-else class="transaction-content">
       <div class="transaction-info">
         <div class="info-card">
-          <h2>Informazioni Generali</h2>
+          <h2>{{ $t('transactions.generalInfo') }}</h2>
           <div class="info-grid">
             <div class="info-item">
-              <span class="label">ID:</span>
+              <span class="label">{{ $t('common.id') }}:</span>
               <span class="value">{{ transaction.id }}</span>
             </div>
             <div class="info-item">
-              <span class="label">Tipo:</span>
+              <span class="label">{{ $t('transactions.type') }}:</span>
               <span class="value">{{ formatType(transaction.transactionType) }}</span>
             </div>
             <div class="info-item">
-              <span class="label">Data:</span>
+              <span class="label">{{ $t('transactions.date') }}:</span>
               <span class="value">{{ formatDate(transaction.date) }}</span>
             </div>
             <div class="info-item">
-              <span class="label">Stato:</span>
+              <span class="label">{{ $t('transactions.status') }}:</span>
               <span class="value" :class="getStatusClass(transaction.status)">
                 {{ formatStatus(transaction.status) }}
               </span>
             </div>
             <div class="info-item">
-              <span class="label">Importo Totale:</span>
+              <span class="label">{{ $t('transactions.totalAmount') }}:</span>
               <span class="value">€ {{ formatCost(transaction.totalAmount) }}</span>
             </div>
             <div class="info-item" v-if="transaction.transactionType === 'purchase'">
-              <span class="label">Fornitore:</span>
+              <span class="label">{{ $t('transactions.supplier') }}:</span>
               <span class="value">{{ getSupplierName(transaction.supplierId) }}</span>
             </div>
             <div class="info-item" v-else>
-              <span class="label">Cliente:</span>
+              <span class="label">{{ $t('transactions.customer') }}:</span>
               <span class="value">{{ getCustomerName(transaction.customerId) }}</span>
             </div>
             <div class="info-item" v-if="transaction.notes">
-              <span class="label">Note:</span>
+              <span class="label">{{ $t('transactions.notes') }}:</span>
               <span class="value">{{ transaction.notes }}</span>
             </div>
           </div>
@@ -84,14 +84,14 @@
       </div>
       
       <div class="transaction-items">
-        <h2>Elementi della Transazione</h2>
+        <h2>{{ $t('transactions.transactionItems') }}</h2>
         <table>
           <thead>
             <tr>
-              <th>Articolo</th>
-              <th>Quantità</th>
-              <th>Prezzo Unitario</th>
-              <th>Totale</th>
+              <th>{{ $t('transactions.item') }}</th>
+              <th>{{ $t('transactions.quantity') }}</th>
+              <th>{{ $t('transactions.unitPrice') }}</th>
+              <th>{{ $t('transactions.total') }}</th>
             </tr>
           </thead>
           <tbody>
@@ -103,7 +103,7 @@
                 <span v-else-if="item.materialId">
                   {{ getMaterialName(item.materialId) }}
                 </span>
-                <span v-else>Articolo sconosciuto</span>
+                <span v-else>{{ $t('common.unknownItem') }}</span>
               </td>
               <td>{{ item.quantity }}</td>
               <td>€ {{ formatCost(item.unitPrice) }}</td>
@@ -112,7 +112,7 @@
           </tbody>
           <tfoot>
             <tr>
-              <td colspan="3" class="total-label">Totale</td>
+              <td colspan="3" class="total-label">{{ $t('transactions.total') }}</td>
               <td class="total-value">€ {{ formatCost(transaction.totalAmount) }}</td>
             </tr>
           </tfoot>
@@ -164,7 +164,7 @@ export default {
         this.items = response.data.items;
       } catch (error) {
         console.error('Error fetching transaction:', error);
-        this.error = 'Si è verificato un errore durante il recupero della transazione. Riprova più tardi.';
+        this.error = this.$t('errors.fetchTransaction');
       } finally {
         this.loading = false;
       }
@@ -209,25 +209,25 @@ export default {
     getSupplierName(supplierId) {
       if (!supplierId) return 'N/A';
       const supplier = this.suppliers.find(s => s.id === supplierId);
-      return supplier ? supplier.name : 'Fornitore sconosciuto';
+      return supplier ? supplier.name : this.$t('common.unknownSupplier');
     },
     
     getCustomerName(customerId) {
       if (!customerId) return 'N/A';
       const customer = this.customers.find(c => c.id === customerId);
-      return customer ? customer.name : 'Cliente sconosciuto';
+      return customer ? customer.name : this.$t('common.unknownCustomer');
     },
     
     getMaterialName(materialId) {
       if (!materialId) return 'N/A';
       const material = this.materials.find(m => m.id === materialId);
-      return material ? material.name : 'Materiale sconosciuto';
+      return material ? material.name : this.$t('common.unknownMaterial');
     },
     
     getModelName(modelId) {
       if (!modelId) return 'N/A';
       const model = this.models.find(m => m.id === modelId);
-      return model ? model.name : 'Modello sconosciuto';
+      return model ? model.name : this.$t('common.unknownModel');
     },
     
     formatDate(dateString) {
@@ -238,9 +238,9 @@ export default {
     formatType(type) {
       switch (type) {
         case 'purchase':
-          return 'Acquisto';
+          return this.$t('transactions.purchase');
         case 'sale':
-          return 'Vendita';
+          return this.$t('transactions.sale');
         default:
           return type;
       }
@@ -249,11 +249,11 @@ export default {
     formatStatus(status) {
       switch (status) {
         case 'pending':
-          return 'In attesa';
+          return this.$t('transactions.pending');
         case 'completed':
-          return 'Completata';
+          return this.$t('transactions.completed');
         case 'cancelled':
-          return 'Annullata';
+          return this.$t('transactions.cancelled');
         default:
           return status;
       }
@@ -284,12 +284,12 @@ export default {
         this.transaction.status = newStatus;
       } catch (error) {
         console.error('Error updating transaction status:', error);
-        alert('Si è verificato un errore durante l\'aggiornamento dello stato della transazione.');
+        alert(this.$t('errors.updateTransactionStatus'));
       }
     },
     
     async deleteTransaction() {
-      if (!confirm('Sei sicuro di voler eliminare questa transazione?')) {
+      if (!confirm(this.$t('transactions.confirmDelete'))) {
         return;
       }
       
@@ -301,7 +301,7 @@ export default {
         if (error.response && error.response.status === 400) {
           alert(error.response.data);
         } else {
-          alert('Si è verificato un errore durante l\'eliminazione della transazione.');
+          alert(this.$t('errors.deleteTransaction'));
         }
       }
     }

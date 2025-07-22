@@ -1,9 +1,9 @@
 <template>
   <div class="supplier-form">
-    <h1>{{ isEditing ? 'Modifica Fornitore' : 'Nuovo Fornitore' }}</h1>
+    <h1>{{ isEditing ? $t('suppliers.editSupplier') : $t('suppliers.newSupplier') }}</h1>
     
     <div v-if="loading" class="loading">
-      Caricamento in corso...
+      {{ $t('common.loading') }}
     </div>
     
     <div v-else-if="error" class="error">
@@ -12,81 +12,81 @@
     
     <form v-else @submit.prevent="saveSupplier">
       <div class="form-group">
-        <label for="name">Nome *</label>
+        <label for="name">{{ $t('suppliers.name') }} *</label>
         <input 
           type="text" 
           id="name" 
           v-model="supplier.name" 
           required
-          placeholder="Nome del fornitore"
+          :placeholder="$t('suppliers.namePlaceholder')"
         >
       </div>
       
       <div class="form-group">
-        <label for="contactPerson">Persona di Contatto</label>
+        <label for="contactPerson">{{ $t('suppliers.contactPerson') }}</label>
         <input 
           type="text" 
           id="contactPerson" 
           v-model="supplier.contactPerson" 
-          placeholder="Nome della persona di contatto"
+          :placeholder="$t('suppliers.contactPersonPlaceholder')"
         >
       </div>
       
       <div class="form-row">
         <div class="form-group">
-          <label for="email">Email</label>
+          <label for="email">{{ $t('suppliers.email') }}</label>
           <input 
             type="email" 
             id="email" 
             v-model="supplier.email" 
-            placeholder="Email"
+            :placeholder="$t('suppliers.emailPlaceholder')"
           >
         </div>
         
         <div class="form-group">
-          <label for="phone">Telefono</label>
+          <label for="phone">{{ $t('suppliers.phone') }}</label>
           <input 
             type="tel" 
             id="phone" 
             v-model="supplier.phone" 
-            placeholder="Numero di telefono"
+            :placeholder="$t('suppliers.phonePlaceholder')"
           >
         </div>
       </div>
       
       <div class="form-group">
-        <label for="address">Indirizzo</label>
+        <label for="address">{{ $t('suppliers.address') }}</label>
         <textarea 
           id="address" 
           v-model="supplier.address" 
-          placeholder="Indirizzo completo"
+          :placeholder="$t('suppliers.addressPlaceholder')"
           rows="3"
         ></textarea>
       </div>
       
       <div class="form-group">
-        <label for="link">Link</label>
+        <label for="link">{{ $t('common.link') }}</label>
         <input 
           type="url" 
           id="link" 
           v-model="supplier.link" 
-          placeholder="URL del fornitore (es. https://esempio.com)"
+          :placeholder="$t('suppliers.linkPlaceholder')"
         >
       </div>
       
       <div class="form-group">
-        <label for="notes">Note</label>
+        <label for="notes">{{ $t('common.notes') }}</label>
         <textarea 
           id="notes" 
           v-model="supplier.notes" 
-          placeholder="Note aggiuntive"
+          :placeholder="$t('common.additionalNotesPlaceholder')"
           rows="3"
         ></textarea>
       </div>
       
       <div class="form-actions">
-        <button type="button" class="btn btn-secondary" @click="goBack">Annulla</button>
-        <button type="submit" class="btn btn-primary">{{ isEditing ? 'Aggiorna' : 'Salva' }}</button>
+        <button type="button" class="btn btn-secondary" @click="goBack">{{ $t('common.cancel') }}</button>
+        <button type="submit" class="btn btn-primary">{{ isEditing ? $t('common.update') : $t('common.save') }}</button>
       </div>
     </form>
   </div>
@@ -138,7 +138,7 @@ export default {
         this.supplier = response.data;
       } catch (error) {
         console.error('Error fetching supplier:', error);
-        this.error = 'Si è verificato un errore durante il recupero del fornitore. Riprova più tardi.';
+        this.error = this.$t('errors.fetchSupplier');
       } finally {
         this.loading = false;
       }
@@ -158,7 +158,7 @@ export default {
         this.$router.push('/suppliers');
       } catch (error) {
         console.error('Error saving supplier:', error);
-        this.error = 'Si è verificato un errore durante il salvataggio del fornitore. Riprova più tardi.';
+        this.error = this.$t('errors.saveSupplier');
       } finally {
         this.loading = false;
       }
