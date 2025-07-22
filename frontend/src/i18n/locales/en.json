@@ -146,6 +146,7 @@
   },
   "models": {
     "title": "Product Models Management",
+    "viewTitle": "Model Details",
     "name": "Name",
     "description": "Description",
     "sku": "SKU",
@@ -154,6 +155,7 @@
     "laborTime": "Labor Time",
     "margin": "Margin",
     "components": "Components",
+    "componentsUsed": "Components Used",
     "component": "Component",
     "newModel": "New Model",
     "editModel": "Edit Model",
@@ -168,7 +170,8 @@
     "calculateCost": "Calculate cost",
     "addComponent": "Add Component",
     "totalItems": "Total Items",
-    "totalComponentsCost": "Total Components Cost"
+    "totalComponentsCost": "Total Components Cost",
+    "inventoryItems": "Inventory Items"
   },
   "products": {
     "title": "Products",

@@ -439,6 +439,9 @@ h1, h2 {
   cursor: pointer;
   border: none;
   font-size: 14px;
+  line-height: 1.2;
+  text-align: center;
+  vertical-align: middle;
 }
 
 .btn-primary {
@@ -449,6 +452,7 @@ h1, h2 {
 .btn-sm {
   padding: 4px 8px;
   font-size: 12px;
+  line-height: 1.2;
 }
 
 .btn-success {
@@ -487,6 +491,7 @@ th, td {
   padding: 12px;
   text-align: left;
   border-bottom: 1px solid #ddd;
+  vertical-align: middle;
 }
 
 th {
@@ -509,6 +514,8 @@ th {
 .actions {
   display: flex;
   gap: 8px;
+  align-items: center;
+  justify-content: flex-start;
 }
 
 .summary {
@@ -549,5 +556,30 @@ th {
 
 .negative {
   color: #dc3545;
+}
+
+.pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+  margin: 20px 0;
+}
+
+.page-numbers {
+  display: flex;
+  gap: 5px;
+}
+
+.btn-active {
+  background-color: #42b983;
+  color: white;
+}
+
+.pagination-info {
+  text-align: center;
+  color: #6c757d;
+  font-size: 14px;
+  margin-bottom: 20px;
 }
 </style>

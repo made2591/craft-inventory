@@ -146,6 +146,7 @@
   },
   "models": {
     "title": "Gestione Modelli di Prodotto",
+    "viewTitle": "Dettagli Modello",
     "name": "Nome",
     "description": "Descrizione",
     "sku": "SKU",
@@ -154,6 +155,7 @@
     "laborTime": "Tempo di lavorazione",
     "margin": "Margine",
     "components": "Componenti",
+    "componentsUsed": "Componenti Utilizzati",
     "component": "Componente",
     "newModel": "Nuovo Modello",
     "editModel": "Modifica Modello",
@@ -168,7 +170,8 @@
     "calculateCost": "Calcola costo",
     "addComponent": "Aggiungi Componente",
     "totalItems": "Totale Articoli",
-    "totalComponentsCost": "Costo Totale Componenti"
+    "totalComponentsCost": "Costo Totale Componenti",
+    "inventoryItems": "Articoli Inventario"
   },
   "products": {
     "title": "Prodotti",
