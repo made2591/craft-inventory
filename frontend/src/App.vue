@@ -8,7 +8,7 @@
       </main>
       
       <footer>
-        <p>&copy; {{ new Date().getFullYear() }} - Gestione Magazzino Artigianato</p>
+        <p>&copy; {{ new Date().getFullYear() }} - {{ $t('app.title') }}</p>
       </footer>
     </div>
   </div>
@@ -29,17 +29,31 @@ export default {
   },
   created() {
     // Controlla lo stato della sidebar
-    window.addEventListener('storage', this.checkSidebarState);
+    window.addEventListener('storage', this.handleStorageChange);
     this.checkSidebarState();
+    
+    // Imposta la lingua corrente
+    document.querySelector('html').setAttribute('lang', this.$i18n.locale);
   },
   beforeUnmount() {
-    window.removeEventListener('storage', this.checkSidebarState);
+    window.removeEventListener('storage', this.handleStorageChange);
   },
   methods: {
     checkSidebarState() {
       const savedState = localStorage.getItem('sidebarCollapsed');
       if (savedState !== null) {
         this.isSidebarCollapsed = savedState === 'true';
+      }
+    },
+    handleStorageChange(event) {
+      // Gestisce i cambiamenti nel localStorage
+      if (event.key === 'sidebarCollapsed') {
+        this.checkSidebarState();
+      } else if (event.key === 'locale') {
+        // Aggiorna la lingua quando cambia nel localStorage
+        const newLocale = localStorage.getItem('locale') || 'it';
+        this.$i18n.locale = newLocale;
+        document.querySelector('html').setAttribute('lang', newLocale);
       }
     }
   }

@@ -283,10 +283,14 @@ export default {
           return;
         }
         
-        // Trasforma i dati per adattarli alla visualizzazione
-        this.purchaseTransactions = data.transactions.map(transaction => {
+        // Array per memorizzare le promesse di recupero dei dettagli delle transazioni
+        const transactionPromises = data.transactions.map(async transaction => {
+          // Recupera i dettagli completi della transazione, inclusi gli elementi
+          const detailResponse = await fetch(`/api/transactions/${transaction.id}`);
+          const detailData = await detailResponse.json();
+          
           // Cerca gli elementi della transazione relativi a questo materiale
-          const items = transaction.items ? transaction.items.filter(item => item.materialId === this.id) : [];
+          const items = detailData.items ? detailData.items.filter(item => item.materialId === this.id) : [];
           const item = items.length > 0 ? items[0] : {};
           
           return {
@@ -301,6 +305,9 @@ export default {
             status: transaction.status
           };
         });
+        
+        // Attendi che tutte le promesse siano risolte
+        this.purchaseTransactions = await Promise.all(transactionPromises);
         
         // Aggiorna le informazioni di paginazione
         this.totalItems = data.pagination.totalItems;

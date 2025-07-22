@@ -2,7 +2,7 @@
   <div class="sidebar" :class="{ 'collapsed': isCollapsed }">
     <div class="sidebar-header">
       <router-link to="/" class="logo">
-        <span v-if="!isCollapsed">Craft Inventory</span>
+        <span v-if="!isCollapsed">{{ $t('app.title') }}</span>
         <span v-else>CI</span>
       </router-link>
       <button class="toggle-btn" @click="toggleSidebar">
@@ -12,80 +12,80 @@
     
     <div class="sidebar-content">
       <div class="sidebar-menu">
-        <router-link to="/" class="menu-item" :title="isCollapsed ? 'Home' : ''">
+        <router-link to="/" class="menu-item" :title="isCollapsed ? $t('navigation.dashboard') : ''">
           <i class="fas fa-home"></i>
-          <span v-if="!isCollapsed">Home</span>
+          <span v-if="!isCollapsed">{{ $t('navigation.dashboard') }}</span>
         </router-link>
         
         <!-- Sezione Inventario -->
         <div class="menu-section">
-          <div class="section-header" @click="toggleSection('inventory')" :title="isCollapsed ? 'Inventario' : ''">
+          <div class="section-header" @click="toggleSection('inventory')" :title="isCollapsed ? $t('navigation.inventory') : ''">
             <i class="fas fa-warehouse"></i>
-            <span v-if="!isCollapsed">Inventario</span>
+            <span v-if="!isCollapsed">{{ $t('navigation.inventory') }}</span>
             <i v-if="!isCollapsed" :class="['fas', sections.inventory ? 'fa-chevron-down' : 'fa-chevron-right']"></i>
           </div>
           
           <div class="section-items" v-if="sections.inventory || isCollapsed">
-            <router-link to="/materials" class="menu-item" :title="isCollapsed ? 'Materiali' : ''">
+            <router-link to="/materials" class="menu-item" :title="isCollapsed ? $t('navigation.materials') : ''">
               <i class="fas fa-box"></i>
-              <span v-if="!isCollapsed">Materiali</span>
+              <span v-if="!isCollapsed">{{ $t('navigation.materials') }}</span>
             </router-link>
             
-            <router-link to="/components" class="menu-item" :title="isCollapsed ? 'Componenti' : ''">
+            <router-link to="/components" class="menu-item" :title="isCollapsed ? $t('navigation.components') : ''">
               <i class="fas fa-cogs"></i>
-              <span v-if="!isCollapsed">Componenti</span>
+              <span v-if="!isCollapsed">{{ $t('navigation.components') }}</span>
             </router-link>
             
-            <router-link to="/models" class="menu-item" :title="isCollapsed ? 'Modelli' : ''">
+            <router-link to="/models" class="menu-item" :title="isCollapsed ? $t('navigation.products') : ''">
               <i class="fas fa-cubes"></i>
-              <span v-if="!isCollapsed">Modelli</span>
+              <span v-if="!isCollapsed">{{ $t('navigation.products') }}</span>
             </router-link>
             
-            <router-link to="/inventory" class="menu-item" :title="isCollapsed ? 'Magazzino' : ''">
+            <router-link to="/inventory" class="menu-item" :title="isCollapsed ? $t('navigation.inventory') : ''">
               <i class="fas fa-dolly-flatbed"></i>
-              <span v-if="!isCollapsed">Magazzino</span>
+              <span v-if="!isCollapsed">{{ $t('navigation.inventory') }}</span>
             </router-link>
           </div>
         </div>
         
         <!-- Sezione Contatti -->
         <div class="menu-section">
-          <div class="section-header" @click="toggleSection('contacts')" :title="isCollapsed ? 'Contatti' : ''">
+          <div class="section-header" @click="toggleSection('contacts')" :title="isCollapsed ? $t('navigation.contacts') : ''">
             <i class="fas fa-address-book"></i>
-            <span v-if="!isCollapsed">Contatti</span>
+            <span v-if="!isCollapsed">{{ $t('navigation.contacts') }}</span>
             <i v-if="!isCollapsed" :class="['fas', sections.contacts ? 'fa-chevron-down' : 'fa-chevron-right']"></i>
           </div>
           
           <div class="section-items" v-if="sections.contacts || isCollapsed">
-            <router-link to="/suppliers" class="menu-item" :title="isCollapsed ? 'Fornitori' : ''">
+            <router-link to="/suppliers" class="menu-item" :title="isCollapsed ? $t('navigation.suppliers') : ''">
               <i class="fas fa-truck"></i>
-              <span v-if="!isCollapsed">Fornitori</span>
+              <span v-if="!isCollapsed">{{ $t('navigation.suppliers') }}</span>
             </router-link>
             
-            <router-link to="/customers" class="menu-item" :title="isCollapsed ? 'Clienti' : ''">
+            <router-link to="/customers" class="menu-item" :title="isCollapsed ? $t('navigation.customers') : ''">
               <i class="fas fa-users"></i>
-              <span v-if="!isCollapsed">Clienti</span>
+              <span v-if="!isCollapsed">{{ $t('navigation.customers') }}</span>
             </router-link>
           </div>
         </div>
         
         <!-- Sezione Transazioni -->
         <div class="menu-section">
-          <div class="section-header" @click="toggleSection('transactions')" :title="isCollapsed ? 'Transazioni' : ''">
+          <div class="section-header" @click="toggleSection('transactions')" :title="isCollapsed ? $t('navigation.transactions') : ''">
             <i class="fas fa-exchange-alt"></i>
-            <span v-if="!isCollapsed">Transazioni</span>
+            <span v-if="!isCollapsed">{{ $t('navigation.transactions') }}</span>
             <i v-if="!isCollapsed" :class="['fas', sections.transactions ? 'fa-chevron-down' : 'fa-chevron-right']"></i>
           </div>
           
           <div class="section-items" v-if="sections.transactions || isCollapsed">
-            <router-link to="/transactions" class="menu-item" :title="isCollapsed ? 'Tutte le Transazioni' : ''">
+            <router-link to="/transactions" class="menu-item" :title="isCollapsed ? $t('transactions.allTransactions') : ''">
               <i class="fas fa-list"></i>
-              <span v-if="!isCollapsed">Tutte le Transazioni</span>
+              <span v-if="!isCollapsed">{{ $t('transactions.allTransactions') }}</span>
             </router-link>
             
-            <router-link to="/transactions/new" class="menu-item" :title="isCollapsed ? 'Nuova Transazione' : ''">
+            <router-link to="/transactions/new" class="menu-item" :title="isCollapsed ? $t('transactions.newTransaction') : ''">
               <i class="fas fa-plus-circle"></i>
-              <span v-if="!isCollapsed">Nuova Transazione</span>
+              <span v-if="!isCollapsed">{{ $t('transactions.newTransaction') }}</span>
             </router-link>
           </div>
         </div>
