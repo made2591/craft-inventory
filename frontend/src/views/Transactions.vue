@@ -76,28 +76,45 @@
             <td>€ {{ formatCost(transaction.totalAmount) }}</td>
             <td>{{ formatStatus(transaction.status) }}</td>
             <td class="actions">
-              <router-link :to="`/transactions/${transaction.id}`" class="btn btn-sm">{{ $t('common.details') }}</router-link>
-              <button 
-                v-if="transaction.status === 'pending'" 
-                @click="updateStatus(transaction.id, 'completed')" 
-                class="btn btn-sm btn-success"
-              >
-                {{ $t('transactions.complete') }}
-              </button>
-              <button 
-                v-if="transaction.status === 'pending'" 
-                @click="updateStatus(transaction.id, 'cancelled')" 
-                class="btn btn-sm btn-warning"
-              >
-                {{ $t('transactions.cancel') }}
-              </button>
-              <button 
-                v-if="transaction.status !== 'completed'" 
-                @click="deleteTransaction(transaction.id)" 
-                class="btn btn-sm btn-danger"
-              >
-                {{ $t('common.delete') }}
-              </button>
+              <div class="dropdown" :class="{ 'dropdown-open': openDropdown === transaction.id }">
+                <button 
+                  @click="toggleDropdown(transaction.id)" 
+                  class="btn btn-sm dropdown-toggle"
+                  :aria-expanded="openDropdown === transaction.id"
+                >
+                  ⋮
+                </button>
+                <div class="dropdown-menu" v-show="openDropdown === transaction.id">
+                  <router-link 
+                    :to="`/transactions/${transaction.id}`" 
+                    class="dropdown-item"
+                    @click="closeDropdown"
+                  >
+                    {{ $t('common.details') }}
+                  </router-link>
+                  <button 
+                    v-if="transaction.status === 'pending'" 
+                    @click="updateStatus(transaction.id, 'completed')" 
+                    class="dropdown-item btn-success-item"
+                  >
+                    {{ $t('transactions.complete') }}
+                  </button>
+                  <button 
+                    v-if="transaction.status === 'pending'" 
+                    @click="updateStatus(transaction.id, 'cancelled')" 
+                    class="dropdown-item btn-warning-item"
+                  >
+                    {{ $t('transactions.cancel') }}
+                  </button>
+                  <button 
+                    v-if="transaction.status !== 'completed'" 
+                    @click="deleteTransaction(transaction.id)" 
+                    class="dropdown-item btn-danger-item"
+                  >
+                    {{ $t('common.delete') }}
+                  </button>
+                </div>
+              </div>
             </td>
           </tr>
         </tbody>
@@ -184,7 +201,8 @@ export default {
       currentPage: 1,
       itemsPerPage: 10,
       totalItems: 0,
-      totalPages: 0
+      totalPages: 0,
+      openDropdown: null
     };
   },
   computed: {
@@ -219,6 +237,12 @@ export default {
     this.fetchSuppliers();
     this.fetchCustomers();
   },
+  mounted() {
+    document.addEventListener('click', this.handleOutsideClick);
+  },
+  beforeUnmount() {
+    document.removeEventListener('click', this.handleOutsideClick);
+  },
   watch: {
     typeFilter() {
       this.currentPage = 1;
@@ -238,6 +262,24 @@ export default {
     }
   },
   methods: {
+    toggleDropdown(transactionId) {
+      if (this.openDropdown === transactionId) {
+        this.openDropdown = null;
+      } else {
+        this.openDropdown = transactionId;
+      }
+    },
+    
+    closeDropdown() {
+      this.openDropdown = null;
+    },
+    
+    handleOutsideClick(event) {
+      if (!event.target.closest('.dropdown')) {
+        this.closeDropdown();
+      }
+    },
+    
     async fetchTransactions() {
       this.loading = true;
       this.error = null;
@@ -357,20 +399,24 @@ export default {
         if (index !== -1) {
           this.transactions[index].status = newStatus;
         }
+        this.closeDropdown();
       } catch (error) {
         console.error('Error updating transaction status:', error);
         alert(this.$t('errors.updateTransactionStatus'));
+        this.closeDropdown();
       }
     },
     
     async deleteTransaction(id) {
       if (!confirm(this.$t('transactions.confirmDelete'))) {
+        this.closeDropdown();
         return;
       }
       
       try {
         await transactionService.deleteTransaction(id);
         this.transactions = this.transactions.filter(t => t.id !== id);
+        this.closeDropdown();
       } catch (error) {
         console.error('Error deleting transaction:', error);
         if (error.response && error.response.status === 400) {
@@ -378,6 +424,7 @@ export default {
         } else {
           alert(this.$t('errors.deleteTransaction'));
         }
+        this.closeDropdown();
       }
     },
     
@@ -516,6 +563,80 @@ th {
   gap: 8px;
   align-items: center;
   justify-content: flex-start;
+  position: relative;
+}
+
+.dropdown {
+  position: relative;
+  display: inline-block;
+}
+
+.dropdown-toggle {
+  background-color: #f8f9fa;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  padding: 4px 8px;
+  cursor: pointer;
+  font-size: 16px;
+  font-weight: bold;
+  color: #6c757d;
+  min-width: 30px;
+  text-align: center;
+}
+
+.dropdown-toggle:hover {
+  background-color: #e9ecef;
+  color: #495057;
+}
+
+.dropdown-menu {
+  position: absolute;
+  right: 0;
+  top: 100%;
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  min-width: 140px;
+  z-index: 1000;
+  margin-top: 2px;
+}
+
+.dropdown-item {
+  display: block;
+  width: 100%;
+  padding: 8px 12px;
+  text-decoration: none;
+  color: #212529;
+  border: none;
+  background: none;
+  text-align: left;
+  cursor: pointer;
+  font-size: 14px;
+  border-bottom: 1px solid #f8f9fa;
+}
+
+.dropdown-item:last-child {
+  border-bottom: none;
+}
+
+.dropdown-item:hover {
+  background-color: #f8f9fa;
+}
+
+.btn-success-item:hover {
+  background-color: #d4edda;
+  color: #155724;
+}
+
+.btn-warning-item:hover {
+  background-color: #fff3cd;
+  color: #856404;
+}
+
+.btn-danger-item:hover {
+  background-color: #f8d7da;
+  color: #721c24;
 }
 
 .summary {
