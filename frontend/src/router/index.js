@@ -28,6 +28,12 @@ const routes = [
     props: true
   },
   {
+    path: '/components/:id/view',
+    name: 'ViewComponent',
+    component: () => import('../views/ComponentView.vue'),
+    props: true
+  },
+  {
     path: '/materials',
     name: 'Materials',
     component: () => import('../views/Materials.vue')
@@ -41,6 +47,12 @@ const routes = [
     path: '/materials/:id',
     name: 'EditMaterial',
     component: () => import('../views/MaterialForm.vue'),
+    props: true
+  },
+  {
+    path: '/materials/:id/view',
+    name: 'ViewMaterial',
+    component: () => import('../views/MaterialView.vue'),
     props: true
   },
   {

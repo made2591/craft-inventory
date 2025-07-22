@@ -26,6 +26,20 @@
         <label for="description">Descrizione</label>
         <textarea id="description" v-model="component.description" class="form-control" rows="3"></textarea>
       </div>
+      
+      <div class="form-group">
+        <label for="quantity">Quantità</label>
+        <input 
+          type="number" 
+          id="quantity" 
+          v-model.number="component.quantity" 
+          min="0" 
+          step="1" 
+          class="form-control"
+          placeholder="Quantità disponibile"
+        >
+        <small class="form-text text-muted">Quantità disponibile di questo componente</small>
+      </div>
 
       <h2>Materiali</h2>
       <div v-if="loadingMaterials" class="loading">
@@ -124,6 +138,7 @@ export default {
       component: {
         name: '',
         description: '',
+        quantity: 0,
         materials: []
       },
       availableMaterials: [],
@@ -284,6 +299,7 @@ export default {
         const componentData = {
           name: this.component.name,
           description: this.component.description,
+          quantity: this.component.quantity || 0,
           materials: this.component.materials
         };
 

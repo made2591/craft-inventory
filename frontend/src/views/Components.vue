@@ -64,15 +64,26 @@
                 {{ sortOrder === 'asc' ? '▲' : '▼' }}
               </span>
             </th>
+            <th @click="sortBy('quantity')" class="sortable">
+              Quantità
+              <span v-if="sortKey === 'quantity'" class="sort-icon">
+                {{ sortOrder === 'asc' ? '▲' : '▼' }}
+              </span>
+            </th>
             <th>Costo Totale</th>
             <th>Azioni</th>
           </tr>
         </thead>
         <tbody>
           <tr v-for="component in paginatedComponents" :key="component.id">
-            <td><strong>{{ component.sku || 'N/A' }}</strong></td>
+            <td>
+              <router-link :to="`/components/${component.id}/view`" class="sku-link">
+                <strong>{{ component.sku || 'N/A' }}</strong>
+              </router-link>
+            </td>
             <td>{{ component.name }}</td>
             <td>{{ component.description || 'N/A' }}</td>
+            <td>{{ component.quantity || 0 }}</td>
             <td>
               <span v-if="loadingCosts[component.id]" class="loading-cost">
                 <i class="loading-spinner"></i> Calcolo...
@@ -87,6 +98,7 @@
               </span>
             </td>
             <td class="actions">
+              <button @click="viewComponent(component.id)" class="btn btn-sm btn-view">Visualizza</button>
               <button @click="editComponent(component.id)" class="btn btn-sm btn-edit">Modifica</button>
               <button @click="deleteComponent(component.id)" class="btn btn-sm btn-danger">Elimina</button>
             </td>
@@ -308,6 +320,10 @@ export default {
       }
     },
     
+    viewComponent(id) {
+      this.$router.push(`/components/${id}/view`);
+    },
+    
     editComponent(id) {
       this.$router.push(`/components/${id}`);
     },
@@ -384,9 +400,23 @@ h1 {
   color: white;
 }
 
+.btn-view {
+  background-color: #17a2b8;
+  color: white;
+}
+
 .btn-active {
   background-color: #42b983;
   color: white;
+}
+
+.sku-link {
+  color: #3498db;
+  text-decoration: none;
+}
+
+.sku-link:hover {
+  text-decoration: underline;
 }
 
 .loading, .error, .empty-state {

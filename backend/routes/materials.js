@@ -61,7 +61,8 @@ export default function materialsRoutes(pool, toCamelCase) {
         costPerUnit, 
         currentStock, 
         minStockLevel, 
-        supplierId 
+        supplierId,
+        link
       } = req.body;
       
       // Validazione dei campi obbligatori
@@ -93,8 +94,8 @@ export default function materialsRoutes(pool, toCamelCase) {
       }
       
       const result = await pool.query(
-        'INSERT INTO materials (id, name, description, sku, unit_of_measure, cost_per_unit, current_stock, min_stock_level, supplier_id, created_at, updated_at) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11) RETURNING *',
-        [id, name, description, sku, defaultUnitOfMeasure, defaultCostPerUnit, defaultCurrentStock, defaultMinStockLevel, supplierId, now, now]
+        'INSERT INTO materials (id, name, description, sku, unit_of_measure, cost_per_unit, current_stock, min_stock_level, supplier_id, link, created_at, updated_at) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12) RETURNING *',
+        [id, name, description, sku, defaultUnitOfMeasure, defaultCostPerUnit, defaultCurrentStock, defaultMinStockLevel, supplierId, link, now, now]
       );
       
       res.status(201).json(toCamelCase(result.rows[0]));
@@ -108,12 +109,12 @@ export default function materialsRoutes(pool, toCamelCase) {
   router.put('/:id', async (req, res) => {
     try {
       const { id } = req.params;
-      const { name, description, unitOfMeasure, costPerUnit, currentStock, minStockLevel, supplierId } = req.body;
+      const { name, description, unitOfMeasure, costPerUnit, currentStock, minStockLevel, supplierId, link } = req.body;
       const now = new Date();
 
       const result = await pool.query(
-        'UPDATE materials SET name = $1, description = $2, unit_of_measure = $3, cost_per_unit = $4, current_stock = $5, min_stock_level = $6, supplier_id = $7, updated_at = $8 WHERE id = $9 RETURNING *',
-        [name, description, unitOfMeasure, costPerUnit, currentStock, minStockLevel, supplierId, now, id]
+        'UPDATE materials SET name = $1, description = $2, unit_of_measure = $3, cost_per_unit = $4, current_stock = $5, min_stock_level = $6, supplier_id = $7, link = $8, updated_at = $9 WHERE id = $10 RETURNING *',
+        [name, description, unitOfMeasure, costPerUnit, currentStock, minStockLevel, supplierId, link, now, id]
       );
 
       if (result.rows.length === 0) {

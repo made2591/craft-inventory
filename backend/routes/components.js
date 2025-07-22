@@ -94,10 +94,11 @@ export default function componentsRoutes(pool, toCamelCase) {
         }
       }
       
-      // Insert the component with SKU
+      // Insert the component with SKU and quantity
+      const quantity = req.body.quantity || 0;
       const componentResult = await pool.query(
-        'INSERT INTO components (id, name, description, sku, created_at, updated_at) VALUES ($1, $2, $3, $4, $5, $6) RETURNING *',
-        [id, name, description, sku, now, now]
+        'INSERT INTO components (id, name, description, sku, quantity, created_at, updated_at) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *',
+        [id, name, description, sku, quantity, now, now]
       );
 
       // Insert the materials for this component
@@ -147,10 +148,11 @@ export default function componentsRoutes(pool, toCamelCase) {
       // Start a transaction
       await pool.query('BEGIN');
 
-      // Update the component
+      // Update the component with quantity
+      const quantity = req.body.quantity !== undefined ? req.body.quantity : 0;
       const componentResult = await pool.query(
-        'UPDATE components SET name = $1, description = $2, updated_at = $3 WHERE id = $4 RETURNING *',
-        [name, description, now, id]
+        'UPDATE components SET name = $1, description = $2, quantity = $3, updated_at = $4 WHERE id = $5 RETURNING *',
+        [name, description, quantity, now, id]
       );
 
       if (componentResult.rows.length === 0) {

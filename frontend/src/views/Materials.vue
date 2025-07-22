@@ -82,7 +82,11 @@
         </thead>
         <tbody>
           <tr v-for="material in paginatedMaterials" :key="material.id" :class="{ 'low-stock': isLowStock(material) }">
-            <td><strong>{{ material.sku || 'N/A' }}</strong></td>
+            <td>
+              <router-link :to="`/materials/${material.id}/view`" class="sku-link">
+                <strong>{{ material.sku || 'N/A' }}</strong>
+              </router-link>
+            </td>
             <td>{{ material.name }}</td>
             <td>{{ material.unitOfMeasure }}</td>
             <td>€ {{ formatCost(material.costPerUnit) }}</td>
@@ -90,6 +94,7 @@
             }} {{ material.unitOfMeasure }}</td>
             <td>{{ material.minStockLevel || 'N/A' }}</td>
             <td class="actions">
+              <button @click="viewMaterial(material.id)" class="btn btn-sm btn-view">Visualizza</button>
               <button @click="editMaterial(material.id)" class="btn btn-sm btn-edit">Modifica</button>
               <button @click="deleteMaterial(material.id)" class="btn btn-sm btn-danger">Elimina</button>
             </td>
@@ -292,6 +297,10 @@ export default {
 
     async refreshMaterials() {
       await this.fetchMaterials();
+    },
+    
+    viewMaterial(id) {
+      this.$router.push(`/materials/${id}/view`);
     }
   }
 };
@@ -467,5 +476,19 @@ th.sortable:hover {
   text-align: center;
   color: #6c757d;
   font-size: 14px;
+}
+
+.sku-link {
+  color: #3498db;
+  text-decoration: none;
+}
+
+.sku-link:hover {
+  text-decoration: underline;
+}
+
+.btn-view {
+  background-color: #17a2b8;
+  color: white;
 }
 </style>

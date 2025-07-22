@@ -32,6 +32,16 @@
         ></textarea>
       </div>
       
+      <div class="form-group">
+        <label for="link">Link</label>
+        <input 
+          type="url" 
+          id="link" 
+          v-model="material.link" 
+          placeholder="URL del materiale (es. https://esempio.com/materiale)"
+        >
+      </div>
+      
       <div class="form-row">
         <div class="form-group">
           <label for="unitOfMeasure">Unità di Misura *</label>
@@ -120,6 +130,7 @@ export default {
       material: {
         name: '',
         description: '',
+        link: '',
         unitOfMeasure: '',
         costPerUnit: 0,
         currentStock: 0,
