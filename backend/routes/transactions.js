@@ -82,6 +82,36 @@ export default function transactionsRoutes(pool, toCamelCase) {
           query += ' AND ' + conditions.join(' AND ');
           countQuery += ' AND ' + countConditions.join(' AND ');
         }
+      } 
+      // Se è specificato un materialId, filtra per le transazioni che contengono quel materiale
+      else if (req.query.materialId) {
+        const materialId = req.query.materialId;
+        
+        query = `
+          SELECT DISTINCT t.*, 
+            s.name as supplier_name, 
+            c.name as customer_name
+          FROM transactions t 
+          LEFT JOIN suppliers s ON t.supplier_id = s.id 
+          LEFT JOIN customers c ON t.customer_id = c.id 
+          JOIN transaction_items ti ON t.id = ti.transaction_id
+          WHERE ti.material_id = ${params.length + 1}
+        `;
+        
+        countQuery = `
+          SELECT COUNT(DISTINCT t.id) FROM transactions t
+          JOIN transaction_items ti ON t.id = ti.transaction_id
+          WHERE ti.material_id = ${countParams.length + 1}
+        `;
+        
+        params.push(materialId);
+        countParams.push(materialId);
+        
+        // Aggiungi altre condizioni se presenti
+        if (conditions.length > 0) {
+          query += ' AND ' + conditions.join(' AND ');
+          countQuery += ' AND ' + countConditions.join(' AND ');
+        }
       } else if (conditions.length > 0) {
         query += ' WHERE ' + conditions.join(' AND ');
         countQuery += ' WHERE ' + countConditions.join(' AND ');

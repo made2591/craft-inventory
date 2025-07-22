@@ -81,7 +81,7 @@
         </div>
       </div>
       
-      <h2>Storico Acquisti</h2>
+      <h2 class="section-title">Storico Acquisti</h2>
       <div v-if="purchaseTransactions.length === 0" class="empty-transactions">
         Nessun acquisto registrato per questo materiale.
       </div>
@@ -144,7 +144,7 @@
         </div>
         
         <div class="pagination-info" v-if="purchaseTransactions.length > 0">
-          Visualizzazione {{ startIndex + 1 }}-{{ endIndex }} di {{ purchaseTransactions.length }} elementi
+          Visualizzazione {{ startIndex + 1 }}-{{ endIndex }} di {{ totalItems || purchaseTransactions.length }} elementi
         </div>
       </div>
     </div>
@@ -171,7 +171,9 @@ export default {
       loading: true,
       error: null,
       currentPage: 1,
-      itemsPerPage: 5
+      itemsPerPage: 5,
+      totalItems: 0,
+      totalPagesCount: 0
     };
   },
   computed: {
@@ -179,17 +181,19 @@ export default {
       return this.supplier ? this.supplier.name : 'Nessun fornitore';
     },
     paginatedPurchases() {
-      return this.purchaseTransactions.slice(this.startIndex, this.endIndex);
+      // Non facciamo più lo slice qui perché i dati sono già paginati dal server
+      return this.purchaseTransactions;
     },
     totalPages() {
-      return Math.ceil(this.purchaseTransactions.length / this.itemsPerPage);
+      // Utilizziamo la variabile totalPagesCount che viene impostata dalla risposta del server
+      return this.totalPagesCount || Math.ceil(this.purchaseTransactions.length / this.itemsPerPage);
     },
     startIndex() {
       return (this.currentPage - 1) * this.itemsPerPage;
     },
     endIndex() {
       const end = this.startIndex + this.itemsPerPage;
-      return end > this.purchaseTransactions.length ? this.purchaseTransactions.length : end;
+      return end > this.totalItems ? this.totalItems : end;
     }
   },
   created() {
@@ -268,14 +272,19 @@ export default {
       this.$router.push('/materials');
     },
     
-    async fetchPurchaseTransactions() {
+    async fetchPurchaseTransactions(page = 1) {
       try {
-        // Ottieni le transazioni di acquisto per questo materiale
-        const response = await fetch(`/api/transactions?type=purchase&materialId=${this.id}`);
+        // Ottieni le transazioni di acquisto per questo materiale con paginazione
+        const response = await fetch(`/api/transactions?type=purchase&materialId=${this.id}&page=${page}&limit=${this.itemsPerPage}`);
         const data = await response.json();
         
+        if (!data || !data.transactions) {
+          console.error('Formato di risposta non valido:', data);
+          return;
+        }
+        
         // Trasforma i dati per adattarli alla visualizzazione
-        this.purchaseTransactions = data.map(transaction => {
+        this.purchaseTransactions = data.transactions.map(transaction => {
           // Cerca gli elementi della transazione relativi a questo materiale
           const items = transaction.items ? transaction.items.filter(item => item.materialId === this.id) : [];
           const item = items.length > 0 ? items[0] : {};
@@ -292,6 +301,11 @@ export default {
             status: transaction.status
           };
         });
+        
+        // Aggiorna le informazioni di paginazione
+        this.totalItems = data.pagination.totalItems;
+        this.totalPagesCount = data.pagination.totalPages;
+        this.currentPage = data.pagination.page;
       } catch (error) {
         console.error('Error fetching purchase transactions:', error);
       }
@@ -325,7 +339,7 @@ export default {
     
     goToPage(page) {
       if (page >= 1 && page <= this.totalPages) {
-        this.currentPage = page;
+        this.fetchPurchaseTransactions(page);
       }
     }
   }
@@ -432,5 +446,93 @@ h1 {
 .low-stock {
   color: #dc3545;
   font-weight: bold;
+}
+
+.section-title {
+  margin-top: 40px;
+  margin-bottom: 20px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid #eee;
+}
+
+.empty-transactions {
+  text-align: center;
+  padding: 20px;
+  background-color: #f8f9fa;
+  border-radius: 4px;
+  color: #6c757d;
+  margin-bottom: 20px;
+}
+
+.transactions-table {
+  margin-top: 20px;
+  margin-bottom: 30px;
+}
+
+.transactions-table table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 20px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.transactions-table th,
+.transactions-table td {
+  padding: 12px 15px;
+  text-align: left;
+  border-bottom: 1px solid #eee;
+}
+
+.transactions-table th {
+  background-color: #f8f9fa;
+  font-weight: bold;
+  color: #555;
+}
+
+.status-pending {
+  background-color: #fff3cd;
+}
+
+.status-completed {
+  background-color: #d4edda;
+}
+
+.status-cancelled {
+  background-color: #f8d7da;
+}
+
+.pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-top: 20px;
+  margin-bottom: 10px;
+}
+
+.page-numbers {
+  display: flex;
+  gap: 5px;
+  margin: 0 10px;
+}
+
+.btn-sm {
+  padding: 4px 8px;
+  font-size: 12px;
+  height: 28px;
+  line-height: 20px;
+}
+
+.btn-active {
+  background-color: #42b983;
+  color: white;
+}
+
+.pagination-info {
+  text-align: center;
+  color: #6c757d;
+  font-size: 14px;
+  margin-top: 10px;
 }
 </style>
