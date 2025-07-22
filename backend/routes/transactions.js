@@ -35,22 +35,22 @@ export default function transactionsRoutes(pool, toCamelCase) {
       const countConditions = [];
       
       if (customerId) {
-        conditions.push(`t.customer_id = ${params.length + 1}`);
-        countConditions.push(`t.customer_id = ${countParams.length + 1}`);
+        conditions.push(`t.customer_id = $${params.length + 1}`);
+        countConditions.push(`t.customer_id = $${countParams.length + 1}`);
         params.push(customerId);
         countParams.push(customerId);
       }
       
       if (supplierId) {
-        conditions.push(`t.supplier_id = ${params.length + 1}`);
-        countConditions.push(`t.supplier_id = ${countParams.length + 1}`);
+        conditions.push(`t.supplier_id = $${params.length + 1}`);
+        countConditions.push(`t.supplier_id = $${countParams.length + 1}`);
         params.push(supplierId);
         countParams.push(supplierId);
       }
       
       if (type) {
-        conditions.push(`t.transaction_type = ${params.length + 1}`);
-        countConditions.push(`t.transaction_type = ${countParams.length + 1}`);
+        conditions.push(`t.transaction_type = $${params.length + 1}`);
+        countConditions.push(`t.transaction_type = $${countParams.length + 1}`);
         params.push(type);
         countParams.push(type);
       }
@@ -65,13 +65,13 @@ export default function transactionsRoutes(pool, toCamelCase) {
           LEFT JOIN suppliers s ON t.supplier_id = s.id 
           LEFT JOIN customers c ON t.customer_id = c.id 
           JOIN transaction_items ti ON t.id = ti.transaction_id
-          WHERE ti.product_model_id = ${params.length + 1}
+          WHERE ti.product_model_id = $${params.length + 1}
         `;
         
         countQuery = `
           SELECT COUNT(DISTINCT t.id) FROM transactions t
           JOIN transaction_items ti ON t.id = ti.transaction_id
-          WHERE ti.product_model_id = ${countParams.length + 1}
+          WHERE ti.product_model_id = $${countParams.length + 1}
         `;
         
         params.push(modelId);
@@ -95,13 +95,13 @@ export default function transactionsRoutes(pool, toCamelCase) {
           LEFT JOIN suppliers s ON t.supplier_id = s.id 
           LEFT JOIN customers c ON t.customer_id = c.id 
           JOIN transaction_items ti ON t.id = ti.transaction_id
-          WHERE ti.material_id = ${params.length + 1}
+          WHERE ti.material_id = $${params.length + 1}
         `;
         
         countQuery = `
           SELECT COUNT(DISTINCT t.id) FROM transactions t
           JOIN transaction_items ti ON t.id = ti.transaction_id
-          WHERE ti.material_id = ${countParams.length + 1}
+          WHERE ti.material_id = $${countParams.length + 1}
         `;
         
         params.push(materialId);
