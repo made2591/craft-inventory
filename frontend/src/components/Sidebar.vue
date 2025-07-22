@@ -92,16 +92,20 @@
         
         <!-- Sezione Sistema -->
         <div class="menu-section">
-          <div class="section-header" @click="toggleSection('system')" :title="isCollapsed ? 'Sistema' : ''">
+          <div class="section-header" @click="toggleSection('system')" :title="isCollapsed ? $t('navigation.system') : ''">
             <i class="fas fa-cogs"></i>
-            <span v-if="!isCollapsed">Sistema</span>
+            <span v-if="!isCollapsed">{{ $t('navigation.system') }}</span>
             <i v-if="!isCollapsed" :class="['fas', sections.system ? 'fa-chevron-down' : 'fa-chevron-right']"></i>
           </div>
           
           <div class="section-items" v-if="sections.system || isCollapsed">
-            <router-link to="/database" class="menu-item" :title="isCollapsed ? 'Gestione Database' : ''">
+            <router-link to="/settings" class="menu-item" :title="isCollapsed ? $t('navigation.settings') : ''">
+              <i class="fas fa-cog"></i>
+              <span v-if="!isCollapsed">{{ $t('navigation.settings') }}</span>
+            </router-link>
+            <router-link to="/database" class="menu-item" :title="isCollapsed ? $t('navigation.database') : ''">
               <i class="fas fa-database"></i>
-              <span v-if="!isCollapsed">Gestione Database</span>
+              <span v-if="!isCollapsed">{{ $t('navigation.database') }}</span>
             </router-link>
           </div>
         </div>
