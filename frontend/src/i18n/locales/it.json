@@ -157,6 +157,7 @@
     "components": "Componenti",
     "componentsUsed": "Componenti Utilizzati",
     "component": "Componente",
+    "noComponentsAssociated": "Nessun componente associato a questo modello.",
     "newModel": "Nuovo Modello",
     "editModel": "Modifica Modello",
     "confirmDelete": "Sei sicuro di voler eliminare questo modello?",
