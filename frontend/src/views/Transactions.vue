@@ -64,16 +64,16 @@
         <tbody>
           <tr v-for="transaction in filteredTransactions" :key="transaction.id" :class="getStatusClass(transaction.status)">
             <td>{{ formatDate(transaction.date) }}</td>
-            <td>{{ formatType(transaction.transaction_type) }}</td>
+            <td>{{ formatType(transaction.transactionType) }}</td>
             <td>
-              <span v-if="transaction.transaction_type === 'purchase'">
-                {{ getSupplierName(transaction.supplier_id) }}
+              <span v-if="transaction.transactionType === 'purchase'">
+                {{ getSupplierName(transaction.supplierId) }}
               </span>
               <span v-else>
-                {{ getCustomerName(transaction.customer_id) }}
+                {{ getCustomerName(transaction.customerId) }}
               </span>
             </td>
-            <td>€ {{ transaction.total_amount !== undefined ? transaction.total_amount.toFixed(2) : '0.00' }}</td>
+            <td>€ {{ formatCost(transaction.totalAmount) }}</td>
             <td>{{ formatStatus(transaction.status) }}</td>
             <td class="actions">
               <router-link :to="`/transactions/${transaction.id}`" class="btn btn-sm">Dettagli</router-link>
@@ -113,16 +113,16 @@
         </div>
         <div class="summary-card">
           <h3>Totale Acquisti</h3>
-          <p class="summary-value">€ {{ totalPurchases !== undefined ? totalPurchases.toFixed(2) : '0.00' }}</p>
+          <p class="summary-value">€ {{ formatCost(totalPurchases) }}</p>
         </div>
         <div class="summary-card">
           <h3>Totale Vendite</h3>
-          <p class="summary-value">€ {{ totalSales !== undefined ? totalSales.toFixed(2) : '0.00' }}</p>
+          <p class="summary-value">€ {{ formatCost(totalSales) }}</p>
         </div>
         <div class="summary-card">
           <h3>Bilancio</h3>
           <p class="summary-value" :class="{ 'positive': totalSales - totalPurchases > 0, 'negative': totalSales - totalPurchases < 0 }">
-            € {{ (totalSales - totalPurchases) !== undefined ? (totalSales - totalPurchases).toFixed(2) : '0.00' }}
+            € {{ formatCost(totalSales - totalPurchases) }}
           </p>
         </div>
       </div>
@@ -155,7 +155,7 @@ export default {
       
       // Filtra per tipo
       if (this.typeFilter) {
-        filtered = filtered.filter(t => t.transaction_type === this.typeFilter);
+        filtered = filtered.filter(t => t.transactionType === this.typeFilter);
       }
       
       // Filtra per stato
@@ -180,13 +180,13 @@ export default {
     },
     totalPurchases() {
       return this.filteredTransactions
-        .filter(t => t.transaction_type === 'purchase' && t.status !== 'cancelled')
-        .reduce((sum, t) => sum + t.total_amount, 0);
+        .filter(t => t.transactionType === 'purchase' && t.status !== 'cancelled')
+        .reduce((sum, t) => sum + (t.totalAmount || 0), 0);
     },
     totalSales() {
       return this.filteredTransactions
-        .filter(t => t.transaction_type === 'sale' && t.status !== 'cancelled')
-        .reduce((sum, t) => sum + t.total_amount, 0);
+        .filter(t => t.transactionType === 'sale' && t.status !== 'cancelled')
+        .reduce((sum, t) => sum + (t.totalAmount || 0), 0);
     }
   },
   created() {
@@ -280,6 +280,12 @@ export default {
         default:
           return '';
       }
+    },
+    
+    formatCost(cost) {
+      if (cost === undefined || cost === null) return '0.00';
+      const numCost = typeof cost === 'number' ? cost : parseFloat(cost);
+      return isNaN(numCost) ? '0.00' : numCost.toFixed(2);
     },
     
     async updateStatus(id, newStatus) {

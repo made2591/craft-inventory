@@ -13,9 +13,20 @@ export default function inventoryRoutes(pool, toCamelCase) {
   // GET /api/inventory - Ottieni tutti gli articoli in inventario
   router.get('/', async (req, res) => {
     try {
-      const result = await pool.query(
-        'SELECT i.*, p.name as model_name FROM inventory_items i JOIN product_models p ON i.model_id = p.id ORDER BY i.created_at DESC'
-      );
+      const { modelId } = req.query;
+      
+      let query = 'SELECT i.*, p.name as model_name, p.sku as model_sku FROM inventory_items i JOIN product_models p ON i.model_id = p.id';
+      const params = [];
+      
+      // Filtra per modelId se specificato
+      if (modelId) {
+        query += ' WHERE i.model_id = $1';
+        params.push(modelId);
+      }
+      
+      query += ' ORDER BY i.created_at DESC';
+      
+      const result = await pool.query(query, params);
 
       // Converti i dati in camelCase
       const items = toCamelCase(result.rows);
@@ -50,7 +61,7 @@ export default function inventoryRoutes(pool, toCamelCase) {
     try {
       const { id } = req.params;
       const result = await pool.query(
-        'SELECT i.*, p.name as model_name FROM inventory_items i JOIN product_models p ON i.model_id = p.id WHERE i.id = $1',
+        'SELECT i.*, p.name as model_name, p.sku as model_sku FROM inventory_items i JOIN product_models p ON i.model_id = p.id WHERE i.id = $1',
         [id]
       );
 

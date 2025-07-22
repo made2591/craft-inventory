@@ -62,7 +62,12 @@
         
         <div class="detail-row">
           <div class="detail-label">Fornitore:</div>
-          <div class="detail-value">{{ supplierName }}</div>
+          <div class="detail-value">
+            <router-link v-if="supplier && supplier.id" :to="`/suppliers/${supplier.id}/view`" class="supplier-link">
+              {{ supplierName }}
+            </router-link>
+            <span v-else>{{ supplierName }}</span>
+          </div>
         </div>
         
         <div class="detail-row">

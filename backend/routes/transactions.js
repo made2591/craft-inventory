@@ -221,5 +221,81 @@ export default function transactionsRoutes(pool, toCamelCase) {
     }
   });
 
+  // DELETE /api/transactions/:id - Elimina una transazione
+  router.delete('/:id', async (req, res) => {
+    try {
+      const { id } = req.params;
+      
+      // Start a transaction
+      await pool.query('BEGIN');
+      
+      // Prima otteniamo i dettagli della transazione e dei suoi elementi
+      const transactionResult = await pool.query('SELECT * FROM transactions WHERE id = $1', [id]);
+      
+      if (transactionResult.rows.length === 0) {
+        await pool.query('ROLLBACK');
+        return res.status(404).json({ error: 'Transaction not found' });
+      }
+      
+      const transaction = transactionResult.rows[0];
+      
+      // Otteniamo gli elementi della transazione
+      const itemsResult = await pool.query('SELECT * FROM transaction_items WHERE transaction_id = $1', [id]);
+      const items = itemsResult.rows;
+      
+      // Ripristina l'inventario in base al tipo di transazione
+      for (const item of items) {
+        // Converti la quantità in un numero intero
+        const quantity = parseInt(item.quantity, 10);
+        
+        if (transaction.transaction_type === 'purchase' && item.material_id) {
+          // Per gli acquisti, diminuisci lo stock del materiale
+          await pool.query(
+            'UPDATE materials SET current_stock = current_stock - $1 WHERE id = $2',
+            [quantity, item.material_id]
+          );
+        } else if (transaction.transaction_type === 'sale' && item.product_model_id) {
+          // Per le vendite, aumenta lo stock dell'inventario
+          // Trova un articolo di inventario per questo modello
+          const inventoryResult = await pool.query(
+            'SELECT id FROM inventory_items WHERE model_id = $1 LIMIT 1',
+            [item.product_model_id]
+          );
+          
+          if (inventoryResult.rows.length > 0) {
+            // Aggiorna l'articolo di inventario trovato
+            await pool.query(
+              'UPDATE inventory_items SET quantity = quantity + $1 WHERE id = $2',
+              [quantity, inventoryResult.rows[0].id]
+            );
+          } else {
+            // Se non esiste un articolo di inventario per questo modello, creane uno nuovo
+            const inventoryId = uuidv4();
+            const now = new Date();
+            
+            await pool.query(
+              'INSERT INTO inventory_items (id, model_id, quantity, created_at, updated_at) VALUES ($1, $2, $3, $4, $5)',
+              [inventoryId, item.product_model_id, quantity, now, now]
+            );
+          }
+        }
+      }
+      
+      // Elimina gli elementi della transazione
+      await pool.query('DELETE FROM transaction_items WHERE transaction_id = $1', [id]);
+      
+      // Elimina la transazione
+      await pool.query('DELETE FROM transactions WHERE id = $1', [id]);
+      
+      await pool.query('COMMIT');
+      
+      res.status(204).send();
+    } catch (err) {
+      await pool.query('ROLLBACK');
+      console.error('Error deleting transaction:', err);
+      res.status(500).json({ error: 'Internal server error' });
+    }
+  });
+
   return router;
 }
