@@ -1,150 +1,238 @@
 <template>
-  <div class="customers">
-    <h1>{{ $t('customers.title') }}</h1>
-    
-    <div class="actions">
-      <router-link to="/customers/new" class="btn btn-primary">{{ $t('customers.newCustomer') }}</router-link>
-    </div>
-    
-    <!-- Filtri e opzioni di paginazione -->
-    <div class="table-controls">
-      <div class="search-filter">
-        <input 
-          type="text" 
-          v-model="searchQuery" 
-          :placeholder="$t('customers.searchPlaceholder')" 
-          @input="filterCustomers"
-        >
-      </div>
-      
-      <div class="filter-group">
-        <label for="customer-type">{{ $t('customers.filterByType') }}:</label>
-        <select id="customer-type" v-model="typeFilter" @change="filterCustomers">
-          <option value="">{{ $t('common.all') }}</option>
-          <option value="private">{{ $t('customers.private') }}</option>
-          <option value="online">{{ $t('customers.onlineChannels') }}</option>
-          <option value="store">{{ $t('customers.stores') }}</option>
-        </select>
-      </div>
-      
-      <div class="pagination-controls">
-        <label for="itemsPerPage">{{ $t('common.itemsPerPage') }}:</label>
-        <select id="itemsPerPage" v-model="itemsPerPage" @change="updatePagination">
-          <option value="5">5</option>
-          <option value="10">10</option>
-          <option value="20">20</option>
-          <option value="50">50</option>
-        </select>
+  <div class="container">
+    <div class="page-header">
+      <h1 class="text-3xl font-bold text-center">{{ $t('customers.title') }}</h1>
+      <div class="flex justify-center">
+        <router-link to="/customers/new" class="btn btn-primary">
+          <i class="fas fa-plus"></i>
+          {{ $t('customers.newCustomer') }}
+        </router-link>
       </div>
     </div>
     
-    <div v-if="loading" class="loading">
-      {{ $t('common.loading') }}
-    </div>
-    
-    <div v-else-if="error" class="error">
-      {{ error }}
-    </div>
-    
-    <div v-else-if="filteredCustomers.length === 0" class="empty-state">
-      {{ $t('customers.noCustomersFound') }}
-    </div>
-    
-    <div v-else class="customers-list">
-      <table>
-        <thead>
-          <tr>
-            <th @click="sortBy('name')" class="sortable">
-              {{ $t('customers.name') }}
-              <span v-if="sortKey === 'name'" class="sort-icon">
-                {{ sortOrder === 'asc' ? '▲' : '▼' }}
-              </span>
-            </th>
-            <th @click="sortBy('customerType')" class="sortable">
-              {{ $t('customers.type') }}
-              <span v-if="sortKey === 'customerType'" class="sort-icon">
-                {{ sortOrder === 'asc' ? '▲' : '▼' }}
-              </span>
-            </th>
-            <th @click="sortBy('contactPerson')" class="sortable">
-              {{ $t('customers.contact') }}
-              <span v-if="sortKey === 'contactPerson'" class="sort-icon">
-                {{ sortOrder === 'asc' ? '▲' : '▼' }}
-              </span>
-            </th>
-            <th @click="sortBy('email')" class="sortable">
-              {{ $t('customers.email') }}
-              <span v-if="sortKey === 'email'" class="sort-icon">
-                {{ sortOrder === 'asc' ? '▲' : '▼' }}
-              </span>
-            </th>
-            <th @click="sortBy('phone')" class="sortable">
-              {{ $t('customers.phone') }}
-              <span v-if="sortKey === 'phone'" class="sort-icon">
-                {{ sortOrder === 'asc' ? '▲' : '▼' }}
-              </span>
-            </th>
-            <!-- Removed actions column header -->
-            <th>{{ $t('common.actions') }}</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr v-for="customer in paginatedCustomers" :key="customer.id" style="position:relative;">
-            <td>
-              <router-link :to="`/customers/${customer.id}/view`" class="customer-link">
-                {{ customer.name }}
-              </router-link>
-            </td>
-            <td>{{ formatCustomerType(customer.customerType) }}</td>
-            <td>{{ customer.contactPerson || 'N/A' }}</td>
-            <td>{{ customer.email || 'N/A' }}</td>
-            <td>{{ customer.phone || 'N/A' }}</td>
-            <td style="position:relative;">
-              <div class="actions-menu-row" @mousedown.stop @click.stop>
-                <button @mousedown.stop @click.stop="toggleMenu(customer.id)" class="btn btn-sm btn-menu">&#8942;</button>
-                <div v-if="openMenuId === customer.id" class="menu-dropdown" @mousedown.stop @click.stop>
-                  <button @click="viewCustomer(customer.id)" class="btn btn-sm btn-view">{{ $t('common.view') }}</button>
-                  <button @click="editCustomer(customer.id)" class="btn btn-sm btn-edit">{{ $t('common.edit') }}</button>
-                  <button @click="deleteCustomer(customer.id)" class="btn btn-sm btn-danger">{{ $t('common.delete') }}</button>
-                </div>
-              </div>
-            </td>
-          </tr>
-        </tbody>
-      </table>
-      
-      <!-- Paginazione -->
-      <div class="pagination">
-        <button 
-          @click="goToPage(currentPage - 1)" 
-          :disabled="currentPage === 1" 
-          class="btn btn-sm"
-        >
-          {{ $t('common.previous') }}
-        </button>
-        
-        <div class="page-numbers">
-          <button 
-            v-for="page in totalPages" 
-            :key="page" 
-            @click="goToPage(page)" 
-            :class="['btn', 'btn-sm', currentPage === page ? 'btn-active' : '']"
-          >
-            {{ page }}
-          </button>
+    <!-- Controls Card -->
+    <div class="card">
+      <div class="grid grid-auto gap-4">
+        <div class="form-group" style="margin-bottom: 0;">
+          <div class="flex items-center gap-2">
+            <i class="fas fa-search text-muted"></i>
+            <input 
+              type="text" 
+              v-model="searchQuery" 
+              :placeholder="$t('customers.searchPlaceholder')" 
+              @input="filterCustomers"
+              class="form-input"
+              style="margin: 0;"
+            >
+          </div>
         </div>
         
-        <button 
-          @click="goToPage(currentPage + 1)" 
-          :disabled="currentPage === totalPages" 
-          class="btn btn-sm"
-        >
-          {{ $t('common.next') }}
-        </button>
+        <div class="form-group" style="margin-bottom: 0;">
+          <div class="flex items-center gap-2">
+            <i class="fas fa-filter text-muted"></i>
+            <select id="customer-type" v-model="typeFilter" @change="filterCustomers" class="form-select">
+              <option value="">{{ $t('common.all') }}</option>
+              <option value="private">{{ $t('customers.private') }}</option>
+              <option value="online">{{ $t('customers.onlineChannels') }}</option>
+              <option value="store">{{ $t('customers.stores') }}</option>
+            </select>
+          </div>
+        </div>
+        
+        <div class="form-group" style="margin-bottom: 0;">
+          <div class="flex items-center gap-2">
+            <label for="itemsPerPage" class="form-label text-sm" style="margin: 0;">{{ $t('common.itemsPerPage') }}:</label>
+            <select id="itemsPerPage" v-model="itemsPerPage" @change="updatePagination" class="form-select">
+              <option value="5">5</option>
+              <option value="10">10</option>
+              <option value="20">20</option>
+              <option value="50">50</option>
+            </select>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <div v-if="loading" class="card text-center">
+      <div class="loading">
+        <div class="spinner"></div>
+        {{ $t('common.loading') }}
+      </div>
+    </div>
+    
+    <div v-else-if="error" class="card text-center">
+      <div class="text-danger">
+        <i class="fas fa-exclamation-triangle"></i>
+        {{ error }}
+      </div>
+    </div>
+    
+    <div v-else-if="filteredCustomers.length === 0" class="card text-center">
+      <div class="text-muted">
+        <i class="fas fa-users text-2xl"></i>
+        <p class="text-lg">{{ $t('customers.noCustomersFound') }}</p>
+      </div>
+    </div>
+    
+    <div v-else class="customers-content">
+      <!-- Desktop Table View -->
+      <div class="table-responsive hidden-mobile">
+        <table class="table">
+          <thead>
+            <tr>
+              <th @click="sortBy('name')" class="sortable cursor-pointer">
+                {{ $t('customers.name') }}
+                <i v-if="sortKey === 'name'" :class="sortOrder === 'asc' ? 'fas fa-sort-up' : 'fas fa-sort-down'" class="ml-1"></i>
+              </th>
+              <th @click="sortBy('customerType')" class="sortable cursor-pointer">
+                {{ $t('customers.type') }}
+                <i v-if="sortKey === 'customerType'" :class="sortOrder === 'asc' ? 'fas fa-sort-up' : 'fas fa-sort-down'" class="ml-1"></i>
+              </th>
+              <th @click="sortBy('contactPerson')" class="sortable cursor-pointer">
+                {{ $t('customers.contact') }}
+                <i v-if="sortKey === 'contactPerson'" :class="sortOrder === 'asc' ? 'fas fa-sort-up' : 'fas fa-sort-down'" class="ml-1"></i>
+              </th>
+              <th @click="sortBy('email')" class="sortable cursor-pointer">
+                {{ $t('customers.email') }}
+                <i v-if="sortKey === 'email'" :class="sortOrder === 'asc' ? 'fas fa-sort-up' : 'fas fa-sort-down'" class="ml-1"></i>
+              </th>
+              <th @click="sortBy('phone')" class="sortable cursor-pointer">
+                {{ $t('customers.phone') }}
+                <i v-if="sortKey === 'phone'" :class="sortOrder === 'asc' ? 'fas fa-sort-up' : 'fas fa-sort-down'" class="ml-1"></i>
+              </th>
+              <th>{{ $t('common.actions') }}</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-for="customer in paginatedCustomers" :key="customer.id">
+              <td>
+                <router-link :to="`/customers/${customer.id}/view`" class="text-primary font-medium">
+                  {{ customer.name }}
+                </router-link>
+              </td>
+              <td>
+                <span :class="getCustomerTypeClass(customer.customerType)" class="badge">
+                  <i :class="getCustomerTypeIcon(customer.customerType)"></i>
+                  {{ formatCustomerType(customer.customerType) }}
+                </span>
+              </td>
+              <td>{{ customer.contactPerson || 'N/A' }}</td>
+              <td>
+                <a v-if="customer.email" :href="`mailto:${customer.email}`" class="text-primary">
+                  {{ customer.email }}
+                </a>
+                <span v-else class="text-muted">N/A</span>
+              </td>
+              <td>
+                <a v-if="customer.phone" :href="`tel:${customer.phone}`" class="text-primary">
+                  {{ customer.phone }}
+                </a>
+                <span v-else class="text-muted">N/A</span>
+              </td>
+              <td>
+                <div class="flex gap-2">
+                  <button @click="viewCustomer(customer.id)" class="btn btn-sm btn-secondary" title="View">
+                    <i class="fas fa-eye"></i>
+                  </button>
+                  <button @click="editCustomer(customer.id)" class="btn btn-sm btn-primary" title="Edit">
+                    <i class="fas fa-edit"></i>
+                  </button>
+                  <button @click="deleteCustomer(customer.id)" class="btn btn-sm btn-danger" title="Delete">
+                    <i class="fas fa-trash"></i>
+                  </button>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Mobile Card View -->
+      <div class="visible-mobile">
+        <div class="grid gap-4">
+          <div v-for="customer in paginatedCustomers" :key="customer.id" class="card">
+            <div class="flex justify-between items-start mb-3">
+              <div>
+                <router-link :to="`/customers/${customer.id}/view`" class="text-lg font-bold text-primary">
+                  {{ customer.name }}
+                </router-link>
+                <p class="text-sm text-muted">{{ customer.contactPerson || 'No contact person' }}</p>
+              </div>
+              <span :class="getCustomerTypeClass(customer.customerType)" class="badge">
+                <i :class="getCustomerTypeIcon(customer.customerType)"></i>
+                {{ formatCustomerType(customer.customerType) }}
+              </span>
+            </div>
+            
+            <div class="grid gap-3 mb-4">
+              <div v-if="customer.email">
+                <p class="text-xs text-muted font-medium">{{ $t('customers.email') }}</p>
+                <a :href="`mailto:${customer.email}`" class="text-primary font-medium">
+                  <i class="fas fa-envelope mr-1"></i>
+                  {{ customer.email }}
+                </a>
+              </div>
+              <div v-if="customer.phone">
+                <p class="text-xs text-muted font-medium">{{ $t('customers.phone') }}</p>
+                <a :href="`tel:${customer.phone}`" class="text-primary font-medium">
+                  <i class="fas fa-phone mr-1"></i>
+                  {{ customer.phone }}
+                </a>
+              </div>
+              <div v-if="customer.address">
+                <p class="text-xs text-muted font-medium">{{ $t('customers.address') }}</p>
+                <p class="font-medium">{{ customer.address }}</p>
+              </div>
+            </div>
+            
+            <div class="btn-group">
+              <button @click="viewCustomer(customer.id)" class="btn btn-secondary">
+                <i class="fas fa-eye"></i>
+                {{ $t('common.view') }}
+              </button>
+              <button @click="editCustomer(customer.id)" class="btn btn-primary">
+                <i class="fas fa-edit"></i>
+                {{ $t('common.edit') }}
+              </button>
+              <button @click="deleteCustomer(customer.id)" class="btn btn-danger">
+                <i class="fas fa-trash"></i>
+                {{ $t('common.delete') }}
+              </button>
+            </div>
+          </div>
+        </div>
       </div>
       
-      <div class="pagination-info">
-        {{ $t('common.paginationInfo', { start: startIndex + 1, end: endIndex, total: filteredCustomers.length }) }}
+      <!-- Pagination -->
+      <div class="card">
+        <div class="flex flex-md-col gap-4 justify-between items-center">
+          <div class="flex items-center gap-2">
+            <button @click="goToPage(currentPage - 1)" :disabled="currentPage === 1" class="btn btn-secondary btn-sm">
+              <i class="fas fa-chevron-left"></i>
+              <span class="hidden-mobile">{{ $t('common.previous') }}</span>
+            </button>
+
+            <div class="flex gap-1">
+              <button 
+                v-for="page in visiblePages" 
+                :key="page" 
+                @click="goToPage(page)"
+                :class="['btn', 'btn-sm', currentPage === page ? 'btn-primary' : 'btn-secondary']"
+              >
+                {{ page }}
+              </button>
+            </div>
+
+            <button @click="goToPage(currentPage + 1)" :disabled="currentPage === totalPages" class="btn btn-secondary btn-sm">
+              <span class="hidden-mobile">{{ $t('common.next') }}</span>
+              <i class="fas fa-chevron-right"></i>
+            </button>
+          </div>
+
+          <div class="text-sm text-muted text-center">
+            {{ $t('common.paginationInfo', { start: startIndex + 1, end: endIndex, total: filteredCustomers.length }) }}
+          </div>
+        </div>
       </div>
     </div>
   </div>
@@ -183,6 +271,24 @@ export default {
     },
     paginatedCustomers() {
       return this.filteredCustomers.slice(this.startIndex, this.endIndex);
+    },
+    visiblePages() {
+      const pages = [];
+      const maxVisible = window.innerWidth < 768 ? 3 : 7;
+      const half = Math.floor(maxVisible / 2);
+      
+      let start = Math.max(1, this.currentPage - half);
+      let end = Math.min(this.totalPages, start + maxVisible - 1);
+      
+      if (end - start + 1 < maxVisible) {
+        start = Math.max(1, end - maxVisible + 1);
+      }
+      
+      for (let i = start; i <= end; i++) {
+        pages.push(i);
+      }
+      
+      return pages;
     }
   },
   created() {
@@ -288,6 +394,32 @@ export default {
       }
     },
     
+    getCustomerTypeClass(type) {
+      switch (type) {
+        case 'private':
+          return 'badge-info';
+        case 'online':
+          return 'badge-success';
+        case 'store':
+          return 'badge-warning';
+        default:
+          return 'badge-secondary';
+      }
+    },
+    
+    getCustomerTypeIcon(type) {
+      switch (type) {
+        case 'private':
+          return 'fas fa-user';
+        case 'online':
+          return 'fas fa-globe';
+        case 'store':
+          return 'fas fa-store';
+        default:
+          return 'fas fa-question';
+      }
+    },
+    
     viewCustomer(id) {
       this.$router.push(`/customers/${id}/view`);
     },
@@ -338,230 +470,156 @@ export default {
 </script>
 
 <style scoped>
-.customers {
-  padding: 20px;
+.page-header {
+  margin-bottom: 32px;
+  padding-bottom: 24px;
+  border-bottom: 2px solid #f1f3f4;
 }
 
-h1 {
-  margin-bottom: 20px;
-}
-
-.actions {
-  margin-bottom: 20px;
-}
-
-.table-controls {
+.customers-content {
   display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 15px;
-  background-color: #f8f9fa;
-  padding: 15px;
-  border-radius: 4px;
-  flex-wrap: wrap;
-  gap: 10px;
+  flex-direction: column;
+  gap: 24px;
 }
 
-.search-filter input {
-  padding: 8px;
-  border: 1px solid #ddd;
-  border-radius: 4px;
-  width: 250px;
-}
-
-.filter-group {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-.filter-group label {
-  font-weight: bold;
-  margin-bottom: 0;
-}
-
-.filter-group select {
-  padding: 6px;
-  border-radius: 4px;
-  border: 1px solid #ddd;
-}
-
-.pagination-controls {
-  display: flex;
-  align-items: center;
-}
-
-.pagination-controls label {
-  margin-right: 8px;
-}
-
-.pagination-controls select {
-  padding: 6px;
-  border: 1px solid #ddd;
-  border-radius: 4px;
-}
-
-.btn {
-  display: inline-block;
-  padding: 8px 16px;
-  border-radius: 4px;
-  text-decoration: none;
+.cursor-pointer {
   cursor: pointer;
-  border: none;
-  font-size: 14px;
 }
 
-.btn-primary {
-  background-color: #42b983;
-  color: white;
+.sortable:hover {
+  background-color: #f8f9fa !important;
 }
 
-.btn-sm {
-  padding: 4px 8px;
-  font-size: 12px;
-  height: 28px; /* Altezza fissa per i pulsanti */
-  line-height: 20px; /* Allineamento verticale del testo */
+.ml-1 {
+  margin-left: 4px;
 }
 
-.btn-danger {
-  background-color: #dc3545;
-  color: white;
+.mr-1 {
+  margin-right: 4px;
 }
 
-.btn-view {
-  background-color: #17a2b8;
-  color: white;
+/* Badge styles for customer types */
+.badge-info {
+  background-color: #d1ecf1;
+  color: #0c5460;
+  border: 1px solid #bee5eb;
 }
 
-.btn-edit {
-  background-color: #3498db;
-  color: white;
+.badge-success {
+  background-color: #d4edda;
+  color: #155724;
+  border: 1px solid #c3e6cb;
 }
 
-.btn-active {
-  background-color: #42b983;
-  color: white;
+.badge-warning {
+  background-color: #fff3cd;
+  color: #856404;
+  border: 1px solid #ffeaa7;
 }
 
-.customer-link {
-  color: #3498db;
+.badge-secondary {
+  background-color: #e2e3e5;
+  color: #383d41;
+  border: 1px solid #d6d8db;
+}
+
+/* Mobile specific styles */
+@media (max-width: 768px) {
+  .page-header h1 {
+    font-size: 24px;
+    margin-bottom: 16px;
+  }
+  
+  .customers-content {
+    gap: 16px;
+  }
+  
+  .card {
+    padding: 16px;
+  }
+  
+  .btn-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  
+  .btn-group .btn {
+    width: 100%;
+    justify-content: center;
+  }
+  
+  .grid-auto {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 480px) {
+  .page-header {
+    margin-bottom: 20px;
+    padding-bottom: 16px;
+  }
+  
+  .page-header h1 {
+    font-size: 20px;
+  }
+}
+
+/* Loading animation */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.card {
+  animation: fadeIn 0.3s ease-out;
+}
+
+/* Hover effects */
+.card:hover {
+  transform: translateY(-2px);
+}
+
+.btn:hover {
+  transform: translateY(-1px);
+}
+
+/* Focus states for accessibility */
+.btn:focus,
+.form-input:focus,
+.form-select:focus {
+  outline: 2px solid #42b983;
+  outline-offset: 2px;
+}
+
+/* Link styles */
+a.text-primary {
   text-decoration: none;
 }
 
-.customer-link:hover {
+a.text-primary:hover {
   text-decoration: underline;
 }
 
-.loading, .error, .empty-state {
-  text-align: center;
-  padding: 20px;
-  background-color: #f8f9fa;
-  border-radius: 4px;
+/* Smooth transitions */
+* {
+  transition: all 0.2s ease;
 }
 
-.error {
-  color: #dc3545;
-}
-
-table {
-  width: 100%;
-  border-collapse: collapse;
-  margin-bottom: 20px;
-}
-
-th, td {
-  padding: 8px 12px;
-  text-align: left;
-  border-bottom: 1px solid #ddd;
-  vertical-align: middle; /* Allineamento verticale al centro */
-  height: 44px; /* Altezza fissa per tutte le celle */
-}
-
-th {
-  background-color: #f8f9fa;
-  font-weight: bold;
-}
-
-th.sortable {
-  cursor: pointer;
-  position: relative;
-}
-
-th.sortable:hover {
-  background-color: #e9ecef;
-}
-
-.sort-icon {
-  margin-left: 5px;
-  font-size: 12px;
-}
-
-.actions {
-  display: flex;
-  gap: 8px;
-  margin: 0; /* Reset del margine */
-  padding: 0; /* Reset del padding */
-  justify-content: center; /* Centra orizzontalmente */
-  align-items: center; /* Allineamento verticale */
-}
-
-.pagination {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  margin-top: 20px;
-  margin-bottom: 10px;
-}
-
-.page-numbers {
-  display: flex;
-  gap: 5px;
-  margin: 0 10px;
-}
-
-.pagination-info {
-  text-align: center;
-  color: #6c757d;
-  font-size: 14px;
-}
-
-.actions-menu-row {
-  position: relative;
-}
-
-.btn-menu {
-  background-color: transparent;
-  color: #333;
-  border: none;
-  cursor: pointer;
-  padding: 0;
-  font-size: 16px;
-}
-
-.menu-dropdown {
-  position: absolute;
-  top: 100%;
-  right: 0;
-  background-color: white;
-  border: 1px solid #ddd;
-  border-radius: 4px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  z-index: 100;
-  display: flex;
-  flex-direction: column;
-  gap: 0;
-}
-
-.menu-dropdown button {
-  padding: 10px 15px;
-  text-align: left;
-  border: none;
-  cursor: pointer;
-  width: 100%;
-  font-size: 14px;
-}
-
-.menu-dropdown button:hover {
-  background-color: #f1f1f1;
+/* Print styles */
+@media print {
+  .btn, .pagination, .page-header .flex {
+    display: none !important;
+  }
+  
+  .card {
+    box-shadow: none;
+    border: 1px solid #ddd;
+  }
+  
+  .badge {
+    border: 1px solid #333 !important;
+    color: #333 !important;
+  }
 }
 </style>
