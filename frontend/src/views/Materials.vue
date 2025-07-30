@@ -123,17 +123,10 @@
               </td>
               <td>{{ material.minStockLevel ? $formatQuantity(material.minStockLevel) : 'N/A' }}</td>
               <td>
-                <div class="flex gap-2">
-                  <button @click="viewMaterial(material.id)" class="btn btn-sm btn-secondary" title="View">
-                    <i class="fas fa-eye"></i>
-                  </button>
-                  <button @click="editMaterial(material.id)" class="btn btn-sm btn-primary" title="Edit">
-                    <i class="fas fa-edit"></i>
-                  </button>
-                  <button @click="deleteMaterial(material.id)" class="btn btn-sm btn-danger" title="Delete">
-                    <i class="fas fa-trash"></i>
-                  </button>
-                </div>
+                <ActionMenu 
+                  :actions="getMaterialActions(material)" 
+                  @action="handleMaterialAction($event, material)"
+                />
               </td>
             </tr>
           </tbody>
@@ -178,19 +171,11 @@
               </div>
             </div>
             
-            <div class="btn-group">
-              <button @click="viewMaterial(material.id)" class="btn btn-secondary">
-                <i class="fas fa-eye"></i>
-                {{ $t('common.view') }}
-              </button>
-              <button @click="editMaterial(material.id)" class="btn btn-primary">
-                <i class="fas fa-edit"></i>
-                {{ $t('common.edit') }}
-              </button>
-              <button @click="deleteMaterial(material.id)" class="btn btn-danger">
-                <i class="fas fa-trash"></i>
-                {{ $t('common.delete') }}
-              </button>
+            <div class="mobile-actions">
+              <ActionMenu 
+                :actions="getMaterialActions(material)" 
+                @action="handleMaterialAction($event, material)"
+              />
             </div>
           </div>
         </div>
@@ -233,8 +218,12 @@
 
 <script>
 import materialService from '../services/materialService';
+import ActionMenu from '../components/ActionMenu.vue';
 
 export default {
+  components: {
+    ActionMenu
+  },
   name: 'MaterialsView',
   data() {
     return {
@@ -436,6 +425,64 @@ export default {
       this.openMenuId = null;
     },
 
+    getMaterialActions(material) {
+      return [
+        {
+          key: 'view',
+          label: this.$t('common.view'),
+          icon: 'fas fa-eye',
+          variant: 'default',
+          tooltip: 'View material details'
+        },
+        {
+          key: 'edit',
+          label: this.$t('common.edit'),
+          icon: 'fas fa-edit',
+          variant: 'primary',
+          tooltip: 'Edit material'
+        },
+        {
+          key: 'duplicate',
+          label: this.$t('common.duplicate'),
+          icon: 'fas fa-copy',
+          variant: 'default',
+          tooltip: 'Duplicate material'
+        },
+        {
+          key: 'delete',
+          label: this.$t('common.delete'),
+          icon: 'fas fa-trash',
+          variant: 'danger',
+          tooltip: 'Delete material'
+        }
+      ];
+    },
+
+    handleMaterialAction(actionKey, material) {
+      switch (actionKey) {
+        case 'view':
+          this.viewMaterial(material.id);
+          break;
+        case 'edit':
+          this.editMaterial(material.id);
+          break;
+        case 'duplicate':
+          this.duplicateMaterial(material);
+          break;
+        case 'delete':
+          this.deleteMaterial(material.id);
+          break;
+      }
+    },
+
+    duplicateMaterial(material) {
+      // Navigate to create form with pre-filled data
+      this.$router.push({
+        path: '/materials/new',
+        query: { duplicate: material.id }
+      });
+    },
+
     async refreshMaterials() {
       await this.fetchMaterials();
     },
@@ -572,9 +619,17 @@ export default {
   transition: all 0.2s ease;
 }
 
+/* Mobile Actions */
+.mobile-actions {
+  display: flex;
+  justify-content: flex-end;
+  padding-top: 12px;
+  border-top: 1px solid #e5e7eb;
+}
+
 /* Print styles */
 @media print {
-  .btn, .pagination, .page-header .flex {
+  .btn, .pagination, .page-header .flex, .mobile-actions {
     display: none !important;
   }
   

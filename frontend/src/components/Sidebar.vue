@@ -232,10 +232,25 @@ export default {
     },
     
     checkMobile() {
+      const wasMobile = this.isMobile;
       this.isMobile = window.innerWidth <= 768;
+      
+      // Auto-collapse sidebar on mobile
+      if (this.isMobile && !wasMobile) {
+        this.isCollapsed = true;
+        localStorage.setItem('sidebarCollapsed', true);
+      } else if (!this.isMobile && wasMobile) {
+        // Restore previous desktop state
+        const savedState = localStorage.getItem('sidebarCollapsed');
+        this.isCollapsed = savedState === 'true';
+      }
+      
       if (!this.isMobile && this.isMobileMenuOpen) {
         this.closeMobileMenu();
       }
+      
+      // Emit sidebar state change
+      this.$emit('sidebar-toggle', this.isCollapsed);
     },
     
     handleResize() {
@@ -313,7 +328,6 @@ export default {
 }
 
 .mobile-menu-btn:hover {
-  transform: translateY(-2px);
   box-shadow: 0 6px 20px rgba(66, 185, 131, 0.4);
 }
 
@@ -382,6 +396,7 @@ export default {
   padding: 20px;
   border-bottom: 1px solid rgba(255, 255, 255, 0.1);
   background: rgba(0, 0, 0, 0.1);
+  min-height: 80px;
 }
 
 .logo {
@@ -391,10 +406,12 @@ export default {
   color: #fff;
   text-decoration: none;
   transition: all 0.3s ease;
+  flex: 1;
+  min-width: 0;
 }
 
 .logo:hover {
-  transform: translateX(2px);
+  opacity: 0.9;
 }
 
 .logo-icon {
@@ -435,11 +452,16 @@ export default {
   padding: 8px;
   border-radius: 8px;
   transition: all 0.3s ease;
+  flex-shrink: 0;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .toggle-btn:hover {
   background: rgba(255, 255, 255, 0.2);
-  transform: scale(1.1);
 }
 
 /* Sidebar Content */
@@ -535,7 +557,6 @@ export default {
 
 .menu-item:hover {
   background: rgba(255, 255, 255, 0.1);
-  transform: translateX(4px);
 }
 
 .menu-item.router-link-active {
@@ -681,6 +702,11 @@ export default {
   
   .sidebar.collapsed {
     width: 280px;
+    transform: translateX(-100%);
+  }
+  
+  .sidebar.collapsed.mobile-open {
+    transform: translateX(0);
   }
   
   .desktop-only {
@@ -696,8 +722,9 @@ export default {
     border-radius: 0;
   }
   
-  .menu-item:hover {
-    transform: none;
+  .sidebar-header {
+    padding: 16px 20px;
+    min-height: 70px;
   }
 }
 

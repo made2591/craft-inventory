@@ -157,9 +157,10 @@
             <td>{{ $formatQuantity(material.current_stock) }} {{ material.unit_of_measure }}</td>
             <td>{{ $formatQuantity(material.min_stock_level) }} {{ material.unit_of_measure }}</td>
             <td>
-              <router-link :to="`/materials/${material.id}`" class="btn btn-sm">
-                {{ $t('common.edit') }}
-              </router-link>
+              <ActionMenu 
+                :actions="getMaterialActions(material)" 
+                @action="handleMaterialAction($event, material)"
+              />
             </td>
           </tr>
         </tbody>
@@ -171,9 +172,13 @@
 <script>
 import api from '../services/api';
 import Chart from 'chart.js/auto';
+import ActionMenu from '../components/ActionMenu.vue';
 
 export default {
   name: 'HomeView',
+  components: {
+    ActionMenu
+  },
   data() {
     return {
       stats: {
@@ -894,6 +899,46 @@ export default {
       });
       } catch (error) {
         console.error('Error initializing sales volume chart:', error);
+      }
+    },
+
+    getMaterialActions(material) {
+      return [
+        {
+          key: 'view',
+          label: this.$t('common.view'),
+          icon: 'fas fa-eye',
+          variant: 'default',
+          tooltip: 'View material details'
+        },
+        {
+          key: 'edit',
+          label: this.$t('common.edit'),
+          icon: 'fas fa-edit',
+          variant: 'primary',
+          tooltip: 'Edit material'
+        },
+        {
+          key: 'restock',
+          label: this.$t('materials.restock'),
+          icon: 'fas fa-plus-circle',
+          variant: 'warning',
+          tooltip: 'Add stock for this material'
+        }
+      ];
+    },
+
+    handleMaterialAction(actionKey, material) {
+      switch (actionKey) {
+        case 'view':
+          this.$router.push(`/materials/${material.id}/view`);
+          break;
+        case 'edit':
+          this.$router.push(`/materials/${material.id}/edit`);
+          break;
+        case 'restock':
+          this.$router.push(`/materials/${material.id}/restock`);
+          break;
       }
     }
   }

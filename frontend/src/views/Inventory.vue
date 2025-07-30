@@ -1,134 +1,216 @@
 <template>
-  <div class="inventory">
-    <h1>{{ $t('inventory.title') }}</h1>
-
-    <div class="actions">
-      <router-link to="/inventory/new" class="btn btn-primary">{{ $t('inventory.newItem') }}</router-link>
-    </div>
-
-    <!-- Filtri e opzioni di paginazione -->
-    <div class="table-controls">
-      <div class="search-filter">
-        <input type="text" v-model="searchQuery" :placeholder="$t('inventory.searchPlaceholder')" @input="filterItems">
-      </div>
-
-      <div class="filter-group">
-        <label for="model-filter">{{ $t('inventory.filterByModel') }}:</label>
-        <select id="model-filter" v-model="modelFilter" @change="filterItems">
-          <option value="">{{ $t('inventory.allModels') }}</option>
-          <option v-for="model in models" :key="model.id" :value="model.id">
-            {{ model.name }}
-          </option>
-        </select>
-      </div>
-
-      <div class="pagination-controls">
-        <label for="itemsPerPage">{{ $t('common.itemsPerPage') }}:</label>
-        <select id="itemsPerPage" v-model="itemsPerPage" @change="updatePagination">
-          <option value="5">5</option>
-          <option value="10">10</option>
-          <option value="20">20</option>
-          <option value="50">50</option>
-        </select>
+  <div class="container">
+    <div class="page-header">
+      <h1 class="text-3xl font-bold text-center">
+        <i class="fas fa-warehouse mr-2"></i>
+        {{ $t('inventory.title') }}
+      </h1>
+      <div class="flex justify-center">
+        <router-link to="/inventory/new" class="btn btn-primary">
+          <i class="fas fa-plus"></i>
+          {{ $t('inventory.newItem') }}
+        </router-link>
       </div>
     </div>
-
-    <div v-if="loading" class="loading">
-      {{ $t('common.loading') }}
-    </div>
-
-    <div v-else-if="error" class="error">
-      {{ error }}
-    </div>
-
-    <div v-else-if="filteredItems.length === 0" class="empty-state">
-      {{ $t('inventory.noItemsFound') }}
-    </div>
-
-    <div v-else class="inventory-list">
-      <table>
-        <thead>
-          <tr>
-            <th @click="sortBy('modelSku')" class="sortable">
-              {{ $t('inventory.modelSku') }}
-              <span v-if="sortKey === 'modelSku'" class="sort-icon">
-                {{ sortOrder === 'asc' ? '▲' : '▼' }}
-              </span>
-            </th>
-            <th @click="sortBy('modelName')" class="sortable">
-              {{ $t('inventory.model') }}
-              <span v-if="sortKey === 'modelName'" class="sort-icon">
-                {{ sortOrder === 'asc' ? '▲' : '▼' }}
-              </span>
-            </th>
-            <th @click="sortBy('quantity')" class="sortable">
-              {{ $t('inventory.quantity') }}
-              <span v-if="sortKey === 'quantity'" class="sort-icon">
-                {{ sortOrder === 'asc' ? '▲' : '▼' }}
-              </span>
-            </th>
-            <th @click="sortBy('productionDate')" class="sortable">
-              {{ $t('inventory.productionDate') }}
-              <span v-if="sortKey === 'productionDate'" class="sort-icon">
-                {{ sortOrder === 'asc' ? '▲' : '▼' }}
-              </span>
-            </th>
-            <th @click="sortBy('notes')" class="sortable">
-              {{ $t('inventory.notes') }}
-              <span v-if="sortKey === 'notes'" class="sort-icon">
-                {{ sortOrder === 'asc' ? '▲' : '▼' }}
-              </span>
-            </th>
-            <!-- Removed actions column header -->
-            <th>{{ $t('common.actions') }}</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr v-for="item in paginatedItems" :key="item.id" style="position:relative;">
-            <td>
-              <router-link v-if="item.modelSku" :to="`/models/${item.modelId}/view`" class="sku-link">
-                {{ item.modelSku }}
-              </router-link>
-              <span v-else>N/A</span>
-            </td>
-            <td>{{ item.modelName || 'N/A' }}</td>
-            <td>{{ $formatQuantity(item.quantity) }}</td>
-            <td>{{ formatDate(item.productionDate) }}</td>
-            <td>{{ item.notes || 'N/A' }}</td>
-            <td style="position:relative;">
-              <div class="actions-menu-row" @mousedown.stop @click.stop>
-                <button @mousedown.stop @click.stop="toggleMenu(item.id)" class="btn btn-sm btn-menu">&#8942;</button>
-                <div v-if="openMenuId === item.id" class="menu-dropdown" @mousedown.stop @click.stop>
-                  <button @click="viewItem(item.id)" class="btn btn-sm btn-view">{{ $t('common.view') }}</button>
-                  <button @click="editItem(item.id)" class="btn btn-sm btn-edit">{{ $t('common.edit') }}</button>
-                  <button @click="deleteItem(item.id)" class="btn btn-sm btn-danger">{{ $t('common.delete') }}</button>
-                </div>
-              </div>
-            </td>
-          </tr>
-        </tbody>
-      </table>
-
-      <!-- Paginazione -->
-      <div class="pagination">
-        <button @click="goToPage(currentPage - 1)" :disabled="currentPage === 1" class="btn btn-sm">
-          {{ $t('common.previous') }}
-        </button>
-
-        <div class="page-numbers">
-          <button v-for="page in totalPages" :key="page" @click="goToPage(page)"
-            :class="['btn', 'btn-sm', currentPage === page ? 'btn-active' : '']">
-            {{ page }}
-          </button>
+    
+    <!-- Controls Card -->
+    <div class="card">
+      <div class="grid grid-auto gap-4">
+        <div class="form-group" style="margin-bottom: 0;">
+          <div class="flex items-center gap-2">
+            <i class="fas fa-search text-muted"></i>
+            <input 
+              type="text" 
+              v-model="searchQuery" 
+              :placeholder="$t('inventory.searchPlaceholder')" 
+              @input="filterItems"
+              class="form-input"
+              style="margin: 0;"
+            >
+          </div>
         </div>
+        
+        <div class="form-group" style="margin-bottom: 0;">
+          <div class="flex items-center gap-2">
+            <i class="fas fa-filter text-muted"></i>
+            <select id="model-filter" v-model="modelFilter" @change="filterItems" class="form-select">
+              <option value="">{{ $t('inventory.allModels') }}</option>
+              <option v-for="model in models" :key="model.id" :value="model.id">
+                {{ model.name }}
+              </option>
+            </select>
+          </div>
+        </div>
+        
+        <div class="form-group" style="margin-bottom: 0;">
+          <div class="flex items-center gap-2">
+            <label for="itemsPerPage" class="form-label text-sm" style="margin: 0;">{{ $t('common.itemsPerPage') }}:</label>
+            <select id="itemsPerPage" v-model="itemsPerPage" @change="updatePagination" class="form-select">
+              <option value="5">5</option>
+              <option value="10">10</option>
+              <option value="20">20</option>
+              <option value="50">50</option>
+            </select>
+          </div>
+        </div>
+      </div>
+    </div>
 
-        <button @click="goToPage(currentPage + 1)" :disabled="currentPage === totalPages" class="btn btn-sm">
-          {{ $t('common.next') }}
-        </button>
+    <div v-if="loading" class="card text-center">
+      <div class="loading">
+        <div class="spinner"></div>
+        {{ $t('common.loading') }}
+      </div>
+    </div>
+    
+    <div v-else-if="error" class="card text-center">
+      <div class="text-danger">
+        <i class="fas fa-exclamation-triangle"></i>
+        {{ error }}
+      </div>
+    </div>
+    
+    <div v-else-if="filteredItems.length === 0" class="card text-center">
+      <div class="text-muted">
+        <i class="fas fa-warehouse text-2xl"></i>
+        <p class="text-lg">{{ $t('inventory.noItemsFound') }}</p>
+      </div>
+    </div>
+
+    <div v-else class="inventory-content">
+      <!-- Desktop Table View -->
+      <div class="table-responsive hidden-mobile">
+        <table class="table">
+          <thead>
+            <tr>
+              <th @click="sortBy('modelSku')" class="sortable cursor-pointer">
+                {{ $t('inventory.modelSku') }}
+                <i v-if="sortKey === 'modelSku'" :class="sortOrder === 'asc' ? 'fas fa-sort-up' : 'fas fa-sort-down'" class="ml-1"></i>
+              </th>
+              <th @click="sortBy('modelName')" class="sortable cursor-pointer">
+                {{ $t('inventory.model') }}
+                <i v-if="sortKey === 'modelName'" :class="sortOrder === 'asc' ? 'fas fa-sort-up' : 'fas fa-sort-down'" class="ml-1"></i>
+              </th>
+              <th @click="sortBy('quantity')" class="sortable cursor-pointer">
+                {{ $t('inventory.quantity') }}
+                <i v-if="sortKey === 'quantity'" :class="sortOrder === 'asc' ? 'fas fa-sort-up' : 'fas fa-sort-down'" class="ml-1"></i>
+              </th>
+              <th @click="sortBy('productionDate')" class="sortable cursor-pointer">
+                {{ $t('inventory.productionDate') }}
+                <i v-if="sortKey === 'productionDate'" :class="sortOrder === 'asc' ? 'fas fa-sort-up' : 'fas fa-sort-down'" class="ml-1"></i>
+              </th>
+              <th @click="sortBy('notes')" class="sortable cursor-pointer">
+                {{ $t('inventory.notes') }}
+                <i v-if="sortKey === 'notes'" :class="sortOrder === 'asc' ? 'fas fa-sort-up' : 'fas fa-sort-down'" class="ml-1"></i>
+              </th>
+              <th>{{ $t('common.actions') }}</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-for="item in paginatedItems" :key="item.id">
+              <td class="font-medium">
+                <router-link v-if="item.modelSku" :to="`/models/${item.modelId}/view`" class="text-primary font-medium">
+                  {{ item.modelSku }}
+                </router-link>
+                <span v-else class="text-muted">N/A</span>
+              </td>
+              <td class="font-medium">{{ item.modelName || 'N/A' }}</td>
+              <td>
+                <span class="badge badge-info">
+                  <i class="fas fa-cubes mr-1"></i>
+                  {{ $formatQuantity(item.quantity) }}
+                </span>
+              </td>
+              <td class="font-medium">{{ formatDate(item.productionDate) }}</td>
+              <td>
+                <span v-if="item.notes" class="text-sm">{{ item.notes }}</span>
+                <span v-else class="text-muted">N/A</span>
+              </td>
+              <td>
+                <ActionMenu 
+                  :actions="getInventoryActions(item)" 
+                  @action="handleInventoryAction($event, item)"
+                />
+              </td>
+            </tr>
+          </tbody>
+        </table>
       </div>
 
-      <div class="pagination-info">
-        {{ $t('common.paginationInfo', { start: startIndex + 1, end: endIndex, total: filteredItems.length }) }}
+      <!-- Mobile Card View -->
+      <div class="visible-mobile">
+        <div class="grid gap-4">
+          <div v-for="item in paginatedItems" :key="item.id" class="card">
+            <div class="flex justify-between items-start mb-3">
+              <div>
+                <router-link v-if="item.modelSku" :to="`/models/${item.modelId}/view`" class="text-lg font-bold text-primary">
+                  {{ item.modelName || 'N/A' }}
+                </router-link>
+                <h3 v-else class="text-lg font-bold">{{ item.modelName || 'N/A' }}</h3>
+                <p class="text-sm text-muted">SKU: {{ item.modelSku || 'N/A' }}</p>
+              </div>
+              <div class="text-right">
+                <span class="badge badge-info">
+                  <i class="fas fa-cubes mr-1"></i>
+                  {{ $formatQuantity(item.quantity) }}
+                </span>
+              </div>
+            </div>
+            
+            <div class="grid gap-3 mb-4">
+              <div>
+                <p class="text-xs text-muted font-medium">{{ $t('inventory.productionDate') }}</p>
+                <p class="font-medium">
+                  <i class="fas fa-calendar mr-1"></i>
+                  {{ formatDate(item.productionDate) }}
+                </p>
+              </div>
+              <div v-if="item.notes">
+                <p class="text-xs text-muted font-medium">{{ $t('inventory.notes') }}</p>
+                <p class="text-sm">{{ item.notes }}</p>
+              </div>
+            </div>
+            
+            <div class="mobile-actions">
+              <ActionMenu 
+                :actions="getInventoryActions(item)" 
+                @action="handleInventoryAction($event, item)"
+              />
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Pagination -->
+      <div class="card">
+        <div class="flex flex-md-col gap-4 justify-between items-center">
+          <div class="flex items-center gap-2">
+            <button @click="goToPage(currentPage - 1)" :disabled="currentPage === 1" class="btn btn-secondary btn-sm">
+              <i class="fas fa-chevron-left"></i>
+              <span class="hidden-mobile">{{ $t('common.previous') }}</span>
+            </button>
+
+            <div class="flex gap-1">
+              <button 
+                v-for="page in visiblePages" 
+                :key="page" 
+                @click="goToPage(page)"
+                :class="['btn', 'btn-sm', currentPage === page ? 'btn-primary' : 'btn-secondary']"
+              >
+                {{ page }}
+              </button>
+            </div>
+
+            <button @click="goToPage(currentPage + 1)" :disabled="currentPage === totalPages" class="btn btn-secondary btn-sm">
+              <span class="hidden-mobile">{{ $t('common.next') }}</span>
+              <i class="fas fa-chevron-right"></i>
+            </button>
+          </div>
+
+          <div class="text-sm text-muted text-center">
+            {{ $t('common.paginationInfo', { start: startIndex + 1, end: endIndex, total: filteredItems.length }) }}
+          </div>
+        </div>
       </div>
     </div>
   </div>
@@ -136,8 +218,12 @@
 
 <script>
 import api from '../services/api';
+import ActionMenu from '../components/ActionMenu.vue';
 
 export default {
+  components: {
+    ActionMenu
+  },
   name: 'InventoryView',
   data() {
     return {
@@ -168,6 +254,24 @@ export default {
     },
     paginatedItems() {
       return this.filteredItems.slice(this.startIndex, this.endIndex);
+    },
+    visiblePages() {
+      const pages = [];
+      const maxVisible = window.innerWidth < 768 ? 3 : 7;
+      const half = Math.floor(maxVisible / 2);
+      
+      let start = Math.max(1, this.currentPage - half);
+      let end = Math.min(this.totalPages, start + maxVisible - 1);
+      
+      if (end - start + 1 < maxVisible) {
+        start = Math.max(1, end - maxVisible + 1);
+      }
+      
+      for (let i = start; i <= end; i++) {
+        pages.push(i);
+      }
+      
+      return pages;
     }
   },
   created() {
@@ -321,6 +425,64 @@ export default {
       }
     },
 
+    getInventoryActions(item) {
+      return [
+        {
+          key: 'view',
+          label: this.$t('common.view'),
+          icon: 'fas fa-eye',
+          variant: 'default',
+          tooltip: 'View inventory item details'
+        },
+        {
+          key: 'edit',
+          label: this.$t('common.edit'),
+          icon: 'fas fa-edit',
+          variant: 'primary',
+          tooltip: 'Edit inventory item'
+        },
+        {
+          key: 'duplicate',
+          label: this.$t('common.duplicate'),
+          icon: 'fas fa-copy',
+          variant: 'default',
+          tooltip: 'Duplicate inventory item'
+        },
+        {
+          key: 'delete',
+          label: this.$t('common.delete'),
+          icon: 'fas fa-trash',
+          variant: 'danger',
+          tooltip: 'Delete inventory item'
+        }
+      ];
+    },
+
+    handleInventoryAction(actionKey, item) {
+      switch (actionKey) {
+        case 'view':
+          this.viewItem(item.id);
+          break;
+        case 'edit':
+          this.editItem(item.id);
+          break;
+        case 'duplicate':
+          this.duplicateItem(item);
+          break;
+        case 'delete':
+          this.deleteItem(item.id);
+          break;
+      }
+    },
+
+    duplicateItem(item) {
+      // Navigate to create form with pre-filled data
+      this.$router.push({
+        path: '/inventory/new',
+        query: { duplicate: item.id }
+      });
+    },
+
     toggleMenu(itemId) {
       this.openMenuId = this.openMenuId === itemId ? null : itemId;
     },
@@ -344,28 +506,47 @@ export default {
 </script>
 
 <style scoped>
-.inventory {
-  padding: 20px;
+.page-header {
+  margin-bottom: 32px;
+  padding-bottom: 24px;
+  border-bottom: 2px solid #f1f3f4;
 }
 
-h1 {
-  margin-bottom: 20px;
-}
-
-.actions {
-  margin-bottom: 20px;
-}
-
-.table-controls {
+.inventory-content {
   display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 15px;
-  background-color: #f8f9fa;
-  padding: 15px;
-  border-radius: 4px;
-  flex-wrap: wrap;
-  gap: 10px;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.cursor-pointer {
+  cursor: pointer;
+}
+
+.sortable:hover {
+  background-color: #f8f9fa !important;
+}
+
+.ml-1 {
+  margin-left: 4px;
+}
+
+.mr-1 {
+  margin-right: 4px;
+}
+
+/* Badge styles for inventory items */
+.badge-info {
+  background-color: #d1ecf1;
+  color: #0c5460;
+  border: 1px solid #bee5eb;
+}
+
+/* Mobile Actions */
+.mobile-actions {
+  display: flex;
+  justify-content: flex-end;
+  padding-top: 12px;
+  border-top: 1px solid #e5e7eb;
 }
 
 .search-filter input {
@@ -585,3 +766,74 @@ th.sortable:hover {
   background-color: #f1f1f1;
 }
 </style>
+/* M
+obile Responsive */
+@media (max-width: 768px) {
+  .page-header h1 {
+    font-size: 24px;
+    margin-bottom: 16px;
+  }
+  
+  .inventory-content {
+    gap: 16px;
+  }
+  
+  .card {
+    padding: 16px;
+  }
+  
+  .grid-auto {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 480px) {
+  .page-header {
+    margin-bottom: 20px;
+    padding-bottom: 16px;
+  }
+  
+  .page-header h1 {
+    font-size: 20px;
+  }
+}
+
+/* Loading animation */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.card {
+  animation: fadeIn 0.3s ease-out;
+}
+
+/* Focus states for accessibility */
+.btn:focus,
+.form-input:focus,
+.form-select:focus {
+  outline: 2px solid #42b983;
+  outline-offset: 2px;
+}
+
+/* Smooth transitions */
+* {
+  transition: all 0.2s ease;
+}
+
+/* Print styles */
+@media print {
+  .btn, .pagination, .page-header .flex, .mobile-actions {
+    display: none !important;
+  }
+  
+  .card {
+    box-shadow: none;
+    border: 1px solid #ddd;
+  }
+  
+  .badge {
+    border: 1px solid #333 !important;
+    color: #333 !important;
+  }
+}

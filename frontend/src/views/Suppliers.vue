@@ -73,7 +73,7 @@
                 {{ sortOrder === 'asc' ? '▲' : '▼' }}
               </span>
             </th>
-            <!-- Removed actions column header -->
+            <th>{{ $t('common.actions') }}</th>
           </tr>
         </thead>
         <tbody>
@@ -87,15 +87,11 @@
             <td>{{ supplier.email || 'N/A' }}</td>
             <td>{{ supplier.phone || 'N/A' }}</td>
             <td>{{ supplier.address || 'N/A' }}</td>
-            <td style="position:relative;">
-              <div class="actions-menu-row" @mousedown.stop @click.stop>
-                <button @mousedown.stop @click.stop="toggleMenu(supplier.id)" class="btn btn-sm btn-menu">&#8942;</button>
-                <div v-if="openMenuId === supplier.id" class="menu-dropdown" @mousedown.stop @click.stop>
-                  <button @click="viewSupplier(supplier.id)" class="btn btn-sm btn-view">{{ $t('common.view') }}</button>
-                  <button @click="editSupplier(supplier.id)" class="btn btn-sm btn-edit">{{ $t('common.edit') }}</button>
-                  <button @click="deleteSupplier(supplier.id)" class="btn btn-sm btn-danger">{{ $t('common.delete') }}</button>
-                </div>
-              </div>
+            <td>
+              <ActionMenu 
+                :actions="getSupplierActions(supplier)" 
+                @action="handleSupplierAction($event, supplier)"
+              />
             </td>
           </tr>
         </tbody>
@@ -140,8 +136,12 @@
 
 <script>
 import api from '../services/api';
+import ActionMenu from '../components/ActionMenu.vue';
 
 export default {
+  components: {
+    ActionMenu
+  },
   name: 'SuppliersView',
   data() {
     return {
@@ -280,6 +280,63 @@ export default {
         } else {
           alert(this.$t('errors.deleteSupplier'));
         }
+      }
+    },
+
+    getSupplierActions(supplier) {
+      return [
+        {
+          key: 'view',
+          label: this.$t('common.view'),
+          icon: 'fas fa-eye',
+          variant: 'default',
+          tooltip: 'View supplier details'
+        },
+        {
+          key: 'edit',
+          label: this.$t('common.edit'),
+          icon: 'fas fa-edit',
+          variant: 'primary',
+          tooltip: 'Edit supplier'
+        },
+        {
+          key: 'contact',
+          label: this.$t('suppliers.contact'),
+          icon: 'fas fa-envelope',
+          variant: 'default',
+          tooltip: 'Contact supplier',
+          disabled: !supplier.email
+        },
+        {
+          key: 'delete',
+          label: this.$t('common.delete'),
+          icon: 'fas fa-trash',
+          variant: 'danger',
+          tooltip: 'Delete supplier'
+        }
+      ];
+    },
+
+    handleSupplierAction(actionKey, supplier) {
+      switch (actionKey) {
+        case 'view':
+          this.viewSupplier(supplier.id);
+          break;
+        case 'edit':
+          this.editSupplier(supplier.id);
+          break;
+        case 'contact':
+          this.contactSupplier(supplier);
+          break;
+        case 'delete':
+          this.deleteSupplier(supplier.id);
+          break;
+      }
+    },
+
+    contactSupplier(supplier) {
+      if (supplier.email) {
+        window.location.href = `mailto:${supplier.email}`;
       }
     },
     

@@ -130,17 +130,10 @@
                 <span v-else class="text-muted">N/A</span>
               </td>
               <td>
-                <div class="flex gap-2">
-                  <button @click="viewCustomer(customer.id)" class="btn btn-sm btn-secondary" title="View">
-                    <i class="fas fa-eye"></i>
-                  </button>
-                  <button @click="editCustomer(customer.id)" class="btn btn-sm btn-primary" title="Edit">
-                    <i class="fas fa-edit"></i>
-                  </button>
-                  <button @click="deleteCustomer(customer.id)" class="btn btn-sm btn-danger" title="Delete">
-                    <i class="fas fa-trash"></i>
-                  </button>
-                </div>
+                <ActionMenu 
+                  :actions="getCustomerActions(customer)" 
+                  @action="handleCustomerAction($event, customer)"
+                />
               </td>
             </tr>
           </tbody>
@@ -185,19 +178,11 @@
               </div>
             </div>
             
-            <div class="btn-group">
-              <button @click="viewCustomer(customer.id)" class="btn btn-secondary">
-                <i class="fas fa-eye"></i>
-                {{ $t('common.view') }}
-              </button>
-              <button @click="editCustomer(customer.id)" class="btn btn-primary">
-                <i class="fas fa-edit"></i>
-                {{ $t('common.edit') }}
-              </button>
-              <button @click="deleteCustomer(customer.id)" class="btn btn-danger">
-                <i class="fas fa-trash"></i>
-                {{ $t('common.delete') }}
-              </button>
+            <div class="mobile-actions">
+              <ActionMenu 
+                :actions="getCustomerActions(customer)" 
+                @action="handleCustomerAction($event, customer)"
+              />
             </div>
           </div>
         </div>
@@ -240,8 +225,12 @@
 
 <script>
 import api from '../services/api';
+import ActionMenu from '../components/ActionMenu.vue';
 
 export default {
+  components: {
+    ActionMenu
+  },
   name: 'CustomersView',
   data() {
     return {
@@ -446,6 +435,63 @@ export default {
         }
       }
     },
+
+    getCustomerActions(customer) {
+      return [
+        {
+          key: 'view',
+          label: this.$t('common.view'),
+          icon: 'fas fa-eye',
+          variant: 'default',
+          tooltip: 'View customer details'
+        },
+        {
+          key: 'edit',
+          label: this.$t('common.edit'),
+          icon: 'fas fa-edit',
+          variant: 'primary',
+          tooltip: 'Edit customer'
+        },
+        {
+          key: 'contact',
+          label: this.$t('customers.contact'),
+          icon: 'fas fa-envelope',
+          variant: 'default',
+          tooltip: 'Contact customer',
+          disabled: !customer.email
+        },
+        {
+          key: 'delete',
+          label: this.$t('common.delete'),
+          icon: 'fas fa-trash',
+          variant: 'danger',
+          tooltip: 'Delete customer'
+        }
+      ];
+    },
+
+    handleCustomerAction(actionKey, customer) {
+      switch (actionKey) {
+        case 'view':
+          this.viewCustomer(customer.id);
+          break;
+        case 'edit':
+          this.editCustomer(customer.id);
+          break;
+        case 'contact':
+          this.contactCustomer(customer);
+          break;
+        case 'delete':
+          this.deleteCustomer(customer.id);
+          break;
+      }
+    },
+
+    contactCustomer(customer) {
+      if (customer.email) {
+        window.location.href = `mailto:${customer.email}`;
+      }
+    },
     
     toggleMenu(customerId) {
       this.openMenuId = this.openMenuId === customerId ? null : customerId;
@@ -538,15 +584,11 @@ export default {
     padding: 16px;
   }
   
-  .btn-group {
+  .mobile-actions {
     display: flex;
-    flex-direction: column;
-    gap: 8px;
-  }
-  
-  .btn-group .btn {
-    width: 100%;
-    justify-content: center;
+    justify-content: flex-end;
+    padding-top: 12px;
+    border-top: 1px solid #e5e7eb;
   }
   
   .grid-auto {

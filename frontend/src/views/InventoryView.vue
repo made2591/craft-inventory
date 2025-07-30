@@ -118,7 +118,10 @@
               <td>{{ $formatCost(transaction.totalAmount) }}</td>
               <td>{{ formatStatus(transaction.status) }}</td>
               <td>
-                <router-link :to="`/transactions/${transaction.id}`" class="btn btn-sm">{{ $t('common.details') }}</router-link>
+                <ActionMenu 
+                  :actions="getTransactionActions(transaction)" 
+                  @action="handleTransactionAction($event, transaction)"
+                />
               </td>
             </tr>
           </tbody>
@@ -164,8 +167,12 @@
 
 <script>
 import api from '../services/api';
+import ActionMenu from '../components/ActionMenu.vue';
 
 export default {
+  components: {
+    ActionMenu
+  },
   name: 'InventoryView',
   props: {
     id: {
@@ -325,6 +332,36 @@ export default {
       };
       
       return statusClassMap[status] || '';
+    },
+
+    getTransactionActions(transaction) {
+      return [
+        {
+          key: 'view',
+          label: this.$t('common.view'),
+          icon: 'fas fa-eye',
+          variant: 'default',
+          tooltip: 'View transaction details'
+        },
+        {
+          key: 'edit',
+          label: this.$t('common.edit'),
+          icon: 'fas fa-edit',
+          variant: 'primary',
+          tooltip: 'Edit transaction'
+        }
+      ];
+    },
+
+    handleTransactionAction(actionKey, transaction) {
+      switch (actionKey) {
+        case 'view':
+          this.$router.push(`/transactions/${transaction.id}/view`);
+          break;
+        case 'edit':
+          this.$router.push(`/transactions/${transaction.id}/edit`);
+          break;
+      }
     }
   }
 };
