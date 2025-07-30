@@ -116,18 +116,18 @@
                   {{ formatCustomerType(customer.customerType) }}
                 </span>
               </td>
-              <td>{{ customer.contactPerson || 'N/A' }}</td>
+              <td>{{ customer.contactPerson || $t('common.notApplicable') }}</td>
               <td>
                 <a v-if="customer.email" :href="`mailto:${customer.email}`" class="text-primary">
                   {{ customer.email }}
                 </a>
-                <span v-else class="text-muted">N/A</span>
+                <span v-else class="text-muted">{{ $t('common.notApplicable') }}</span>
               </td>
               <td>
                 <a v-if="customer.phone" :href="`tel:${customer.phone}`" class="text-primary">
                   {{ customer.phone }}
                 </a>
-                <span v-else class="text-muted">N/A</span>
+                <span v-else class="text-muted">{{ $t('common.notApplicable') }}</span>
               </td>
               <td>
                 <ActionMenu 

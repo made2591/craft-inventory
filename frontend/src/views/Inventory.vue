@@ -145,7 +145,7 @@
                   {{ item.modelName || 'N/A' }}
                 </router-link>
                 <h3 v-else class="text-lg font-bold">{{ item.modelName || 'N/A' }}</h3>
-                <p class="text-sm text-muted">SKU: {{ item.modelSku || 'N/A' }}</p>
+                <p class="text-sm text-muted">{{ $t('common.sku') }}: {{ item.modelSku || $t('common.notApplicable') }}</p>
               </div>
               <div class="text-right">
                 <span class="badge badge-info">

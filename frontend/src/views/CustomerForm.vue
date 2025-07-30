@@ -153,7 +153,7 @@ export default {
         this.customer = response.data;
       } catch (error) {
         console.error('Error fetching customer:', error);
-        this.error = 'Si è verificato un errore durante il recupero del cliente. Riprova più tardi.';
+        this.error = this.$t('errors.fetchCustomer');
       } finally {
         this.loading = false;
       }
@@ -173,7 +173,7 @@ export default {
         this.$router.push('/customers');
       } catch (error) {
         console.error('Error saving customer:', error);
-        this.error = 'Si è verificato un errore durante il salvataggio del cliente. Riprova più tardi.';
+        this.error = this.$t('errors.saveCustomer');
       } finally {
         this.loading = false;
       }

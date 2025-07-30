@@ -57,16 +57,23 @@
     "selectModel": "Select a model",
     "selectSupplier": "Select a supplier",
     "selectComponent": "Select a component",
+    "selectMaterial": "Select a material",
     "update": "Update",
     "view": "View",
     "remove": "Remove",
+    "duplicate": "Duplicate",
     "quantity": "Quantity",
     "totalCost": "Total Cost",
     "custom": "Custom",
     "currency": "€",
     "itemsPerPage": "Items per page",
     "updating": "Updating...",
-    "notAvailable": "Not available"
+    "notAvailable": "Not available",
+    "notApplicable": "N/A",
+    "lowStock": "Low Stock",
+    "calculating": "Calculating...",
+    "calculateCost": "Calculate Cost",
+    "sku": "SKU"
   },
   "dashboard": {
     "title": "Dashboard",
@@ -480,6 +487,11 @@
     "deleteSupplier": "An error occurred while deleting the supplier.",
     "deleteSupplierMaterials": "Cannot delete supplier: there are associated materials.",
     "deleteInventoryItem": "An error occurred while deleting the inventory item.",
+    "deleteModel": "An error occurred while deleting the product.",
+    "recalculateCosts": "An error occurred while recalculating costs. Please try again later.",
+    "componentInUse": "Cannot delete component: it is used in one or more models.",
+    "fetchCustomer": "An error occurred while fetching the customer. Please try again later.",
+    "saveCustomer": "An error occurred while saving the customer. Please try again later.",
     "passwordsMismatch": "Passwords do not match.",
     "passwordTooShort": "Password must be at least 6 characters long.",
     "authenticationError": "An error occurred during authentication. Please try again later.",
@@ -497,5 +509,10 @@
     "importDatabase": "An error occurred while importing the database. Please try again later.",
     "resetDatabase": "An error occurred while resetting the database. Please try again later.",
     "initTestData": "An error occurred while initializing test data. Please try again later."
+  },
+  "confirmations": {
+    "deleteMaterial": "Are you sure you want to delete this material?",
+    "deleteComponent": "Are you sure you want to delete this component?",
+    "deleteModel": "Are you sure you want to delete this product?"
   }
 }

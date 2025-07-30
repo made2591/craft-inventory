@@ -83,10 +83,10 @@
                 {{ supplier.name }}
               </router-link>
             </td>
-            <td>{{ supplier.contactPerson || 'N/A' }}</td>
-            <td>{{ supplier.email || 'N/A' }}</td>
-            <td>{{ supplier.phone || 'N/A' }}</td>
-            <td>{{ supplier.address || 'N/A' }}</td>
+            <td>{{ supplier.contactPerson || $t('common.notApplicable') }}</td>
+            <td>{{ supplier.email || $t('common.notApplicable') }}</td>
+            <td>{{ supplier.phone || $t('common.notApplicable') }}</td>
+            <td>{{ supplier.address || $t('common.notApplicable') }}</td>
             <td>
               <ActionMenu 
                 :actions="getSupplierActions(supplier)" 

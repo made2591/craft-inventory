@@ -98,11 +98,11 @@
             <tr v-for="component in paginatedComponents" :key="component.id">
               <td class="font-medium">
                 <router-link :to="`/components/${component.id}/view`" class="text-primary font-medium">
-                  {{ component.sku || 'N/A' }}
+                  {{ component.sku || $t('common.notApplicable') }}
                 </router-link>
               </td>
               <td class="font-medium">{{ component.name }}</td>
-              <td>{{ component.description || 'N/A' }}</td>
+              <td>{{ component.description || $t('common.notApplicable') }}</td>
               <td>
                 <span class="badge badge-info">
                   <i class="fas fa-cubes mr-1"></i>
@@ -142,7 +142,7 @@
                 <router-link :to="`/components/${component.id}/view`" class="text-lg font-bold text-primary">
                   {{ component.name }}
                 </router-link>
-                <p class="text-sm text-muted">SKU: {{ component.sku || 'N/A' }}</p>
+                <p class="text-sm text-muted">{{ $t('common.sku') }}: {{ component.sku || $t('common.notApplicable') }}</p>
               </div>
               <div class="text-right">
                 <span class="badge badge-info">
@@ -293,7 +293,7 @@ export default {
         this.calculateAllComponentCosts();
       } catch (error) {
         console.error('Error fetching components:', error);
-        this.error = 'Si è verificato un errore durante il recupero dei componenti. Riprova più tardi.';
+        this.error = this.$t('errors.fetchComponents');
       } finally {
         this.loading = false;
       }
@@ -321,7 +321,7 @@ export default {
         }
       } catch (error) {
         console.error('Error recalculating costs:', error);
-        alert('Si è verificato un errore durante il ricalcolo dei costi. Riprova più tardi.');
+        alert(this.$t('errors.recalculateCosts'));
       } finally {
         this.isRecalculating = false;
       }
@@ -345,7 +345,7 @@ export default {
         console.error('Error fetching component cost:', error);
         this.componentCosts = { 
           ...this.componentCosts, 
-          [componentId]: 'Errore' 
+          [componentId]: this.$t('common.error')
         };
       } finally {
         // Rimuovi lo stato di caricamento per questo componente
@@ -484,7 +484,7 @@ export default {
       });
     },
     async deleteComponent(id) {
-      if (!confirm('Sei sicuro di voler eliminare questo componente?')) {
+      if (!confirm(this.$t('confirmations.deleteComponent'))) {
         return;
       }
       try {
@@ -494,9 +494,9 @@ export default {
       } catch (error) {
         console.error('Error deleting component:', error);
         if (error.response && error.response.status === 400) {
-          alert('Impossibile eliminare il componente: è utilizzato in uno o più modelli.');
+          alert(this.$t('errors.componentInUse'));
         } else {
-          alert('Si è verificato un errore durante l\'eliminazione del componente.');
+          alert(this.$t('errors.deleteComponent'));
         }
       }
     }

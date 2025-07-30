@@ -106,7 +106,7 @@
             <tr v-for="material in paginatedMaterials" :key="material.id" :class="{ 'low-stock-row': isLowStock(material) }">
               <td>
                 <router-link :to="`/materials/${material.id}/view`" class="text-primary font-medium">
-                  {{ material.sku || 'N/A' }}
+                  {{ material.sku || $t('common.notApplicable') }}
                 </router-link>
               </td>
               <td class="font-medium">{{ material.name }}</td>
@@ -118,10 +118,10 @@
                 </span>
                 <span v-if="isLowStock(material)" class="badge badge-warning ml-2">
                   <i class="fas fa-exclamation-triangle"></i>
-                  Low Stock
+                  {{ $t('common.lowStock') }}
                 </span>
               </td>
-              <td>{{ material.minStockLevel ? $formatQuantity(material.minStockLevel) : 'N/A' }}</td>
+              <td>{{ material.minStockLevel ? $formatQuantity(material.minStockLevel) : $t('common.notApplicable') }}</td>
               <td>
                 <ActionMenu 
                   :actions="getMaterialActions(material)" 
@@ -142,11 +142,11 @@
                 <router-link :to="`/materials/${material.id}/view`" class="text-lg font-bold text-primary">
                   {{ material.name }}
                 </router-link>
-                <p class="text-sm text-muted">SKU: {{ material.sku || 'N/A' }}</p>
+                <p class="text-sm text-muted">{{ $t('common.sku') }}: {{ material.sku || $t('common.notApplicable') }}</p>
               </div>
               <div v-if="isLowStock(material)" class="badge badge-warning">
                 <i class="fas fa-exclamation-triangle"></i>
-                Low Stock
+                {{ $t('common.lowStock') }}
               </div>
             </div>
             
@@ -167,7 +167,7 @@
               </div>
               <div>
                 <p class="text-xs text-muted font-medium">{{ $t('materials.minStockLevel') }}</p>
-                <p class="font-medium">{{ material.minStockLevel ? $formatQuantity(material.minStockLevel) : 'N/A' }}</p>
+                <p class="font-medium">{{ material.minStockLevel ? $formatQuantity(material.minStockLevel) : $t('common.notApplicable') }}</p>
               </div>
             </div>
             
@@ -299,7 +299,7 @@ export default {
         this.filterMaterials();
       } catch (error) {
         console.error('Error fetching materials:', error);
-        this.error = 'Si è verificato un errore durante il recupero dei materiali. Riprova più tardi.';
+        this.error = this.$t('errors.fetchMaterials');
       } finally {
         this.loading = false;
       }
@@ -411,7 +411,7 @@ export default {
     },
 
     async deleteMaterial(id) {
-      if (!confirm('Sei sicuro di voler eliminare questo materiale?')) {
+      if (!confirm(this.$t('confirmations.deleteMaterial'))) {
         return;
       }
       try {
@@ -420,7 +420,7 @@ export default {
         this.filterMaterials();
       } catch (error) {
         console.error('Error deleting material:', error);
-        alert('Si è verificato un errore durante l\'eliminazione del materiale.');
+        alert(this.$t('errors.deleteMaterial'));
       }
       this.openMenuId = null;
     },

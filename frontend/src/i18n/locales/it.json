@@ -57,16 +57,23 @@
     "selectModel": "Seleziona un modello",
     "selectSupplier": "Seleziona un fornitore",
     "selectComponent": "Seleziona un componente",
+    "selectMaterial": "Seleziona un materiale",
     "update": "Aggiorna",
     "view": "Visualizza",
     "remove": "Rimuovi",
+    "duplicate": "Duplica",
     "quantity": "Quantità",
     "totalCost": "Costo Totale",
     "custom": "Personalizzato",
     "currency": "€",
     "itemsPerPage": "Elementi per pagina",
     "updating": "Aggiornamento...",
-    "notAvailable": "Non disponibile"
+    "notAvailable": "Non disponibile",
+    "notApplicable": "N/A",
+    "lowStock": "Scorte Basse",
+    "calculating": "Calcolo...",
+    "calculateCost": "Calcola Costo",
+    "sku": "SKU"
   },
   "dashboard": {
     "title": "Dashboard",
@@ -480,6 +487,11 @@
     "deleteSupplier": "Si è verificato un errore durante l'eliminazione del fornitore.",
     "deleteSupplierMaterials": "Impossibile eliminare il fornitore: ci sono materiali associati.",
     "deleteInventoryItem": "Si è verificato un errore durante l'eliminazione dell'articolo dall'inventario.",
+    "deleteModel": "Si è verificato un errore durante l'eliminazione del prodotto.",
+    "recalculateCosts": "Si è verificato un errore durante il ricalcolo dei costi. Riprova più tardi.",
+    "componentInUse": "Impossibile eliminare il componente: è utilizzato in uno o più modelli.",
+    "fetchCustomer": "Si è verificato un errore durante il recupero del cliente. Riprova più tardi.",
+    "saveCustomer": "Si è verificato un errore durante il salvataggio del cliente. Riprova più tardi.",
     "passwordsMismatch": "Le password non corrispondono.",
     "passwordTooShort": "La password deve essere lunga almeno 6 caratteri.",
     "authenticationError": "Si è verificato un errore durante l'autenticazione. Riprova più tardi.",
@@ -497,5 +509,10 @@
     "importDatabase": "Si è verificato un errore durante l'importazione del database. Riprova più tardi.",
     "resetDatabase": "Si è verificato un errore durante il reset del database. Riprova più tardi.",
     "initTestData": "Si è verificato un errore durante l'inizializzazione dei dati di test. Riprova più tardi."
+  },
+  "confirmations": {
+    "deleteMaterial": "Sei sicuro di voler eliminare questo materiale?",
+    "deleteComponent": "Sei sicuro di voler eliminare questo componente?",
+    "deleteModel": "Sei sicuro di voler eliminare questo prodotto?"
   }
 }

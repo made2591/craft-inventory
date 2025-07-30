@@ -107,11 +107,11 @@
             <tr v-for="model in paginatedModels" :key="model.id">
               <td>
                 <router-link :to="`/models/${model.id}/view`" class="text-primary font-medium">
-                  {{ model.sku || 'N/A' }}
+                  {{ model.sku || $t('common.notApplicable') }}
                 </router-link>
               </td>
               <td class="font-medium">{{ model.name }}</td>
-              <td>{{ model.description || 'N/A' }}</td>
+              <td>{{ model.description || $t('common.notApplicable') }}</td>
               <td class="font-medium">{{ $formatCost(model.productionCost || model.production_cost) }}</td>
               <td class="font-medium">{{ $formatCost(model.sellingPrice || model.selling_price) }}</td>
               <td>{{ formatTime(model.laborTimeMinutes || model.labor_time_minutes) }}</td>
@@ -136,7 +136,7 @@
                 <router-link :to="`/models/${model.id}/view`" class="text-lg font-bold text-primary">
                   {{ model.name }}
                 </router-link>
-                <p class="text-sm text-muted">SKU: {{ model.sku || 'N/A' }}</p>
+                <p class="text-sm text-muted">{{ $t('common.sku') }}: {{ model.sku || $t('common.notApplicable') }}</p>
               </div>
             </div>
             
@@ -434,7 +434,7 @@ export default {
       });
     },
     async deleteModel(id) {
-      if (!confirm('Sei sicuro di voler eliminare questo prodotto?')) {
+      if (!confirm(this.$t('confirmations.deleteModel'))) {
         return;
       }
       try {
@@ -443,8 +443,12 @@ export default {
         this.filterModels();
       } catch (error) {
         console.error('Error deleting model:', error);
-        alert('Si è verificato un errore durante l\'eliminazione del prodotto.');
+        alert(this.$t('errors.deleteModel'));
       }
+    },
+
+    async refreshModels() {
+      await this.fetchModels();
     }
   }
 };
