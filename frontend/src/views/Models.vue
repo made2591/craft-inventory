@@ -1,147 +1,208 @@
 <template>
-  <div class="models">
-    <h1>{{ $t('models.title') }}</h1>
-    
-    <div class="actions">
-      <router-link to="/models/new" class="btn btn-primary">{{ $t('models.newModel') }}</router-link>
+  <div class="container">
+    <div class="page-header">
+      <h1 class="text-3xl font-bold text-center">{{ $t('models.title') }}</h1>
+      <div class="flex flex-md-col gap-4 justify-between items-center">
+        <router-link to="/models/new" class="btn btn-primary">
+          <i class="fas fa-plus"></i>
+          {{ $t('models.newModel') }}
+        </router-link>
+        <button @click="refreshModels" class="btn btn-secondary" :disabled="loading">
+          <div v-if="loading" class="loading">
+            <div class="spinner"></div>
+            {{ $t('common.updating') }}
+          </div>
+          <span v-else>
+            <i class="fas fa-sync-alt"></i>
+            {{ $t('models.refreshModels') }}
+          </span>
+        </button>
+      </div>
     </div>
-    
-    <div v-if="loading" class="loading">
-      {{ $t('common.loading') }}
+
+    <div v-if="loading" class="card text-center">
+      <div class="loading">
+        <div class="spinner"></div>
+        {{ $t('common.loading') }}
+      </div>
     </div>
-    
-    <div v-else-if="error" class="error">
-      {{ error }}
+
+    <div v-else-if="error" class="card text-center">
+      <div class="text-danger">
+        <i class="fas fa-exclamation-triangle"></i>
+        {{ error }}
+      </div>
     </div>
-    
-    <div v-else-if="models.length === 0" class="empty-state">
-      {{ $t('models.noModelsFound') }}
+
+    <div v-else-if="models.length === 0" class="card text-center">
+      <div class="text-muted">
+        <i class="fas fa-cubes text-2xl"></i>
+        <p class="text-lg">{{ $t('models.noModelsFound') }}</p>
+      </div>
     </div>
-    
-    <div v-else class="models-list">
-      <!-- Filtri e opzioni di paginazione -->
-      <div class="table-controls">
-        <div class="search-filter">
-          <input 
-            type="text" 
-            v-model="searchQuery" 
-            :placeholder="$t('models.searchPlaceholder')" 
-            @input="filterModels"
-          >
-        </div>
-        <div class="pagination-controls">
-          <label for="itemsPerPage">{{ $t('common.itemsPerPage') }}:</label>
-          <select id="itemsPerPage" v-model="itemsPerPage" @change="updatePagination">
-            <option value="5">5</option>
-            <option value="10">10</option>
-            <option value="20">20</option>
-            <option value="50">50</option>
-          </select>
+
+    <div v-else class="models-content">
+      <!-- Controls Card -->
+      <div class="card">
+        <div class="flex flex-md-col gap-4 justify-between items-center">
+          <div class="form-group flex-1" style="margin-bottom: 0;">
+            <div class="flex items-center gap-2">
+              <i class="fas fa-search text-muted"></i>
+              <input 
+                type="text" 
+                v-model="searchQuery" 
+                :placeholder="$t('models.searchPlaceholder')" 
+                @input="filterModels"
+                class="form-input"
+                style="margin: 0;"
+              >
+            </div>
+          </div>
+          <div class="flex items-center gap-2">
+            <label for="itemsPerPage" class="form-label text-sm" style="margin: 0;">{{ $t('common.itemsPerPage') }}:</label>
+            <select id="itemsPerPage" v-model="itemsPerPage" @change="updatePagination" class="form-select">
+              <option value="5">5</option>
+              <option value="10">10</option>
+              <option value="20">20</option>
+              <option value="50">50</option>
+            </select>
+          </div>
         </div>
       </div>
-      
-      <table>
-        <thead>
-          <tr>
-            <th @click="sortBy('sku')" class="sortable">
-              {{ $t('models.sku') }}
-              <span v-if="sortKey === 'sku'" class="sort-icon">
-                {{ sortOrder === 'asc' ? '▲' : '▼' }}
-              </span>
-            </th>
-            <th @click="sortBy('name')" class="sortable">
-              {{ $t('models.name') }}
-              <span v-if="sortKey === 'name'" class="sort-icon">
-                {{ sortOrder === 'asc' ? '▲' : '▼' }}
-              </span>
-            </th>
-            <th @click="sortBy('description')" class="sortable">
-              {{ $t('models.description') }}
-              <span v-if="sortKey === 'description'" class="sort-icon">
-                {{ sortOrder === 'asc' ? '▲' : '▼' }}
-              </span>
-            </th>
-            <th @click="sortBy('production_cost')" class="sortable">
-              {{ $t('models.productionCost') }}
-              <span v-if="sortKey === 'production_cost'" class="sort-icon">
-                {{ sortOrder === 'asc' ? '▲' : '▼' }}
-              </span>
-            </th>
-            <th @click="sortBy('selling_price')" class="sortable">
-              {{ $t('models.sellingPrice') }}
-              <span v-if="sortKey === 'selling_price'" class="sort-icon">
-                {{ sortOrder === 'asc' ? '▲' : '▼' }}
-              </span>
-            </th>
-            <th @click="sortBy('labor_time_minutes')" class="sortable">
-              {{ $t('models.laborTime') }}
-              <span v-if="sortKey === 'labor_time_minutes'" class="sort-icon">
-                {{ sortOrder === 'asc' ? '▲' : '▼' }}
-              </span>
-            </th>
-            <th>{{ $t('models.margin') }}</th>
-            <!-- Removed actions column header -->
-          </tr>
-        </thead>
-        <tbody>
-          <tr v-for="model in paginatedModels" :key="model.id" style="position:relative;">
-            <td>
-              <router-link :to="`/models/${model.id}/view`" class="sku-link">
-                <strong>{{ model.sku || 'N/A' }}</strong>
-              </router-link>
-            </td>
-            <td>{{ model.name }}</td>
-            <td>{{ model.description || 'N/A' }}</td>
-            <td>{{ $formatCost(model.productionCost || model.production_cost) }}</td>
-            <td>{{ $formatCost(model.sellingPrice || model.selling_price) }}</td>
-            <td>{{ formatTime(model.laborTimeMinutes || model.labor_time_minutes) }}</td>
-            <td>{{ calculateMargin(model) }}%</td>
-            <td style="position:relative;">
-              <div class="actions-menu-row" @mousedown.stop @click.stop>
-                <button @mousedown.stop @click.stop="toggleMenu(model.id)" class="btn btn-sm btn-menu">&#8942;</button>
-                <div v-if="openMenuId === model.id" class="menu-dropdown" @mousedown.stop @click.stop>
-                  <button @click="viewModel(model.id)" class="btn btn-sm btn-view">{{ $t('common.view') }}</button>
-                  <button @click="editModel(model.id)" class="btn btn-sm btn-edit">{{ $t('common.edit') }}</button>
-                  <button @click="deleteModel(model.id)" class="btn btn-sm btn-danger">{{ $t('common.delete') }}</button>
-                </div>
+
+      <!-- Desktop Table View -->
+      <div class="table-responsive hidden-mobile">
+        <table class="table">
+          <thead>
+            <tr>
+              <th @click="sortBy('sku')" class="sortable cursor-pointer">
+                {{ $t('models.sku') }}
+                <i v-if="sortKey === 'sku'" :class="sortOrder === 'asc' ? 'fas fa-sort-up' : 'fas fa-sort-down'" class="ml-1"></i>
+              </th>
+              <th @click="sortBy('name')" class="sortable cursor-pointer">
+                {{ $t('models.name') }}
+                <i v-if="sortKey === 'name'" :class="sortOrder === 'asc' ? 'fas fa-sort-up' : 'fas fa-sort-down'" class="ml-1"></i>
+              </th>
+              <th @click="sortBy('description')" class="sortable cursor-pointer">
+                {{ $t('models.description') }}
+                <i v-if="sortKey === 'description'" :class="sortOrder === 'asc' ? 'fas fa-sort-up' : 'fas fa-sort-down'" class="ml-1"></i>
+              </th>
+              <th @click="sortBy('production_cost')" class="sortable cursor-pointer">
+                {{ $t('models.productionCost') }}
+                <i v-if="sortKey === 'production_cost'" :class="sortOrder === 'asc' ? 'fas fa-sort-up' : 'fas fa-sort-down'" class="ml-1"></i>
+              </th>
+              <th @click="sortBy('selling_price')" class="sortable cursor-pointer">
+                {{ $t('models.sellingPrice') }}
+                <i v-if="sortKey === 'selling_price'" :class="sortOrder === 'asc' ? 'fas fa-sort-up' : 'fas fa-sort-down'" class="ml-1"></i>
+              </th>
+              <th @click="sortBy('labor_time_minutes')" class="sortable cursor-pointer">
+                {{ $t('models.laborTime') }}
+                <i v-if="sortKey === 'labor_time_minutes'" :class="sortOrder === 'asc' ? 'fas fa-sort-up' : 'fas fa-sort-down'" class="ml-1"></i>
+              </th>
+              <th>{{ $t('models.margin') }}</th>
+              <th>{{ $t('common.actions') }}</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-for="model in paginatedModels" :key="model.id">
+              <td>
+                <router-link :to="`/models/${model.id}/view`" class="text-primary font-medium">
+                  {{ model.sku || 'N/A' }}
+                </router-link>
+              </td>
+              <td class="font-medium">{{ model.name }}</td>
+              <td>{{ model.description || 'N/A' }}</td>
+              <td class="font-medium">{{ $formatCost(model.productionCost || model.production_cost) }}</td>
+              <td class="font-medium">{{ $formatCost(model.sellingPrice || model.selling_price) }}</td>
+              <td>{{ formatTime(model.laborTimeMinutes || model.labor_time_minutes) }}</td>
+              <td class="font-medium">{{ calculateMargin(model) }}%</td>
+              <td>
+                <ActionMenu 
+                  :actions="getModelActions(model)" 
+                  @action="handleModelAction($event, model)"
+                />
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Mobile Card View -->
+      <div class="visible-mobile">
+        <div class="grid gap-4">
+          <div v-for="model in paginatedModels" :key="model.id" class="card">
+            <div class="flex justify-between items-start mb-3">
+              <div>
+                <router-link :to="`/models/${model.id}/view`" class="text-lg font-bold text-primary">
+                  {{ model.name }}
+                </router-link>
+                <p class="text-sm text-muted">SKU: {{ model.sku || 'N/A' }}</p>
               </div>
-            </td>
-          </tr>
-        </tbody>
-      </table>
-      
-      <!-- Paginazione -->
-      <div class="pagination">
-        <button 
-          @click="goToPage(currentPage - 1)" 
-          :disabled="currentPage === 1" 
-          class="btn btn-sm"
-        >
-          {{ $t('common.previous') }}
-        </button>
-        
-        <div class="page-numbers">
-          <button 
-            v-for="page in totalPages" 
-            :key="page" 
-            @click="goToPage(page)" 
-            :class="['btn', 'btn-sm', currentPage === page ? 'btn-active' : '']"
-          >
-            {{ page }}
-          </button>
+            </div>
+            
+            <div class="grid grid-2 gap-3 mb-4">
+              <div v-if="model.description">
+                <p class="text-xs text-muted font-medium">{{ $t('models.description') }}</p>
+                <p class="text-sm">{{ model.description }}</p>
+              </div>
+              <div>
+                <p class="text-xs text-muted font-medium">{{ $t('models.productionCost') }}</p>
+                <p class="font-medium">{{ $formatCost(model.productionCost || model.production_cost) }}</p>
+              </div>
+              <div>
+                <p class="text-xs text-muted font-medium">{{ $t('models.sellingPrice') }}</p>
+                <p class="font-medium">{{ $formatCost(model.sellingPrice || model.selling_price) }}</p>
+              </div>
+              <div>
+                <p class="text-xs text-muted font-medium">{{ $t('models.laborTime') }}</p>
+                <p class="font-medium">{{ formatTime(model.laborTimeMinutes || model.labor_time_minutes) }}</p>
+              </div>
+              <div>
+                <p class="text-xs text-muted font-medium">{{ $t('models.margin') }}</p>
+                <p class="font-medium">{{ calculateMargin(model) }}%</p>
+              </div>
+            </div>
+            
+            <div class="mobile-actions">
+              <ActionMenu 
+                :actions="getModelActions(model)" 
+                @action="handleModelAction($event, model)"
+              />
+            </div>
+          </div>
         </div>
-        
-        <button 
-          @click="goToPage(currentPage + 1)" 
-          :disabled="currentPage === totalPages" 
-          class="btn btn-sm"
-        >
-          {{ $t('common.next') }}
-        </button>
       </div>
-      
-      <div class="pagination-info">
-        {{ $t('common.paginationInfo', { start: startIndex + 1, end: endIndex, total: filteredModels.length }) }}
+
+      <!-- Pagination -->
+      <div class="card">
+        <div class="flex flex-md-col gap-4 justify-between items-center">
+          <div class="flex items-center gap-2">
+            <button @click="goToPage(currentPage - 1)" :disabled="currentPage === 1" class="btn btn-secondary btn-sm">
+              <i class="fas fa-chevron-left"></i>
+              <span class="hidden-mobile">{{ $t('common.previous') }}</span>
+            </button>
+
+            <div class="flex gap-1">
+              <button 
+                v-for="page in visiblePages" 
+                :key="page" 
+                @click="goToPage(page)"
+                :class="['btn', 'btn-sm', currentPage === page ? 'btn-primary' : 'btn-secondary']"
+              >
+                {{ page }}
+              </button>
+            </div>
+
+            <button @click="goToPage(currentPage + 1)" :disabled="currentPage === totalPages" class="btn btn-secondary btn-sm">
+              <span class="hidden-mobile">{{ $t('common.next') }}</span>
+              <i class="fas fa-chevron-right"></i>
+            </button>
+          </div>
+
+          <div class="text-sm text-muted text-center">
+            {{ $t('common.paginationInfo', { start: startIndex + 1, end: endIndex, total: filteredModels.length }) }}
+          </div>
+        </div>
       </div>
     </div>
   </div>
@@ -149,9 +210,13 @@
 
 <script>
 import api from '../services/api';
+import ActionMenu from '../components/ActionMenu.vue';
 
 export default {
   name: 'ModelsView',
+  components: {
+    ActionMenu
+  },
   data() {
     return {
       models: [],
@@ -162,8 +227,7 @@ export default {
       sortKey: 'name',
       sortOrder: 'asc',
       currentPage: 1,
-      itemsPerPage: 10,
-      openMenuId: null // Per il menu azioni
+      itemsPerPage: 10
     };
   },
   computed: {
@@ -179,6 +243,24 @@ export default {
     },
     paginatedModels() {
       return this.filteredModels.slice(this.startIndex, this.endIndex);
+    },
+    visiblePages() {
+      const pages = [];
+      const maxVisible = window.innerWidth < 768 ? 3 : 7;
+      const half = Math.floor(maxVisible / 2);
+      
+      let start = Math.max(1, this.currentPage - half);
+      let end = Math.min(this.totalPages, start + maxVisible - 1);
+      
+      if (end - start + 1 < maxVisible) {
+        start = Math.max(1, end - maxVisible + 1);
+      }
+      
+      for (let i = start; i <= end; i++) {
+        pages.push(i);
+      }
+      
+      return pages;
     }
   },
   created() {
@@ -289,36 +371,68 @@ export default {
       const margin = ((sellingPrice - productionCost) / sellingPrice) * 100;
       return margin.toFixed(1);
     },
-    
-    toggleMenu(id) {
-      this.openMenuId = this.openMenuId === id ? null : id;
-    },
-    
-    handleClickOutside(event) {
-      if (this.openMenuId !== null) {
-        const menus = document.querySelectorAll('.menu-dropdown');
-        let clickedInside = false;
-        menus.forEach(menu => {
-          if (menu.contains(event.target)) {
-            clickedInside = true;
-          }
-        });
-        if (!clickedInside) {
-          this.openMenuId = null;
+
+    getModelActions(model) {
+      return [
+        {
+          key: 'view',
+          label: this.$t('common.view'),
+          icon: 'fas fa-eye',
+          variant: 'default',
+          tooltip: 'View model details'
+        },
+        {
+          key: 'edit',
+          label: this.$t('common.edit'),
+          icon: 'fas fa-edit',
+          variant: 'primary',
+          tooltip: 'Edit model'
+        },
+        {
+          key: 'duplicate',
+          label: this.$t('common.duplicate'),
+          icon: 'fas fa-copy',
+          variant: 'default',
+          tooltip: 'Duplicate model'
+        },
+        {
+          key: 'delete',
+          label: this.$t('common.delete'),
+          icon: 'fas fa-trash',
+          variant: 'danger',
+          tooltip: 'Delete model'
         }
+      ];
+    },
+
+    handleModelAction(actionKey, model) {
+      switch (actionKey) {
+        case 'view':
+          this.$router.push(`/models/${model.id}/view`);
+          break;
+        case 'edit':
+          this.$router.push(`/models/${model.id}`);
+          break;
+        case 'duplicate':
+          this.duplicateModel(model);
+          break;
+        case 'delete':
+          this.deleteModel(model.id);
+          break;
       }
     },
-    
-    viewModel(id) {
-      this.$router.push(`/models/${id}/view`);
-      this.openMenuId = null;
+
+    async refreshModels() {
+      await this.fetchModels();
     },
-    
-    editModel(id) {
-      this.$router.push(`/models/${id}`);
-      this.openMenuId = null;
+
+    duplicateModel(model) {
+      // Navigate to create form with pre-filled data
+      this.$router.push({
+        path: '/models/new',
+        query: { duplicate: model.id }
+      });
     },
-    
     async deleteModel(id) {
       if (!confirm('Sei sicuro di voler eliminare questo prodotto?')) {
         return;
@@ -331,19 +445,134 @@ export default {
         console.error('Error deleting model:', error);
         alert('Si è verificato un errore durante l\'eliminazione del prodotto.');
       }
-      this.openMenuId = null;
     }
-  },
-  mounted() {
-    document.addEventListener('click', this.handleClickOutside);
-  },
-  beforeUnmount() {
-    document.removeEventListener('click', this.handleClickOutside);
   }
 };
 </script>
 
 <style scoped>
+.page-header {
+  margin-bottom: 32px;
+  padding-bottom: 24px;
+  border-bottom: 2px solid #f1f3f4;
+}
+
+.models-content {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.cursor-pointer {
+  cursor: pointer;
+}
+
+.sortable:hover {
+  background-color: #f8f9fa !important;
+}
+
+.ml-1 {
+  margin-left: 4px;
+}
+
+.ml-2 {
+  margin-left: 8px;
+}
+
+/* Mobile specific styles */
+@media (max-width: 768px) {
+  .page-header h1 {
+    font-size: 24px;
+    margin-bottom: 16px;
+  }
+  
+  .models-content {
+    gap: 16px;
+  }
+  
+  .card {
+    padding: 16px;
+  }
+  
+  .btn-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  
+  .btn-group .btn {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+@media (max-width: 480px) {
+  .page-header {
+    margin-bottom: 20px;
+    padding-bottom: 16px;
+  }
+  
+  .page-header h1 {
+    font-size: 20px;
+  }
+  
+  .grid-2 {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Loading animation */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.card {
+  animation: fadeIn 0.3s ease-out;
+}
+
+/* Hover effects */
+.card:hover {
+  transform: translateY(-2px);
+}
+
+.btn:hover {
+  transform: translateY(-1px);
+}
+
+/* Focus states for accessibility */
+.btn:focus,
+.form-input:focus,
+.form-select:focus {
+  outline: 2px solid #42b983;
+  outline-offset: 2px;
+}
+
+/* Smooth transitions */
+* {
+  transition: all 0.2s ease;
+}
+
+/* Mobile Actions */
+.mobile-actions {
+  display: flex;
+  justify-content: flex-end;
+  padding-top: 12px;
+  border-top: 1px solid #e5e7eb;
+}
+
+/* Print styles */
+@media print {
+  .btn, .pagination, .page-header .flex, .mobile-actions {
+    display: none !important;
+  }
+  
+  .card {
+    box-shadow: none;
+    border: 1px solid #ddd;
+  }
+}
+
 .models {
   padding: 20px;
 }

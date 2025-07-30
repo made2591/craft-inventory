@@ -12,24 +12,18 @@
         </router-link>
       </div>
     </div>
-    
+
     <!-- Controls Card -->
     <div class="card">
       <div class="grid grid-auto gap-4">
         <div class="form-group" style="margin-bottom: 0;">
           <div class="flex items-center gap-2">
             <i class="fas fa-search text-muted"></i>
-            <input 
-              type="text" 
-              v-model="searchQuery" 
-              :placeholder="$t('inventory.searchPlaceholder')" 
-              @input="filterItems"
-              class="form-input"
-              style="margin: 0;"
-            >
+            <input type="text" v-model="searchQuery" :placeholder="$t('inventory.searchPlaceholder')"
+              @input="filterItems" class="form-input" style="margin: 0;">
           </div>
         </div>
-        
+
         <div class="form-group" style="margin-bottom: 0;">
           <div class="flex items-center gap-2">
             <i class="fas fa-filter text-muted"></i>
@@ -41,10 +35,11 @@
             </select>
           </div>
         </div>
-        
+
         <div class="form-group" style="margin-bottom: 0;">
           <div class="flex items-center gap-2">
-            <label for="itemsPerPage" class="form-label text-sm" style="margin: 0;">{{ $t('common.itemsPerPage') }}:</label>
+            <label for="itemsPerPage" class="form-label text-sm" style="margin: 0;">{{ $t('common.itemsPerPage')
+            }}:</label>
             <select id="itemsPerPage" v-model="itemsPerPage" @change="updatePagination" class="form-select">
               <option value="5">5</option>
               <option value="10">10</option>
@@ -62,14 +57,14 @@
         {{ $t('common.loading') }}
       </div>
     </div>
-    
+
     <div v-else-if="error" class="card text-center">
       <div class="text-danger">
         <i class="fas fa-exclamation-triangle"></i>
         {{ error }}
       </div>
     </div>
-    
+
     <div v-else-if="filteredItems.length === 0" class="card text-center">
       <div class="text-muted">
         <i class="fas fa-warehouse text-2xl"></i>
@@ -85,23 +80,28 @@
             <tr>
               <th @click="sortBy('modelSku')" class="sortable cursor-pointer">
                 {{ $t('inventory.modelSku') }}
-                <i v-if="sortKey === 'modelSku'" :class="sortOrder === 'asc' ? 'fas fa-sort-up' : 'fas fa-sort-down'" class="ml-1"></i>
+                <i v-if="sortKey === 'modelSku'" :class="sortOrder === 'asc' ? 'fas fa-sort-up' : 'fas fa-sort-down'"
+                  class="ml-1"></i>
               </th>
               <th @click="sortBy('modelName')" class="sortable cursor-pointer">
                 {{ $t('inventory.model') }}
-                <i v-if="sortKey === 'modelName'" :class="sortOrder === 'asc' ? 'fas fa-sort-up' : 'fas fa-sort-down'" class="ml-1"></i>
+                <i v-if="sortKey === 'modelName'" :class="sortOrder === 'asc' ? 'fas fa-sort-up' : 'fas fa-sort-down'"
+                  class="ml-1"></i>
               </th>
               <th @click="sortBy('quantity')" class="sortable cursor-pointer">
                 {{ $t('inventory.quantity') }}
-                <i v-if="sortKey === 'quantity'" :class="sortOrder === 'asc' ? 'fas fa-sort-up' : 'fas fa-sort-down'" class="ml-1"></i>
+                <i v-if="sortKey === 'quantity'" :class="sortOrder === 'asc' ? 'fas fa-sort-up' : 'fas fa-sort-down'"
+                  class="ml-1"></i>
               </th>
               <th @click="sortBy('productionDate')" class="sortable cursor-pointer">
                 {{ $t('inventory.productionDate') }}
-                <i v-if="sortKey === 'productionDate'" :class="sortOrder === 'asc' ? 'fas fa-sort-up' : 'fas fa-sort-down'" class="ml-1"></i>
+                <i v-if="sortKey === 'productionDate'"
+                  :class="sortOrder === 'asc' ? 'fas fa-sort-up' : 'fas fa-sort-down'" class="ml-1"></i>
               </th>
               <th @click="sortBy('notes')" class="sortable cursor-pointer">
                 {{ $t('inventory.notes') }}
-                <i v-if="sortKey === 'notes'" :class="sortOrder === 'asc' ? 'fas fa-sort-up' : 'fas fa-sort-down'" class="ml-1"></i>
+                <i v-if="sortKey === 'notes'" :class="sortOrder === 'asc' ? 'fas fa-sort-up' : 'fas fa-sort-down'"
+                  class="ml-1"></i>
               </th>
               <th>{{ $t('common.actions') }}</th>
             </tr>
@@ -127,10 +127,7 @@
                 <span v-else class="text-muted">N/A</span>
               </td>
               <td>
-                <ActionMenu 
-                  :actions="getInventoryActions(item)" 
-                  @action="handleInventoryAction($event, item)"
-                />
+                <ActionMenu :actions="getInventoryActions(item)" @action="handleInventoryAction($event, item)" />
               </td>
             </tr>
           </tbody>
@@ -143,7 +140,8 @@
           <div v-for="item in paginatedItems" :key="item.id" class="card">
             <div class="flex justify-between items-start mb-3">
               <div>
-                <router-link v-if="item.modelSku" :to="`/models/${item.modelId}/view`" class="text-lg font-bold text-primary">
+                <router-link v-if="item.modelSku" :to="`/models/${item.modelId}/view`"
+                  class="text-lg font-bold text-primary">
                   {{ item.modelName || 'N/A' }}
                 </router-link>
                 <h3 v-else class="text-lg font-bold">{{ item.modelName || 'N/A' }}</h3>
@@ -156,7 +154,7 @@
                 </span>
               </div>
             </div>
-            
+
             <div class="grid gap-3 mb-4">
               <div>
                 <p class="text-xs text-muted font-medium">{{ $t('inventory.productionDate') }}</p>
@@ -170,12 +168,9 @@
                 <p class="text-sm">{{ item.notes }}</p>
               </div>
             </div>
-            
+
             <div class="mobile-actions">
-              <ActionMenu 
-                :actions="getInventoryActions(item)" 
-                @action="handleInventoryAction($event, item)"
-              />
+              <ActionMenu :actions="getInventoryActions(item)" @action="handleInventoryAction($event, item)" />
             </div>
           </div>
         </div>
@@ -191,17 +186,14 @@
             </button>
 
             <div class="flex gap-1">
-              <button 
-                v-for="page in visiblePages" 
-                :key="page" 
-                @click="goToPage(page)"
-                :class="['btn', 'btn-sm', currentPage === page ? 'btn-primary' : 'btn-secondary']"
-              >
+              <button v-for="page in visiblePages" :key="page" @click="goToPage(page)"
+                :class="['btn', 'btn-sm', currentPage === page ? 'btn-primary' : 'btn-secondary']">
                 {{ page }}
               </button>
             </div>
 
-            <button @click="goToPage(currentPage + 1)" :disabled="currentPage === totalPages" class="btn btn-secondary btn-sm">
+            <button @click="goToPage(currentPage + 1)" :disabled="currentPage === totalPages"
+              class="btn btn-secondary btn-sm">
               <span class="hidden-mobile">{{ $t('common.next') }}</span>
               <i class="fas fa-chevron-right"></i>
             </button>
@@ -259,18 +251,18 @@ export default {
       const pages = [];
       const maxVisible = window.innerWidth < 768 ? 3 : 7;
       const half = Math.floor(maxVisible / 2);
-      
+
       let start = Math.max(1, this.currentPage - half);
       let end = Math.min(this.totalPages, start + maxVisible - 1);
-      
+
       if (end - start + 1 < maxVisible) {
         start = Math.max(1, end - maxVisible + 1);
       }
-      
+
       for (let i = start; i <= end; i++) {
         pages.push(i);
       }
-      
+
       return pages;
     }
   },
@@ -769,71 +761,71 @@ th.sortable:hover {
 /* M
 obile Responsive */
 @media (max-width: 768px) {
-  .page-header h1 {
-    font-size: 24px;
-    margin-bottom: 16px;
-  }
-  
-  .inventory-content {
-    gap: 16px;
-  }
-  
-  .card {
-    padding: 16px;
-  }
-  
-  .grid-auto {
-    grid-template-columns: 1fr;
-  }
+.page-header h1 {
+font-size: 24px;
+margin-bottom: 16px;
+}
+
+.inventory-content {
+gap: 16px;
+}
+
+.card {
+padding: 16px;
+}
+
+.grid-auto {
+grid-template-columns: 1fr;
+}
 }
 
 @media (max-width: 480px) {
-  .page-header {
-    margin-bottom: 20px;
-    padding-bottom: 16px;
-  }
-  
-  .page-header h1 {
-    font-size: 20px;
-  }
+.page-header {
+margin-bottom: 20px;
+padding-bottom: 16px;
+}
+
+.page-header h1 {
+font-size: 20px;
+}
 }
 
 /* Loading animation */
 @keyframes fadeIn {
-  from { opacity: 0; transform: translateY(10px); }
-  to { opacity: 1; transform: translateY(0); }
+from { opacity: 0; transform: translateY(10px); }
+to { opacity: 1; transform: translateY(0); }
 }
 
 .card {
-  animation: fadeIn 0.3s ease-out;
+animation: fadeIn 0.3s ease-out;
 }
 
 /* Focus states for accessibility */
 .btn:focus,
 .form-input:focus,
 .form-select:focus {
-  outline: 2px solid #42b983;
-  outline-offset: 2px;
+outline: 2px solid #42b983;
+outline-offset: 2px;
 }
 
 /* Smooth transitions */
 * {
-  transition: all 0.2s ease;
+transition: all 0.2s ease;
 }
 
 /* Print styles */
 @media print {
-  .btn, .pagination, .page-header .flex, .mobile-actions {
-    display: none !important;
-  }
-  
-  .card {
-    box-shadow: none;
-    border: 1px solid #ddd;
-  }
-  
-  .badge {
-    border: 1px solid #333 !important;
-    color: #333 !important;
-  }
+.btn, .pagination, .page-header .flex, .mobile-actions {
+display: none !important;
+}
+
+.card {
+box-shadow: none;
+border: 1px solid #ddd;
+}
+
+.badge {
+border: 1px solid #333 !important;
+color: #333 !important;
+}
 }
