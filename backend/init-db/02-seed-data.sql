@@ -118,9 +118,10 @@ VALUES
     ('a3eebc99-9c0b-4ef8-bb6d-6bb9bd380a20', 'a2eebc99-9c0b-4ef8-bb6d-6bb9bd380a17', 'b0eebc99-9c0b-4ef8-bb6d-6bb9bd380a15', NULL, 15.00, 3.50, NOW(), NOW()),
     ('a3eebc99-9c0b-4ef8-bb6d-6bb9bd380a21', 'a2eebc99-9c0b-4ef8-bb6d-6bb9bd380a18', 'b0eebc99-9c0b-4ef8-bb6d-6bb9bd380a14', NULL, 7.50, 60.00, NOW(), NOW());
 
--- Insert transactions (sales)
+-- Insert transactions (sales) - Extended with more recent data
 INSERT INTO transactions (id, transaction_type, date, supplier_id, customer_id, total_amount, status, notes, created_at, updated_at)
 VALUES
+    -- Vendite degli ultimi 6 mesi per popolare i grafici
     ('a4eebc99-9c0b-4ef8-bb6d-6bb9bd380a11', 'sale', NOW() - INTERVAL '40 days', NULL, 'a1eebc99-9c0b-4ef8-bb6d-6bb9bd380a11', 445.00, 'completed', 'Ordine mensile boutique', NOW(), NOW()),
     ('a4eebc99-9c0b-4ef8-bb6d-6bb9bd380a12', 'sale', NOW() - INTERVAL '35 days', NULL, 'a1eebc99-9c0b-4ef8-bb6d-6bb9bd380a12', 65.00, 'completed', 'Ordine cliente privato', NOW(), NOW()),
     ('a4eebc99-9c0b-4ef8-bb6d-6bb9bd380a13', 'sale', NOW() - INTERVAL '30 days', NULL, 'a1eebc99-9c0b-4ef8-bb6d-6bb9bd380a13', 267.00, 'completed', 'Ordine marketplace online', NOW(), NOW()),
@@ -128,17 +129,43 @@ VALUES
     ('a4eebc99-9c0b-4ef8-bb6d-6bb9bd380a15', 'sale', NOW() - INTERVAL '20 days', NULL, 'a1eebc99-9c0b-4ef8-bb6d-6bb9bd380a15', 110.00, 'completed', 'Ordine cliente privato', NOW(), NOW()),
     ('a4eebc99-9c0b-4ef8-bb6d-6bb9bd380a16', 'sale', NOW() - INTERVAL '15 days', NULL, 'a1eebc99-9c0b-4ef8-bb6d-6bb9bd380a11', 356.00, 'completed', 'Secondo ordine mensile boutique', NOW(), NOW()),
     ('a4eebc99-9c0b-4ef8-bb6d-6bb9bd380a17', 'sale', NOW() - INTERVAL '10 days', NULL, 'a1eebc99-9c0b-4ef8-bb6d-6bb9bd380a12', 120.00, 'completed', 'Ordine regalo cliente privato', NOW(), NOW()),
-    ('a4eebc99-9c0b-4ef8-bb6d-6bb9bd380a18', 'sale', NOW() - INTERVAL '5 days', NULL, 'a1eebc99-9c0b-4ef8-bb6d-6bb9bd380a13', 178.00, 'pending', 'Ordine marketplace online', NOW(), NOW()),
-    ('a4eebc99-9c0b-4ef8-bb6d-6bb9bd380a19', 'sale', NOW() - INTERVAL '3 days', NULL, 'a1eebc99-9c0b-4ef8-bb6d-6bb9bd380a14', 89.00, 'pending', 'Ordine urgente negozio eco-friendly', NOW(), NOW()),
-    ('a4eebc99-9c0b-4ef8-bb6d-6bb9bd380a20', 'sale', NOW() - INTERVAL '1 day', NULL, 'a1eebc99-9c0b-4ef8-bb6d-6bb9bd380a11', 275.00, 'pending', 'Ordine speciale boutique', NOW(), NOW()),
+    ('a4eebc99-9c0b-4ef8-bb6d-6bb9bd380a18', 'sale', NOW() - INTERVAL '5 days', NULL, 'a1eebc99-9c0b-4ef8-bb6d-6bb9bd380a13', 178.00, 'completed', 'Ordine marketplace online', NOW(), NOW()),
+    ('a4eebc99-9c0b-4ef8-bb6d-6bb9bd380a19', 'sale', NOW() - INTERVAL '3 days', NULL, 'a1eebc99-9c0b-4ef8-bb6d-6bb9bd380a14', 89.00, 'completed', 'Ordine urgente negozio eco-friendly', NOW(), NOW()),
+    ('a4eebc99-9c0b-4ef8-bb6d-6bb9bd380a20', 'sale', NOW() - INTERVAL '1 day', NULL, 'a1eebc99-9c0b-4ef8-bb6d-6bb9bd380a11', 275.00, 'completed', 'Ordine speciale boutique', NOW(), NOW()),
     ('a4eebc99-9c0b-4ef8-bb6d-6bb9bd380a21', 'sale', NOW() - INTERVAL '28 days', NULL, 'a1eebc99-9c0b-4ef8-bb6d-6bb9bd380a14', 599.00, 'completed', 'Vendita tavolo rustico', NOW(), NOW()),
     ('a4eebc99-9c0b-4ef8-bb6d-6bb9bd380a22', 'sale', NOW() - INTERVAL '22 days', NULL, 'a1eebc99-9c0b-4ef8-bb6d-6bb9bd380a13', 1198.00, 'completed', 'Vendita due tavoli rustici', NOW(), NOW()),
     ('a4eebc99-9c0b-4ef8-bb6d-6bb9bd380a23', 'sale', NOW() - INTERVAL '18 days', NULL, 'a1eebc99-9c0b-4ef8-bb6d-6bb9bd380a11', 398.00, 'completed', 'Vendita due sedie moderne', NOW(), NOW()),
-    ('a4eebc99-9c0b-4ef8-bb6d-6bb9bd380a24', 'sale', NOW() - INTERVAL '12 days', NULL, 'a1eebc99-9c0b-4ef8-bb6d-6bb9bd380a15', 258.00, 'completed', 'Vendita due lampade artigianali', NOW(), NOW());
+    ('a4eebc99-9c0b-4ef8-bb6d-6bb9bd380a24', 'sale', NOW() - INTERVAL '12 days', NULL, 'a1eebc99-9c0b-4ef8-bb6d-6bb9bd380a15', 258.00, 'completed', 'Vendita due lampade artigianali', NOW(), NOW()),
+    
+    -- Vendite del mese scorso
+    ('a4eebc99-9c0b-4ef8-bb6d-6bb9bd380a25', 'sale', NOW() - INTERVAL '45 days', NULL, 'a1eebc99-9c0b-4ef8-bb6d-6bb9bd380a11', 890.00, 'completed', 'Ordine grande boutique', NOW(), NOW()),
+    ('a4eebc99-9c0b-4ef8-bb6d-6bb9bd380a26', 'sale', NOW() - INTERVAL '50 days', NULL, 'a1eebc99-9c0b-4ef8-bb6d-6bb9bd380a12', 178.00, 'completed', 'Ordine cliente privato', NOW(), NOW()),
+    ('a4eebc99-9c0b-4ef8-bb6d-6bb9bd380a27', 'sale', NOW() - INTERVAL '55 days', NULL, 'a1eebc99-9c0b-4ef8-bb6d-6bb9bd380a13', 445.00, 'completed', 'Ordine marketplace', NOW(), NOW()),
+    
+    -- Vendite di 2 mesi fa
+    ('a4eebc99-9c0b-4ef8-bb6d-6bb9bd380a28', 'sale', NOW() - INTERVAL '75 days', NULL, 'a1eebc99-9c0b-4ef8-bb6d-6bb9bd380a11', 1200.00, 'completed', 'Ordine speciale boutique', NOW(), NOW()),
+    ('a4eebc99-9c0b-4ef8-bb6d-6bb9bd380a29', 'sale', NOW() - INTERVAL '80 days', NULL, 'a1eebc99-9c0b-4ef8-bb6d-6bb9bd380a14', 356.00, 'completed', 'Ordine negozio eco', NOW(), NOW()),
+    ('a4eebc99-9c0b-4ef8-bb6d-6bb9bd380a30', 'sale', NOW() - INTERVAL '85 days', NULL, 'a1eebc99-9c0b-4ef8-bb6d-6bb9bd380a15', 267.00, 'completed', 'Ordine cliente privato', NOW(), NOW()),
+    
+    -- Vendite di 3 mesi fa
+    ('a4eebc99-9c0b-4ef8-bb6d-6bb9bd380a31', 'sale', NOW() - INTERVAL '105 days', NULL, 'a1eebc99-9c0b-4ef8-bb6d-6bb9bd380a11', 890.00, 'completed', 'Ordine boutique', NOW(), NOW()),
+    ('a4eebc99-9c0b-4ef8-bb6d-6bb9bd380a32', 'sale', NOW() - INTERVAL '110 days', NULL, 'a1eebc99-9c0b-4ef8-bb6d-6bb9bd380a13', 534.00, 'completed', 'Ordine marketplace', NOW(), NOW()),
+    ('a4eebc99-9c0b-4ef8-bb6d-6bb9bd380a33', 'sale', NOW() - INTERVAL '115 days', NULL, 'a1eebc99-9c0b-4ef8-bb6d-6bb9bd380a12', 178.00, 'completed', 'Ordine privato', NOW(), NOW()),
+    
+    -- Vendite di 4 mesi fa
+    ('a4eebc99-9c0b-4ef8-bb6d-6bb9bd380a34', 'sale', NOW() - INTERVAL '135 days', NULL, 'a1eebc99-9c0b-4ef8-bb6d-6bb9bd380a11', 1456.00, 'completed', 'Ordine grande boutique', NOW(), NOW()),
+    ('a4eebc99-9c0b-4ef8-bb6d-6bb9bd380a35', 'sale', NOW() - INTERVAL '140 days', NULL, 'a1eebc99-9c0b-4ef8-bb6d-6bb9bd380a14', 445.00, 'completed', 'Ordine negozio eco', NOW(), NOW()),
+    ('a4eebc99-9c0b-4ef8-bb6d-6bb9bd380a36', 'sale', NOW() - INTERVAL '145 days', NULL, 'a1eebc99-9c0b-4ef8-bb6d-6bb9bd380a15', 267.00, 'completed', 'Ordine cliente', NOW(), NOW()),
+    
+    -- Vendite di 5 mesi fa
+    ('a4eebc99-9c0b-4ef8-bb6d-6bb9bd380a37', 'sale', NOW() - INTERVAL '165 days', NULL, 'a1eebc99-9c0b-4ef8-bb6d-6bb9bd380a11', 1123.00, 'completed', 'Ordine boutique', NOW(), NOW()),
+    ('a4eebc99-9c0b-4ef8-bb6d-6bb9bd380a38', 'sale', NOW() - INTERVAL '170 days', NULL, 'a1eebc99-9c0b-4ef8-bb6d-6bb9bd380a13', 678.00, 'completed', 'Ordine marketplace', NOW(), NOW()),
+    ('a4eebc99-9c0b-4ef8-bb6d-6bb9bd380a39', 'sale', NOW() - INTERVAL '175 days', NULL, 'a1eebc99-9c0b-4ef8-bb6d-6bb9bd380a12', 356.00, 'completed', 'Ordine privato', NOW(), NOW());
 
--- Insert transaction items for sales
+-- Insert transaction items for sales - Extended with more data
 INSERT INTO transaction_items (id, transaction_id, material_id, product_model_id, quantity, unit_price, created_at, updated_at)
 VALUES
+    -- Items per le transazioni esistenti
     ('a5eebc99-9c0b-4ef8-bb6d-6bb9bd380a11', 'a4eebc99-9c0b-4ef8-bb6d-6bb9bd380a11', NULL, 'e0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11', 5, 89.00, NOW(), NOW()),
     ('a5eebc99-9c0b-4ef8-bb6d-6bb9bd380a12', 'a4eebc99-9c0b-4ef8-bb6d-6bb9bd380a12', NULL, 'e0eebc99-9c0b-4ef8-bb6d-6bb9bd380a12', 1, 65.00, NOW(), NOW()),
     ('a5eebc99-9c0b-4ef8-bb6d-6bb9bd380a13', 'a4eebc99-9c0b-4ef8-bb6d-6bb9bd380a13', NULL, 'e0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11', 3, 89.00, NOW(), NOW()),
@@ -155,7 +182,37 @@ VALUES
     ('a5eebc99-9c0b-4ef8-bb6d-6bb9bd380a24', 'a4eebc99-9c0b-4ef8-bb6d-6bb9bd380a21', NULL, 'e0eebc99-9c0b-4ef8-bb6d-6bb9bd380a16', 1, 599.00, NOW(), NOW()),
     ('a5eebc99-9c0b-4ef8-bb6d-6bb9bd380a25', 'a4eebc99-9c0b-4ef8-bb6d-6bb9bd380a22', NULL, 'e0eebc99-9c0b-4ef8-bb6d-6bb9bd380a16', 2, 599.00, NOW(), NOW()),
     ('a5eebc99-9c0b-4ef8-bb6d-6bb9bd380a26', 'a4eebc99-9c0b-4ef8-bb6d-6bb9bd380a23', NULL, 'e0eebc99-9c0b-4ef8-bb6d-6bb9bd380a17', 2, 199.00, NOW(), NOW()),
-    ('a5eebc99-9c0b-4ef8-bb6d-6bb9bd380a27', 'a4eebc99-9c0b-4ef8-bb6d-6bb9bd380a24', NULL, 'e0eebc99-9c0b-4ef8-bb6d-6bb9bd380a18', 2, 129.00, NOW(), NOW());
+    ('a5eebc99-9c0b-4ef8-bb6d-6bb9bd380a27', 'a4eebc99-9c0b-4ef8-bb6d-6bb9bd380a24', NULL, 'e0eebc99-9c0b-4ef8-bb6d-6bb9bd380a18', 2, 129.00, NOW(), NOW()),
+    
+    -- Items per le nuove transazioni
+    ('a5eebc99-9c0b-4ef8-bb6d-6bb9bd380a28', 'a4eebc99-9c0b-4ef8-bb6d-6bb9bd380a25', NULL, 'e0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11', 10, 89.00, NOW(), NOW()),
+    ('a5eebc99-9c0b-4ef8-bb6d-6bb9bd380a29', 'a4eebc99-9c0b-4ef8-bb6d-6bb9bd380a26', NULL, 'e0eebc99-9c0b-4ef8-bb6d-6bb9bd380a13', 2, 55.00, NOW(), NOW()),
+    ('a5eebc99-9c0b-4ef8-bb6d-6bb9bd380a30', 'a4eebc99-9c0b-4ef8-bb6d-6bb9bd380a26', NULL, 'e0eebc99-9c0b-4ef8-bb6d-6bb9bd380a15', 2, 25.00, NOW(), NOW()),
+    ('a5eebc99-9c0b-4ef8-bb6d-6bb9bd380a31', 'a4eebc99-9c0b-4ef8-bb6d-6bb9bd380a26', NULL, 'e0eebc99-9c0b-4ef8-bb6d-6bb9bd380a18', 1, 129.00, NOW(), NOW()),
+    ('a5eebc99-9c0b-4ef8-bb6d-6bb9bd380a32', 'a4eebc99-9c0b-4ef8-bb6d-6bb9bd380a27', NULL, 'e0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11', 5, 89.00, NOW(), NOW()),
+    
+    ('a5eebc99-9c0b-4ef8-bb6d-6bb9bd380a33', 'a4eebc99-9c0b-4ef8-bb6d-6bb9bd380a28', NULL, 'e0eebc99-9c0b-4ef8-bb6d-6bb9bd380a16', 2, 599.00, NOW(), NOW()),
+    ('a5eebc99-9c0b-4ef8-bb6d-6bb9bd380a34', 'a4eebc99-9c0b-4ef8-bb6d-6bb9bd380a29', NULL, 'e0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11', 4, 89.00, NOW(), NOW()),
+    ('a5eebc99-9c0b-4ef8-bb6d-6bb9bd380a35', 'a4eebc99-9c0b-4ef8-bb6d-6bb9bd380a30', NULL, 'e0eebc99-9c0b-4ef8-bb6d-6bb9bd380a13', 3, 55.00, NOW(), NOW()),
+    ('a5eebc99-9c0b-4ef8-bb6d-6bb9bd380a36', 'a4eebc99-9c0b-4ef8-bb6d-6bb9bd380a30', NULL, 'e0eebc99-9c0b-4ef8-bb6d-6bb9bd380a17', 1, 199.00, NOW(), NOW()),
+    
+    ('a5eebc99-9c0b-4ef8-bb6d-6bb9bd380a37', 'a4eebc99-9c0b-4ef8-bb6d-6bb9bd380a31', NULL, 'e0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11', 10, 89.00, NOW(), NOW()),
+    ('a5eebc99-9c0b-4ef8-bb6d-6bb9bd380a38', 'a4eebc99-9c0b-4ef8-bb6d-6bb9bd380a32', NULL, 'e0eebc99-9c0b-4ef8-bb6d-6bb9bd380a16', 1, 599.00, NOW(), NOW()),
+    ('a5eebc99-9c0b-4ef8-bb6d-6bb9bd380a39', 'a4eebc99-9c0b-4ef8-bb6d-6bb9bd380a33', NULL, 'e0eebc99-9c0b-4ef8-bb6d-6bb9bd380a13', 2, 55.00, NOW(), NOW()),
+    ('a5eebc99-9c0b-4ef8-bb6d-6bb9bd380a40', 'a4eebc99-9c0b-4ef8-bb6d-6bb9bd380a33', NULL, 'e0eebc99-9c0b-4ef8-bb6d-6bb9bd380a15', 2, 25.00, NOW(), NOW()),
+    ('a5eebc99-9c0b-4ef8-bb6d-6bb9bd380a41', 'a4eebc99-9c0b-4ef8-bb6d-6bb9bd380a33', NULL, 'e0eebc99-9c0b-4ef8-bb6d-6bb9bd380a18', 1, 129.00, NOW(), NOW()),
+    
+    ('a5eebc99-9c0b-4ef8-bb6d-6bb9bd380a42', 'a4eebc99-9c0b-4ef8-bb6d-6bb9bd380a34', NULL, 'e0eebc99-9c0b-4ef8-bb6d-6bb9bd380a16', 2, 599.00, NOW(), NOW()),
+    ('a5eebc99-9c0b-4ef8-bb6d-6bb9bd380a43', 'a4eebc99-9c0b-4ef8-bb6d-6bb9bd380a34', NULL, 'e0eebc99-9c0b-4ef8-bb6d-6bb9bd380a17', 1, 199.00, NOW(), NOW()),
+    ('a5eebc99-9c0b-4ef8-bb6d-6bb9bd380a44', 'a4eebc99-9c0b-4ef8-bb6d-6bb9bd380a35', NULL, 'e0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11', 5, 89.00, NOW(), NOW()),
+    ('a5eebc99-9c0b-4ef8-bb6d-6bb9bd380a45', 'a4eebc99-9c0b-4ef8-bb6d-6bb9bd380a36', NULL, 'e0eebc99-9c0b-4ef8-bb6d-6bb9bd380a13', 3, 55.00, NOW(), NOW()),
+    ('a5eebc99-9c0b-4ef8-bb6d-6bb9bd380a46', 'a4eebc99-9c0b-4ef8-bb6d-6bb9bd380a36', NULL, 'e0eebc99-9c0b-4ef8-bb6d-6bb9bd380a15', 2, 25.00, NOW(), NOW()),
+    ('a5eebc99-9c0b-4ef8-bb6d-6bb9bd380a47', 'a4eebc99-9c0b-4ef8-bb6d-6bb9bd380a36', NULL, 'e0eebc99-9c0b-4ef8-bb6d-6bb9bd380a18', 1, 129.00, NOW(), NOW()),
+    
+    ('a5eebc99-9c0b-4ef8-bb6d-6bb9bd380a48', 'a4eebc99-9c0b-4ef8-bb6d-6bb9bd380a37', NULL, 'e0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11', 8, 89.00, NOW(), NOW()),
+    ('a5eebc99-9c0b-4ef8-bb6d-6bb9bd380a49', 'a4eebc99-9c0b-4ef8-bb6d-6bb9bd380a37', NULL, 'e0eebc99-9c0b-4ef8-bb6d-6bb9bd380a17', 2, 199.00, NOW(), NOW()),
+    ('a5eebc99-9c0b-4ef8-bb6d-6bb9bd380a50', 'a4eebc99-9c0b-4ef8-bb6d-6bb9bd380a38', NULL, 'e0eebc99-9c0b-4ef8-bb6d-6bb9bd380a16', 1, 599.00, NOW(), NOW()),
+    ('a5eebc99-9c0b-4ef8-bb6d-6bb9bd380a51', 'a4eebc99-9c0b-4ef8-bb6d-6bb9bd380a39', NULL, 'e0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11', 4, 89.00, NOW(), NOW());
 
 -- Insert a user for testing
 INSERT INTO users (id, username, email, password, created_at, updated_at)
