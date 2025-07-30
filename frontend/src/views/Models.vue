@@ -80,11 +80,11 @@
               </span>
             </th>
             <th>{{ $t('models.margin') }}</th>
-            <th>{{ $t('common.actions') }}</th>
+            <!-- Removed actions column header -->
           </tr>
         </thead>
         <tbody>
-          <tr v-for="model in paginatedModels" :key="model.id">
+          <tr v-for="model in paginatedModels" :key="model.id" style="position:relative;">
             <td>
               <router-link :to="`/models/${model.id}/view`" class="sku-link">
                 <strong>{{ model.sku || 'N/A' }}</strong>
@@ -96,10 +96,15 @@
             <td>{{ $formatCost(model.sellingPrice || model.selling_price) }}</td>
             <td>{{ formatTime(model.laborTimeMinutes || model.labor_time_minutes) }}</td>
             <td>{{ calculateMargin(model) }}%</td>
-            <td class="actions">
-              <button @click="viewModel(model.id)" class="btn btn-sm btn-view">{{ $t('common.view') }}</button>
-              <button @click="editModel(model.id)" class="btn btn-sm btn-edit">{{ $t('common.edit') }}</button>
-              <button @click="deleteModel(model.id)" class="btn btn-sm btn-danger">{{ $t('common.delete') }}</button>
+            <td style="position:relative;">
+              <div class="actions-menu-row" @mousedown.stop @click.stop>
+                <button @mousedown.stop @click.stop="toggleMenu(model.id)" class="btn btn-sm btn-menu">&#8942;</button>
+                <div v-if="openMenuId === model.id" class="menu-dropdown" @mousedown.stop @click.stop>
+                  <button @click="viewModel(model.id)" class="btn btn-sm btn-view">{{ $t('common.view') }}</button>
+                  <button @click="editModel(model.id)" class="btn btn-sm btn-edit">{{ $t('common.edit') }}</button>
+                  <button @click="deleteModel(model.id)" class="btn btn-sm btn-danger">{{ $t('common.delete') }}</button>
+                </div>
+              </div>
             </td>
           </tr>
         </tbody>
@@ -157,7 +162,8 @@ export default {
       sortKey: 'name',
       sortOrder: 'asc',
       currentPage: 1,
-      itemsPerPage: 10
+      itemsPerPage: 10,
+      openMenuId: null // Per il menu azioni
     };
   },
   computed: {
@@ -284,28 +290,55 @@ export default {
       return margin.toFixed(1);
     },
     
+    toggleMenu(id) {
+      this.openMenuId = this.openMenuId === id ? null : id;
+    },
+    
+    handleClickOutside(event) {
+      if (this.openMenuId !== null) {
+        const menus = document.querySelectorAll('.menu-dropdown');
+        let clickedInside = false;
+        menus.forEach(menu => {
+          if (menu.contains(event.target)) {
+            clickedInside = true;
+          }
+        });
+        if (!clickedInside) {
+          this.openMenuId = null;
+        }
+      }
+    },
+    
     viewModel(id) {
       this.$router.push(`/models/${id}/view`);
+      this.openMenuId = null;
     },
     
     editModel(id) {
       this.$router.push(`/models/${id}`);
+      this.openMenuId = null;
     },
     
     async deleteModel(id) {
-      if (!confirm(this.$t('models.confirmDelete'))) {
+      if (!confirm('Sei sicuro di voler eliminare questo prodotto?')) {
         return;
       }
-      
       try {
-        await api.delete(`/api/models/${id}`);
+        await this.$api.delete(`/api/models/${id}`);
         this.models = this.models.filter(m => m.id !== id);
         this.filterModels();
       } catch (error) {
         console.error('Error deleting model:', error);
-        alert(this.$t('errors.deleteModel'));
+        alert('Si è verificato un errore durante l\'eliminazione del prodotto.');
       }
+      this.openMenuId = null;
     }
+  },
+  mounted() {
+    document.addEventListener('click', this.handleClickOutside);
+  },
+  beforeUnmount() {
+    document.removeEventListener('click', this.handleClickOutside);
   }
 };
 </script>
@@ -474,5 +507,90 @@ th.sortable:hover {
   text-align: center;
   color: #6c757d;
   font-size: 14px;
+}
+
+.actions-menu-row {
+  position: absolute;
+  right: 12px;
+  bottom: 8px;
+  display: flex;
+  align-items: flex-end;
+  z-index: 20;
+}
+
+.btn-menu {
+  background-color: transparent;
+  color: #333;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  font-size: 16px;
+}
+
+.menu-dropdown {
+  position: absolute;
+  right: 0;
+  bottom: 36px;
+  background: #fff;
+  border: 1px solid #ddd;
+  border-radius: 10px;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.14);
+  z-index: 30;
+  display: flex;
+  flex-direction: column;
+  min-width: 150px;
+  padding: 18px 16px;
+  gap: 14px;
+}
+
+.menu-dropdown .btn {
+  margin: 0;
+  width: 100%;
+  text-align: left;
+  padding: 10px 16px;
+  border-radius: 8px;
+  background: none;
+  color: #222;
+  font-size: 16px;
+  font-weight: 500;
+  box-shadow: none;
+  border: none;
+  transition: box-shadow 0.2s, background 0.2s;
+  display: flex;
+  align-items: center;
+  min-height: 40px;
+}
+
+.menu-dropdown .btn:hover {
+  background: #f5f5f5;
+  box-shadow: 0 2px 8px rgba(66,185,131,0.12);
+  color: #222;
+}
+
+.menu-dropdown .btn-danger {
+  color: #dc3545;
+}
+
+.menu-dropdown .btn-danger:hover {
+  background: #fbeaea;
+  box-shadow: 0 2px 8px rgba(220,53,69,0.12);
+}
+
+.menu-dropdown .btn-view {
+  color: #17a2b8;
+}
+
+.menu-dropdown .btn-edit {
+  color: #3498db;
+}
+
+.menu-dropdown .btn-view:hover {
+  background: #e6f7fa;
+  box-shadow: 0 2px 8px rgba(23,162,184,0.12);
+}
+
+.menu-dropdown .btn-edit:hover {
+  background: #eaf4fb;
+  box-shadow: 0 2px 8px rgba(52,152,219,0.12);
 }
 </style>
