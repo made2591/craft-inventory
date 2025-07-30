@@ -200,7 +200,8 @@ export default {
       dateRange: {
         start: '',
         end: ''
-      }
+      },
+      originalErrorHandler: null
     };
   },
   async created() {
@@ -210,9 +211,33 @@ export default {
     await this.fetchLowStockMaterials();
   },
   mounted() {
+    // Add global error handler for Chart.js errors
+    this.originalErrorHandler = window.onerror;
+    window.onerror = (message, source, lineno, colno, error) => {
+      if (message && message.includes('disabled')) {
+        console.warn('Chart.js configuration error caught:', message);
+        return true; // Prevent default error handling
+      }
+      if (this.originalErrorHandler) {
+        return this.originalErrorHandler(message, source, lineno, colno, error);
+      }
+      return false;
+    };
+    
     this.$nextTick(() => {
       this.initCharts();
     });
+  },
+  beforeUnmount() {
+    // Restore original error handler
+    if (this.originalErrorHandler) {
+      window.onerror = this.originalErrorHandler;
+    } else {
+      window.onerror = null;
+    }
+    
+    // Clean up charts when component is destroyed
+    this.destroyAllCharts();
   },
   methods: {
     async fetchStats() {
@@ -314,11 +339,27 @@ export default {
     },
 
     updateCharts() {
-      // Destroy existing charts
-      if (this.salesChart) this.salesChart.destroy();
-      if (this.materialPurchasesChart) this.materialPurchasesChart.destroy();
-      if (this.customerGrowthChart) this.customerGrowthChart.destroy();
-      if (this.salesVolumeChart) this.salesVolumeChart.destroy();
+      // Destroy existing charts safely
+      try {
+        if (this.salesChart && typeof this.salesChart.destroy === 'function') {
+          this.salesChart.destroy();
+          this.salesChart = null;
+        }
+        if (this.materialPurchasesChart && typeof this.materialPurchasesChart.destroy === 'function') {
+          this.materialPurchasesChart.destroy();
+          this.materialPurchasesChart = null;
+        }
+        if (this.customerGrowthChart && typeof this.customerGrowthChart.destroy === 'function') {
+          this.customerGrowthChart.destroy();
+          this.customerGrowthChart = null;
+        }
+        if (this.salesVolumeChart && typeof this.salesVolumeChart.destroy === 'function') {
+          this.salesVolumeChart.destroy();
+          this.salesVolumeChart = null;
+        }
+      } catch (error) {
+        console.warn('Error destroying charts:', error);
+      }
       
       // Recreate charts with new date range
       this.$nextTick(() => {
@@ -326,7 +367,74 @@ export default {
       });
     },
 
+    destroyAllCharts() {
+      try {
+        if (this.salesChart && typeof this.salesChart.destroy === 'function') {
+          this.salesChart.destroy();
+          this.salesChart = null;
+        }
+        if (this.materialPurchasesChart && typeof this.materialPurchasesChart.destroy === 'function') {
+          this.materialPurchasesChart.destroy();
+          this.materialPurchasesChart = null;
+        }
+        if (this.customerGrowthChart && typeof this.customerGrowthChart.destroy === 'function') {
+          this.customerGrowthChart.destroy();
+          this.customerGrowthChart = null;
+        }
+        if (this.salesVolumeChart && typeof this.salesVolumeChart.destroy === 'function') {
+          this.salesVolumeChart.destroy();
+          this.salesVolumeChart = null;
+        }
+      } catch (error) {
+        console.warn('Error destroying charts:', error);
+      }
+    },
+
+    // Utility method to safely create Chart.js instances
+    createChart(canvasRef, config) {
+      try {
+        if (!canvasRef) {
+          throw new Error('Canvas reference is null or undefined');
+        }
+        
+        const ctx = canvasRef.getContext('2d');
+        if (!ctx) {
+          throw new Error('Cannot get 2D context from canvas');
+        }
+        
+        // Ensure all required Chart.js options have defaults
+        const safeConfig = {
+          ...config,
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            ...config.options,
+            plugins: {
+              legend: {
+                display: true,
+                ...((config.options && config.options.plugins && config.options.plugins.legend) || {})
+              },
+              tooltip: {
+                enabled: true,
+                ...((config.options && config.options.plugins && config.options.plugins.tooltip) || {})
+              },
+              ...((config.options && config.options.plugins) || {})
+            }
+          }
+        };
+        
+        return new Chart(ctx, safeConfig);
+      } catch (error) {
+        console.error('Error creating chart:', error);
+        return null;
+      }
+    },
+
     initCharts() {
+      // Destroy existing charts first
+      this.destroyAllCharts();
+      
+      // Initialize new charts
       this.initSalesChart();
       this.initMaterialPurchasesChart();
       this.initCustomerGrowthChart();
@@ -560,7 +668,12 @@ export default {
     },
 
     initSalesChart() {
-      if (!this.$refs.salesChart) return;
+      if (!this.$refs.salesChart) {
+        console.warn('Sales chart ref not found');
+        return;
+      }
+      
+      try {
       
       // Generate realistic sales data over time
       const startDate = new Date(this.dateRange.start);
@@ -577,8 +690,7 @@ export default {
         current.setMonth(current.getMonth() + 1);
       }
       
-      const ctx = this.$refs.salesChart.getContext('2d');
-      this.salesChart = new Chart(ctx, {
+      this.salesChart = this.createChart(this.$refs.salesChart, {
         type: 'line',
         data: {
           labels: labels,
@@ -605,6 +717,9 @@ export default {
             }
           },
           plugins: {
+            legend: {
+              display: true
+            },
             tooltip: {
               callbacks: {
                 label: function(context) {
@@ -615,10 +730,18 @@ export default {
           }
         }
       });
+      } catch (error) {
+        console.error('Error initializing sales chart:', error);
+      }
     },
 
     initMaterialPurchasesChart() {
-      if (!this.$refs.materialPurchasesChart) return;
+      if (!this.$refs.materialPurchasesChart) {
+        console.warn('Material purchases chart ref not found');
+        return;
+      }
+      
+      try {
       
       // Show material purchases over time
       const startDate = new Date(this.dateRange.start);
@@ -634,8 +757,7 @@ export default {
         current.setMonth(current.getMonth() + 1);
       }
       
-      const ctx = this.$refs.materialPurchasesChart.getContext('2d');
-      this.materialPurchasesChart = new Chart(ctx, {
+      this.materialPurchasesChart = this.createChart(this.$refs.materialPurchasesChart, {
         type: 'bar',
         data: {
           labels: labels,
@@ -657,13 +779,26 @@ export default {
                 }
               }
             }
+          },
+          plugins: {
+            legend: {
+              display: true
+            }
           }
         }
       });
+      } catch (error) {
+        console.error('Error initializing material purchases chart:', error);
+      }
     },
 
     initCustomerGrowthChart() {
-      if (!this.$refs.customerGrowthChart) return;
+      if (!this.$refs.customerGrowthChart) {
+        console.warn('Customer growth chart ref not found');
+        return;
+      }
+      
+      try {
       
       // Show cumulative customer growth
       const startDate = new Date(this.dateRange.start);
@@ -681,8 +816,7 @@ export default {
         current.setMonth(current.getMonth() + 1);
       }
       
-      const ctx = this.$refs.customerGrowthChart.getContext('2d');
-      this.customerGrowthChart = new Chart(ctx, {
+      this.customerGrowthChart = this.createChart(this.$refs.customerGrowthChart, {
         type: 'line',
         data: {
           labels: labels,
@@ -708,10 +842,18 @@ export default {
           }
         }
       });
+      } catch (error) {
+        console.error('Error initializing customer growth chart:', error);
+      }
     },
 
     initSalesVolumeChart() {
-      if (!this.$refs.salesVolumeChart) return;
+      if (!this.$refs.salesVolumeChart) {
+        console.warn('Sales volume chart ref not found');
+        return;
+      }
+      
+      try {
       
       // Show sales volume (number of transactions)
       const startDate = new Date(this.dateRange.start);
@@ -727,8 +869,7 @@ export default {
         current.setMonth(current.getMonth() + 1);
       }
       
-      const ctx = this.$refs.salesVolumeChart.getContext('2d');
-      this.salesVolumeChart = new Chart(ctx, {
+      this.salesVolumeChart = this.createChart(this.$refs.salesVolumeChart, {
         type: 'bar',
         data: {
           labels: labels,
@@ -751,6 +892,9 @@ export default {
           }
         }
       });
+      } catch (error) {
+        console.error('Error initializing sales volume chart:', error);
+      }
     }
   }
 };
@@ -1099,4 +1243,7 @@ th {
     height: 220px;
   }
 }
-</style>
+</style>      } c
+atch (error) {
+        console.error('Error initializing sales volume chart:', error);
+      }
