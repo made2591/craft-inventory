@@ -58,11 +58,11 @@
             <th>{{ $t('transactions.clientSupplier') }}</th>
             <th>{{ $t('transactions.totalAmount') }}</th>
             <th>{{ $t('transactions.status') }}</th>
-            <th>{{ $t('common.actions') }}</th>
+            <!-- Removed actions column header -->
           </tr>
         </thead>
         <tbody>
-          <tr v-for="transaction in paginatedTransactions" :key="transaction.id" :class="getStatusClass(transaction.status)">
+          <tr v-for="transaction in paginatedTransactions" :key="transaction.id" :class="getStatusClass(transaction.status)" style="position:relative;">
             <td>{{ formatDate(transaction.date) }}</td>
             <td>{{ formatType(transaction.transactionType) }}</td>
             <td>
@@ -75,44 +75,13 @@
             </td>
             <td>{{ $formatCost(transaction.totalAmount) }}</td>
             <td>{{ formatStatus(transaction.status) }}</td>
-            <td class="actions">
-              <div class="dropdown" :class="{ 'dropdown-open': openDropdown === transaction.id }">
-                <button 
-                  @click="toggleDropdown(transaction.id)" 
-                  class="btn btn-sm dropdown-toggle"
-                  :aria-expanded="openDropdown === transaction.id"
-                >
-                  ⋮
-                </button>
-                <div class="dropdown-menu" v-show="openDropdown === transaction.id">
-                  <router-link 
-                    :to="`/transactions/${transaction.id}`" 
-                    class="dropdown-item"
-                    @click="closeDropdown"
-                  >
-                    {{ $t('common.details') }}
-                  </router-link>
-                  <button 
-                    v-if="transaction.status === 'pending'" 
-                    @click="updateStatus(transaction.id, 'completed')" 
-                    class="dropdown-item btn-success-item"
-                  >
-                    {{ $t('transactions.complete') }}
-                  </button>
-                  <button 
-                    v-if="transaction.status === 'pending'" 
-                    @click="updateStatus(transaction.id, 'cancelled')" 
-                    class="dropdown-item btn-warning-item"
-                  >
-                    {{ $t('transactions.cancel') }}
-                  </button>
-                  <button 
-                    v-if="transaction.status !== 'completed'" 
-                    @click="deleteTransaction(transaction.id)" 
-                    class="dropdown-item btn-danger-item"
-                  >
-                    {{ $t('common.delete') }}
-                  </button>
+            <td style="position:relative;">
+              <div class="actions-menu-row" @mousedown.stop @click.stop>
+                <button @mousedown.stop @click.stop="toggleMenu(transaction.id)" class="btn btn-sm btn-menu">&#8942;</button>
+                <div v-if="openMenuId === transaction.id" class="menu-dropdown" @mousedown.stop @click.stop>
+                  <button @click="viewTransaction(transaction.id)" class="btn btn-sm btn-view">{{ $t('common.view') }}</button>
+                  <button @click="editTransaction(transaction.id)" class="btn btn-sm btn-edit">{{ $t('common.edit') }}</button>
+                  <button @click="deleteTransaction(transaction.id)" class="btn btn-sm btn-danger">{{ $t('common.delete') }}</button>
                 </div>
               </div>
             </td>
@@ -202,7 +171,8 @@ export default {
       itemsPerPage: 10,
       totalItems: 0,
       totalPages: 0,
-      openDropdown: null
+      openDropdown: null,
+      openMenuId: null
     };
   },
   computed: {
@@ -274,9 +244,18 @@ export default {
       this.openDropdown = null;
     },
     
+    toggleMenu(transactionId) {
+      if (this.openMenuId === transactionId) {
+        this.openMenuId = null;
+      } else {
+        this.openMenuId = transactionId;
+      }
+    },
+    
     handleOutsideClick(event) {
-      if (!event.target.closest('.dropdown')) {
+      if (!event.target.closest('.dropdown') && !event.target.closest('.actions-menu-row')) {
         this.closeDropdown();
+        this.openMenuId = null;
       }
     },
     
@@ -696,5 +675,59 @@ th {
   color: #6c757d;
   font-size: 14px;
   margin-bottom: 20px;
+}
+
+.actions-menu-row {
+  position: relative;
+}
+
+.btn-menu {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 18px;
+  color: #6c757d;
+}
+
+.btn-menu:hover {
+  color: #495057;
+}
+
+.menu-dropdown {
+  position: absolute;
+  right: 0;
+  top: 100%;
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  min-width: 140px;
+  z-index: 1000;
+  margin-top: 2px;
+}
+
+.btn-view, .btn-edit, .btn-danger {
+  display: block;
+  width: 100%;
+  padding: 8px 12px;
+  text-decoration: none;
+  color: #212529;
+  border: none;
+  background: none;
+  text-align: left;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.btn-danger {
+  color: #dc3545;
+}
+
+.btn-danger:hover {
+  background-color: #f8d7da;
+}
+
+.btn-edit:hover {
+  background-color: #e2e3e5;
 }
 </style>

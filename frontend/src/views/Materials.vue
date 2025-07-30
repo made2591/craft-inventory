@@ -1,6 +1,7 @@
 <template>
   <div class="materials">
     <h1>{{ $t('materials.title') }}</h1>
+    <div class="materials-header-divider"></div>
 
     <div class="actions">
       <router-link to="/materials/new" class="btn btn-primary">{{ $t('materials.newMaterial') }}</router-link>
@@ -77,11 +78,10 @@
                 {{ sortOrder === 'asc' ? '▲' : '▼' }}
               </span>
             </th>
-            <th>{{ $t('common.actions') }}</th>
           </tr>
         </thead>
         <tbody>
-          <tr v-for="material in paginatedMaterials" :key="material.id" :class="{ 'low-stock': isLowStock(material) }">
+          <tr v-for="material in paginatedMaterials" :key="material.id" style="position:relative;">
             <td>
               <router-link :to="`/materials/${material.id}/view`" class="sku-link">
                 <strong>{{ material.sku || 'N/A' }}</strong>
@@ -90,13 +90,17 @@
             <td>{{ material.name }}</td>
             <td>{{ material.unitOfMeasure }}</td>
             <td>{{ $formatCost(material.costPerUnit) }}</td>
-            <td>{{ $formatQuantity(material.currentStock !== undefined && material.currentStock !== null ? material.currentStock : 0)
-            }} {{ material.unitOfMeasure }}</td>
-            <td>{{ material.minStockLevel ? $formatQuantity(material.minStockLevel) : 'N/A' }}</td>
-            <td class="actions">
-              <button @click="viewMaterial(material.id)" class="btn btn-sm btn-view">{{ $t('common.view') }}</button>
-              <button @click="editMaterial(material.id)" class="btn btn-sm btn-edit">{{ $t('common.edit') }}</button>
-              <button @click="deleteMaterial(material.id)" class="btn btn-sm btn-danger">{{ $t('common.delete') }}</button>
+            <td>{{ $formatQuantity(material.currentStock !== undefined && material.currentStock !== null ? material.currentStock : 0) }} {{ material.unitOfMeasure }}</td>
+            <td style="position:relative;">
+              {{ material.minStockLevel ? $formatQuantity(material.minStockLevel) : 'N/A' }}
+              <div class="actions-menu-row" @mousedown.stop @click.stop>
+                <button @mousedown.stop @click.stop="toggleMenu(material.id)" class="btn btn-sm btn-menu">&#8942;</button>
+                <div v-if="openMenuId === material.id" class="menu-dropdown" @mousedown.stop @click.stop>
+                  <button @click="viewMaterial(material.id)" class="btn btn-sm btn-view">{{ $t('common.view') }}</button>
+                  <button @click="editMaterial(material.id)" class="btn btn-sm btn-edit">{{ $t('common.edit') }}</button>
+                  <button @click="deleteMaterial(material.id)" class="btn btn-sm btn-danger">{{ $t('common.delete') }}</button>
+                </div>
+              </div>
             </td>
           </tr>
         </tbody>
@@ -142,7 +146,8 @@ export default {
       sortKey: 'name',
       sortOrder: 'asc',
       currentPage: 1,
-      itemsPerPage: 10
+      itemsPerPage: 10,
+      openMenuId: null // Per il menu azioni
     };
   },
   computed: {
@@ -269,32 +274,59 @@ export default {
       return currentStock < minStockLevel;
     },
 
+    toggleMenu(id) {
+      this.openMenuId = this.openMenuId === id ? null : id;
+    },
+
+    handleClickOutside(event) {
+      if (this.openMenuId !== null) {
+        const menus = document.querySelectorAll('.menu-dropdown');
+        let clickedInside = false;
+        menus.forEach(menu => {
+          if (menu.contains(event.target)) {
+            clickedInside = true;
+          }
+        });
+        if (!clickedInside) {
+          this.openMenuId = null;
+        }
+      }
+    },
+
+    viewMaterial(id) {
+      this.$router.push(`/materials/${id}/view`);
+      this.openMenuId = null;
+    },
+
     editMaterial(id) {
       this.$router.push(`/materials/${id}`);
+      this.openMenuId = null;
     },
 
     async deleteMaterial(id) {
       if (!confirm('Sei sicuro di voler eliminare questo materiale?')) {
         return;
       }
-
       try {
-        await materialService.deleteMaterial(id);
+        await this.$api.delete(`/api/materials/${id}`);
         this.materials = this.materials.filter(m => m.id !== id);
         this.filterMaterials();
       } catch (error) {
         console.error('Error deleting material:', error);
         alert('Si è verificato un errore durante l\'eliminazione del materiale.');
       }
+      this.openMenuId = null;
     },
 
     async refreshMaterials() {
       await this.fetchMaterials();
     },
-    
-    viewMaterial(id) {
-      this.$router.push(`/materials/${id}/view`);
-    }
+  },
+  mounted() {
+    document.addEventListener('click', this.handleClickOutside);
+  },
+  beforeUnmount() {
+    document.removeEventListener('click', this.handleClickOutside);
   }
 };
 </script>
@@ -306,6 +338,13 @@ export default {
 
 h1 {
   margin-bottom: 20px;
+}
+
+.materials-header-divider {
+  width: 100%;
+  height: 1px;
+  background: #e5e5e5;
+  margin-bottom: 18px;
 }
 
 .actions {
@@ -483,5 +522,91 @@ th.sortable:hover {
 .btn-view {
   background-color: #17a2b8;
   color: white;
+}
+
+.actions-menu-row {
+  position: absolute;
+  right: 12px;
+  bottom: 8px;
+  display: flex;
+  align-items: flex-end;
+  z-index: 20;
+}
+
+.menu-dropdown {
+  position: absolute;
+  right: 0;
+  bottom: 36px;
+  background: #fff;
+  border: 1px solid #ddd;
+  border-radius: 10px;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.14);
+  z-index: 30;
+  display: flex;
+  flex-direction: column;
+  min-width: 150px;
+  padding: 18px 16px;
+  gap: 14px;
+}
+
+.menu-dropdown .btn {
+  margin: 0;
+  width: 100%;
+  text-align: left;
+  padding: 10px 16px;
+  border-radius: 8px;
+  background: none;
+  color: #222;
+  font-size: 16px;
+  font-weight: 500;
+  box-shadow: none;
+  border: none;
+  transition: box-shadow 0.2s, background 0.2s;
+  display: flex;
+  align-items: center;
+  min-height: 40px;
+}
+
+.menu-dropdown .btn:hover {
+  background: #f5f5f5;
+  box-shadow: 0 2px 8px rgba(66,185,131,0.12);
+  color: #222;
+}
+
+.menu-dropdown .btn-danger {
+  color: #dc3545;
+}
+
+.menu-dropdown .btn-danger:hover {
+  background: #fbeaea;
+  box-shadow: 0 2px 8px rgba(220,53,69,0.12);
+}
+
+.menu-dropdown .btn-view {
+  color: #17a2b8;
+}
+
+.menu-dropdown .btn-edit {
+  color: #3498db;
+}
+
+.menu-dropdown .btn-view:hover {
+  background: #e6f7fa;
+  box-shadow: 0 2px 8px rgba(23,162,184,0.12);
+}
+
+.menu-dropdown .btn-edit:hover {
+  background: #eaf4fb;
+  box-shadow: 0 2px 8px rgba(52,152,219,0.12);
+}
+
+.btn-menu {
+  background: none !important;
+  color: #333;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  font-size: 16px;
+  box-shadow: none;
 }
 </style>

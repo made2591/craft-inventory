@@ -71,11 +71,10 @@
               </span>
             </th>
             <th>{{ $t('common.totalCost') }}</th>
-            <th>{{ $t('common.actions') }}</th>
           </tr>
         </thead>
         <tbody>
-          <tr v-for="component in paginatedComponents" :key="component.id">
+          <tr v-for="component in paginatedComponents" :key="component.id" style="position:relative;">
             <td>
               <router-link :to="`/components/${component.id}/view`" class="sku-link">
                 <strong>{{ component.sku || 'N/A' }}</strong>
@@ -84,7 +83,7 @@
             <td>{{ component.name }}</td>
             <td>{{ component.description || 'N/A' }}</td>
             <td>{{ $formatQuantity(component.quantity || 0) }}</td>
-            <td>
+            <td style="position:relative;">
               <span v-if="loadingCosts[component.id]" class="loading-cost">
                 <i class="loading-spinner"></i> {{ $t('common.calculating') }}...
               </span>
@@ -96,11 +95,15 @@
                   {{ $t('common.calculateCost') }}
                 </button>
               </span>
-            </td>
-            <td class="actions">
-              <button @click="viewComponent(component.id)" class="btn btn-sm btn-view">{{ $t('common.view') }}</button>
-              <button @click="editComponent(component.id)" class="btn btn-sm btn-edit">{{ $t('common.edit') }}</button>
-              <button @click="deleteComponent(component.id)" class="btn btn-sm btn-danger">{{ $t('common.delete') }}</button>
+              <!-- Menu azioni a tre puntini allineato in basso a destra della riga -->
+              <div class="actions-menu-row" @mousedown.stop @click.stop>
+                <button @mousedown.stop @click.stop="toggleMenu(component.id)" class="btn btn-sm btn-menu">&#8942;</button>
+                <div v-if="openMenuId === component.id" class="menu-dropdown" @mousedown.stop @click.stop>
+                  <button @click="viewComponent(component.id)" class="btn btn-sm btn-view">{{ $t('common.view') }}</button>
+                  <button @click="editComponent(component.id)" class="btn btn-sm btn-edit">{{ $t('common.edit') }}</button>
+                  <button @click="deleteComponent(component.id)" class="btn btn-sm btn-danger">{{ $t('common.delete') }}</button>
+                </div>
+              </div>
             </td>
           </tr>
         </tbody>
@@ -161,7 +164,8 @@ export default {
       sortKey: 'name',
       sortOrder: 'asc',
       currentPage: 1,
-      itemsPerPage: 10
+      itemsPerPage: 10,
+      openMenuId: null // Per il menu azioni
     };
   },
   computed: {
@@ -181,6 +185,12 @@ export default {
   },
   created() {
     this.fetchComponents();
+  },
+  mounted() {
+    document.addEventListener('click', this.handleClickOutside);
+  },
+  beforeUnmount() {
+    document.removeEventListener('click', this.handleClickOutside);
   },
   methods: {
     async fetchComponents() {
@@ -264,12 +274,21 @@ export default {
         this.filteredComponents = [...this.components];
       } else {
         const query = this.searchQuery.toLowerCase();
-        this.filteredComponents = this.components.filter(component => 
-          component.name.toLowerCase().includes(query) ||
-          (component.description && component.description.toLowerCase().includes(query))
-        );
+        this.filteredComponents = this.components.filter(component => {
+          // Cerca in tutti i campi noti, anche nascosti
+          return [
+            component.sku,
+            component.name,
+            component.description,
+            component.quantity,
+            this.componentCosts[component.id],
+            component.id
+          ].some(field => {
+            if (field === null || field === undefined) return false;
+            return String(field).toLowerCase().includes(query);
+          });
+        });
       }
-      
       this.sortComponents();
       this.currentPage = 1;
     },
@@ -322,17 +341,18 @@ export default {
     
     viewComponent(id) {
       this.$router.push(`/components/${id}/view`);
+      this.openMenuId = null;
     },
     
     editComponent(id) {
       this.$router.push(`/components/${id}`);
+      this.openMenuId = null;
     },
     
     async deleteComponent(id) {
       if (!confirm('Sei sicuro di voler eliminare questo componente?')) {
         return;
       }
-      
       try {
         await componentService.deleteComponent(id);
         this.components = this.components.filter(c => c.id !== id);
@@ -345,7 +365,26 @@ export default {
           alert('Si è verificato un errore durante l\'eliminazione del componente.');
         }
       }
-    }
+      this.openMenuId = null;
+    },
+    toggleMenu(id) {
+      this.openMenuId = this.openMenuId === id ? null : id;
+    },
+    handleClickOutside(event) {
+      // Chiudi il menu se clicchi fuori
+      if (this.openMenuId !== null) {
+        const menus = document.querySelectorAll('.menu-dropdown');
+        let clickedInside = false;
+        menus.forEach(menu => {
+          if (menu.contains(event.target)) {
+            clickedInside = true;
+          }
+        });
+        if (!clickedInside) {
+          this.openMenuId = null;
+        }
+      }
+    },
   }
 };
 </script>
@@ -543,5 +582,73 @@ th.sortable:hover {
   to {
     transform: rotate(360deg);
   }
+}
+
+/* Stili per il menu azioni a tre puntini */
+.actions-menu-row {
+  position: absolute;
+  right: 12px;
+  bottom: 8px;
+  display: flex;
+  align-items: flex-end;
+  z-index: 20;
+}
+.menu-dropdown {
+  position: absolute;
+  right: 0;
+  bottom: 36px;
+  background: #fff;
+  border: 1px solid #ddd;
+  border-radius: 10px;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.14);
+  z-index: 30;
+  display: flex;
+  flex-direction: column;
+  min-width: 150px;
+  padding: 18px 16px;
+  gap: 14px;
+}
+.menu-dropdown .btn {
+  margin: 0;
+  width: 100%;
+  text-align: left;
+  padding: 10px 16px;
+  border-radius: 8px;
+  background: none;
+  color: #222;
+  font-size: 16px;
+  font-weight: 500;
+  box-shadow: none;
+  border: none;
+  transition: box-shadow 0.2s, background 0.2s;
+  display: flex;
+  align-items: center;
+  min-height: 40px;
+}
+.menu-dropdown .btn:hover {
+  background: #f5f5f5;
+  box-shadow: 0 2px 8px rgba(66,185,131,0.12);
+  color: #222;
+}
+.menu-dropdown .btn-danger {
+  color: #dc3545;
+}
+.menu-dropdown .btn-danger:hover {
+  background: #fbeaea;
+  box-shadow: 0 2px 8px rgba(220,53,69,0.12);
+}
+.menu-dropdown .btn-view {
+  color: #17a2b8;
+}
+.menu-dropdown .btn-edit {
+  color: #3498db;
+}
+.menu-dropdown .btn-view:hover {
+  background: #e6f7fa;
+  box-shadow: 0 2px 8px rgba(23,162,184,0.12);
+}
+.menu-dropdown .btn-edit:hover {
+  background: #eaf4fb;
+  box-shadow: 0 2px 8px rgba(52,152,219,0.12);
 }
 </style>

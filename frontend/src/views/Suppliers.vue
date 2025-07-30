@@ -73,11 +73,11 @@
                 {{ sortOrder === 'asc' ? '▲' : '▼' }}
               </span>
             </th>
-            <th>{{ $t('common.actions') }}</th>
+            <!-- Removed actions column header -->
           </tr>
         </thead>
         <tbody>
-          <tr v-for="supplier in paginatedSuppliers" :key="supplier.id">
+          <tr v-for="supplier in paginatedSuppliers" :key="supplier.id" style="position:relative;">
             <td>
               <router-link :to="`/suppliers/${supplier.id}/view`" class="name-link">
                 {{ supplier.name }}
@@ -87,10 +87,15 @@
             <td>{{ supplier.email || 'N/A' }}</td>
             <td>{{ supplier.phone || 'N/A' }}</td>
             <td>{{ supplier.address || 'N/A' }}</td>
-            <td class="actions">
-              <button @click="viewSupplier(supplier.id)" class="btn btn-sm btn-view">{{ $t('common.view') }}</button>
-              <button @click="editSupplier(supplier.id)" class="btn btn-sm btn-edit">{{ $t('common.edit') }}</button>
-              <button @click="deleteSupplier(supplier.id)" class="btn btn-sm btn-danger">{{ $t('common.delete') }}</button>
+            <td style="position:relative;">
+              <div class="actions-menu-row" @mousedown.stop @click.stop>
+                <button @mousedown.stop @click.stop="toggleMenu(supplier.id)" class="btn btn-sm btn-menu">&#8942;</button>
+                <div v-if="openMenuId === supplier.id" class="menu-dropdown" @mousedown.stop @click.stop>
+                  <button @click="viewSupplier(supplier.id)" class="btn btn-sm btn-view">{{ $t('common.view') }}</button>
+                  <button @click="editSupplier(supplier.id)" class="btn btn-sm btn-edit">{{ $t('common.edit') }}</button>
+                  <button @click="deleteSupplier(supplier.id)" class="btn btn-sm btn-danger">{{ $t('common.delete') }}</button>
+                </div>
+              </div>
             </td>
           </tr>
         </tbody>
@@ -148,7 +153,8 @@ export default {
       sortKey: 'name',
       sortOrder: 'asc',
       currentPage: 1,
-      itemsPerPage: 10
+      itemsPerPage: 10,
+      openMenuId: null
     };
   },
   computed: {
@@ -275,7 +281,26 @@ export default {
           alert(this.$t('errors.deleteSupplier'));
         }
       }
+    },
+    
+    toggleMenu(supplierId) {
+      this.openMenuId = this.openMenuId === supplierId ? null : supplierId;
+    },
+    
+    handleClickOutside(event) {
+      const target = event.target;
+      const menu = this.$el.querySelector('.menu-dropdown');
+      
+      if (menu && !menu.contains(target)) {
+        this.openMenuId = null;
+      }
     }
+  },
+  mounted() {
+    document.addEventListener('click', this.handleClickOutside);
+  },
+  beforeDestroy() {
+    document.removeEventListener('click', this.handleClickOutside);
   }
 };
 </script>
@@ -444,5 +469,44 @@ th.sortable:hover {
   text-align: center;
   color: #6c757d;
   font-size: 14px;
+}
+
+.actions-menu-row {
+  position: relative;
+}
+
+.btn-menu {
+  background-color: transparent;
+  color: #333;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  font-size: 16px;
+}
+
+.menu-dropdown {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  background-color: white;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  z-index: 100;
+}
+
+.menu-dropdown button {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 8px 12px;
+  border: none;
+  background: none;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.menu-dropdown button:hover {
+  background-color: #f1f1f1;
 }
 </style>
