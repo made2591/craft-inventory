@@ -548,7 +548,7 @@ export default {
 .btn:focus,
 .form-input:focus,
 .form-select:focus {
-  outline: 2px solid #42b983;
+  outline: 2px solid var(--primary);
   outline-offset: 2px;
 }
 
@@ -600,8 +600,8 @@ h1 {
 }
 
 .btn-primary {
-  background-color: #42b983;
-  color: white;
+  background-color: var(--secondary);
+  color: var(--surface);
 }
 
 .btn-sm {
@@ -612,32 +612,33 @@ h1 {
 }
 
 .btn-danger {
-  background-color: #dc3545;
-  color: white;
+  background-color: var(--danger);
+  color: var(--surface);
 }
 
 .btn-edit {
-  background-color: #3498db;
-  color: white;
+  background-color: var(--oxford-blue-light);
+  color: var(--surface);
 }
 
 .btn-view {
-  background-color: #17a2b8;
-  color: white;
+  background-color: var(--info);
+  color: var(--surface);
 }
 
 .btn-active {
-  background-color: #42b983;
-  color: white;
+  background-color: var(--secondary);
+  color: var(--surface);
 }
 
 .sku-link {
-  color: #3498db;
+  color: var(--secondary);
   text-decoration: none;
 }
 
 .sku-link:hover {
   text-decoration: underline;
+  color: var(--fulvous-dark);
 }
 
 .loading, .error, .empty-state {

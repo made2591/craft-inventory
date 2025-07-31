@@ -436,13 +436,13 @@ h1 {
 }
 
 .btn-primary {
-  background-color: #42b983;
-  color: white;
+  background-color: var(--secondary);
+  color: var(--surface);
 }
 
 .btn-secondary {
-  background-color: #6c757d;
-  color: white;
+  background-color: var(--oxford-blue-muted);
+  color: var(--surface);
 }
 
 .detail-card {
@@ -563,7 +563,7 @@ h1 {
 }
 
 .btn-active {
-  background-color: #42b983;
+  background-color: var(--primary);
   color: white;
 }
 

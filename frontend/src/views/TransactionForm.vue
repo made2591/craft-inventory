@@ -684,9 +684,9 @@ export default {
 }
 
 .item-card:hover {
-  border-color: #42b983;
+  border-color: var(--primary);
   transform: translateY(-2px);
-  box-shadow: 0 8px 25px rgba(66, 185, 131, 0.15);
+  box-shadow: 0 8px 25px rgba(226, 132, 19, 0.15);
 }
 
 .item-header {
@@ -700,12 +700,12 @@ export default {
 
 .item-number {
   font-weight: 600;
-  color: #42b983;
+  color: var(--primary);
   font-size: 1.1rem;
 }
 
 .total-display {
-  background: linear-gradient(135deg, #42b983 0%, #369970 100%);
+  background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
   color: white;
   padding: 12px 16px;
   border-radius: 8px;
@@ -728,7 +728,7 @@ export default {
 
 .summary-card {
   background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
-  border: 2px solid #42b983;
+  border: 2px solid var(--primary);
 }
 
 .summary-grid {
@@ -753,7 +753,7 @@ export default {
 }
 
 .summary-item.total-summary {
-  background: linear-gradient(135deg, #42b983 0%, #369970 100%);
+  background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
   color: white;
 }
 
@@ -764,8 +764,8 @@ export default {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: rgba(66, 185, 131, 0.1);
-  color: #42b983;
+  background: var(--primary-transparent);
+  color: var(--primary);
   font-size: 20px;
 }
 
@@ -791,7 +791,7 @@ export default {
 }
 
 .total-amount {
-  color: #42b983;
+  color: var(--primary);
 }
 
 .total-summary .total-amount {
@@ -895,13 +895,13 @@ export default {
 .form-input:focus,
 .form-select:focus,
 .form-textarea:focus {
-  outline: 2px solid #42b983;
+  outline: 2px solid var(--primary);
   outline-offset: 2px;
-  border-color: #42b983;
+  border-color: var(--primary);
 }
 
 .btn:focus {
-  outline: 2px solid #42b983;
+  outline: 2px solid var(--primary);
   outline-offset: 2px;
 }
 
@@ -955,7 +955,7 @@ export default {
 /* Success state styling */
 .form-input.success,
 .form-select.success {
-  border-color: #42b983;
-  box-shadow: 0 0 0 2px rgba(66, 185, 131, 0.2);
+  border-color: var(--primary);
+  box-shadow: 0 0 0 2px var(--primary-transparent);
 }
 </style>

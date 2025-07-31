@@ -272,12 +272,12 @@ input, textarea, select {
 }
 
 .btn-primary {
-  background-color: #42b983;
-  color: white;
+  background-color: var(--secondary);
+  color: var(--surface);
 }
 
 .btn-secondary {
-  background-color: #6c757d;
-  color: white;
+  background-color: var(--oxford-blue-muted);
+  color: var(--surface);
 }
 </style>

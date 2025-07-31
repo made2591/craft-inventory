@@ -478,8 +478,8 @@ h1 {
 }
 
 .btn-primary {
-  background-color: #42b983;
-  color: white;
+  background-color: var(--secondary);
+  color: var(--surface);
 }
 
 .btn-sm {
@@ -490,32 +490,33 @@ h1 {
 }
 
 .btn-danger {
-  background-color: #dc3545;
-  color: white;
+  background-color: var(--danger);
+  color: var(--surface);
 }
 
 .btn-edit {
-  background-color: #3498db;
-  color: white;
+  background-color: var(--oxford-blue-light);
+  color: var(--surface);
 }
 
 .btn-view {
-  background-color: #17a2b8;
-  color: white;
+  background-color: var(--info);
+  color: var(--surface);
 }
 
 .btn-active {
-  background-color: #42b983;
-  color: white;
+  background-color: var(--secondary);
+  color: var(--surface);
 }
 
 .name-link {
-  color: #3498db;
+  color: var(--secondary);
   text-decoration: none;
 }
 
 .name-link:hover {
   text-decoration: underline;
+  color: var(--fulvous-dark);
 }
 
 .loading, .error, .empty-state {

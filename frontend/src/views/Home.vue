@@ -469,7 +469,7 @@ export default {
             label: this.$t('dashboard.currentStock'),
             data: data,
             backgroundColor: [
-              '#42b983', '#3498db', '#f1c40f', '#e74c3c', '#9b59b6', '#1abc9c'
+              'var(--secondary)', 'var(--oxford-blue-light)', 'var(--fulvous-light)', 'var(--danger)', 'var(--cardinal)', 'var(--info)'
             ]
           }]
         },
@@ -626,12 +626,12 @@ export default {
             {
               label: this.$t('dashboard.currentStock'),
               data: currentStock,
-              backgroundColor: '#42b983'
+              backgroundColor: 'var(--secondary)'
             },
             {
               label: this.$t('dashboard.minimumStock'),
               data: minStock,
-              backgroundColor: '#e74c3c'
+              backgroundColor: 'var(--danger)'
             }
           ]
         },
@@ -705,8 +705,8 @@ export default {
           datasets: [{
             label: this.$t('dashboard.sales'),
             data: salesData,
-            borderColor: '#42b983',
-            backgroundColor: 'rgba(66, 185, 131, 0.1)',
+            borderColor: 'var(--primary)',
+            backgroundColor: 'var(--primary-transparent)',
             fill: true,
             tension: 0.4
           }]
@@ -1009,27 +1009,27 @@ h2 {
 }
 
 .material-icon {
-  background: linear-gradient(135deg, #42b983, #369870);
+  background: linear-gradient(135deg, var(--fulvous), var(--fulvous-dark));
 }
 
 .model-icon {
-  background: linear-gradient(135deg, #3498db, #2980b9);
+  background: linear-gradient(135deg, var(--oxford-blue-light), var(--oxford-blue));
 }
 
 .inventory-icon {
-  background: linear-gradient(135deg, #f1c40f, #f39c12);
+  background: linear-gradient(135deg, var(--fulvous-light), var(--fulvous));
 }
 
 .supplier-icon {
-  background: linear-gradient(135deg, #9b59b6, #8e44ad);
+  background: linear-gradient(135deg, var(--cardinal), var(--rusty-red));
 }
 
 .customer-icon {
-  background: linear-gradient(135deg, #e74c3c, #c0392b);
+  background: linear-gradient(135deg, var(--rusty-red), var(--cardinal));
 }
 
 .revenue-icon {
-  background: linear-gradient(135deg, #1abc9c, #16a085);
+  background: linear-gradient(135deg, var(--fulvous), var(--fulvous-dark));
 }
 
 .stat-content {
@@ -1050,22 +1050,22 @@ h2 {
   font-size: 28px;
   font-weight: 700;
   margin: 0 0 4px 0;
-  color: #2c3e50;
+  color: var(--text-primary);
   line-height: 1.2;
 }
 
 .stat-subtitle {
   font-size: 12px;
-  color: #95a5a6;
+  color: var(--text-muted);
   margin: 0;
 }
 
 .stat-subtitle.positive {
-  color: #27ae60;
+  color: var(--success);
 }
 
 .stat-subtitle.negative {
-  color: #e74c3c;
+  color: var(--danger);
 }
 
 .charts-container {
@@ -1080,11 +1080,11 @@ h2 {
 }
 
 .chart-card {
-  background-color: #fff;
+  background-color: var(--surface);
   border-radius: 12px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  box-shadow: 0 4px 20px rgba(0, 0, 34, 0.08);
   padding: 24px;
-  border: 1px solid rgba(0, 0, 0, 0.05);
+  border: 1px solid var(--border-light);
 }
 
 .chart-wrapper {
@@ -1117,12 +1117,12 @@ h2 {
 .date-input-group label {
   font-size: 14px;
   font-weight: 500;
-  color: #2c3e50;
+  color: var(--text-primary);
 }
 
 .date-input-group input {
   padding: 10px 12px;
-  border: 1px solid #ddd;
+  border: 1px solid var(--border);
   border-radius: 6px;
   font-size: 14px;
   min-width: 150px;
@@ -1130,8 +1130,8 @@ h2 {
 
 .btn-reset {
   padding: 10px 20px;
-  background-color: #42b983;
-  color: white;
+  background-color: var(--secondary);
+  color: var(--surface);
   border: none;
   border-radius: 6px;
   cursor: pointer;
@@ -1140,7 +1140,7 @@ h2 {
 }
 
 .btn-reset:hover {
-  background-color: #369870;
+  background-color: var(--fulvous-dark);
 }
 
 .quick-actions {
@@ -1170,9 +1170,9 @@ h2 {
 }
 
 .action-btn:hover {
-  background-color: #42b983;
+  background-color: var(--primary);
   color: white;
-  border-color: #42b983;
+  border-color: var(--primary);
 }
 
 .low-stock-alert {
@@ -1183,7 +1183,7 @@ h2 {
 }
 
 .low-stock-alert h2 {
-  color: #e74c3c;
+  color: var(--danger);
 }
 
 table {
@@ -1194,19 +1194,19 @@ table {
 th, td {
   padding: 12px;
   text-align: left;
-  border-bottom: 1px solid #ddd;
+  border-bottom: 1px solid var(--border);
 }
 
 th {
-  background-color: #f8f9fa;
+  background-color: var(--snow-dark);
   font-weight: bold;
 }
 
 .btn-sm {
   padding: 4px 8px;
   font-size: 12px;
-  background-color: #42b983;
-  color: white;
+  background-color: var(--secondary);
+  color: var(--surface);
   border-radius: 4px;
   text-decoration: none;
 }

@@ -242,7 +242,7 @@ h2 {
 }
 
 .btn-primary {
-  background-color: #42b983;
+  background-color: var(--primary);
   color: white;
 }
 
@@ -323,7 +323,7 @@ tfoot {
 
 .total-value {
   font-weight: bold;
-  color: #42b983;
+  color: var(--secondary);
 }
 
 .loading-cost {
@@ -339,7 +339,7 @@ tfoot {
   height: 16px;
   margin-right: 8px;
   border: 2px solid rgba(0, 0, 0, 0.1);
-  border-top-color: #42b983;
+  border-top-color: var(--secondary);
   border-radius: 50%;
   animation: spin 1s linear infinite;
 }

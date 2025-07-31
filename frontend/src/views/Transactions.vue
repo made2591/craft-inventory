@@ -787,8 +787,8 @@ export default {
 }
 
 .btn-primary {
-  background-color: #42b983;
-  color: white;
+  background-color: var(--secondary);
+  color: var(--surface);
 }
 
 .btn-sm {
@@ -798,18 +798,18 @@ export default {
 }
 
 .btn-success {
-  background-color: #28a745;
-  color: white;
+  background-color: var(--success);
+  color: var(--surface);
 }
 
 .btn-warning {
-  background-color: #ffc107;
-  color: #212529;
+  background-color: var(--warning);
+  color: var(--oxford-blue);
 }
 
 .btn-danger {
-  background-color: #dc3545;
-  color: white;
+  background-color: var(--danger);
+  color: var(--surface);
 }
 
 .loading, .error, .empty-state {
@@ -988,7 +988,7 @@ th {
 }
 
 .btn-active {
-  background-color: #42b983;
+  background-color: var(--primary);
   color: white;
 }
 

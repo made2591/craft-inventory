@@ -1,216 +1,131 @@
 <template>
-  <div class="container">
-    <div class="page-header">
-      <h1 class="text-3xl font-bold text-center">{{ $t('materials.title') }}</h1>
-      <div class="flex flex-md-col gap-4 justify-between items-center">
-        <router-link to="/materials/new" class="btn btn-primary">
-          <i class="fas fa-plus"></i>
-          {{ $t('materials.newMaterial') }}
-        </router-link>
-        <button @click="refreshMaterials" class="btn btn-secondary" :disabled="loading">
-          <div v-if="loading" class="loading">
-            <div class="spinner"></div>
-            {{ $t('common.updating') }}
-          </div>
-          <span v-else>
-            <i class="fas fa-sync-alt"></i>
-            {{ $t('materials.refreshMaterials') }}
-          </span>
+  <div class="materials">
+    <h1>{{ $t('materials.title') }}</h1>
+    <div class="materials-header-divider"></div>
+
+    <div class="actions">
+      <router-link to="/materials/new" class="btn btn-primary">{{ $t('materials.newMaterial') }}</router-link>
+      <button @click="refreshMaterials" class="btn btn-secondary" :disabled="loading">
+        {{ loading ? $t('common.updating') : $t('materials.refreshMaterials') }}
+      </button>
+    </div>
+
+    <div v-if="loading" class="loading">
+      {{ $t('common.loading') }}
+    </div>
+
+    <div v-else-if="error" class="error">
+      {{ error }}
+    </div>
+
+    <div v-else-if="materials.length === 0" class="empty-state">
+      {{ $t('materials.noMaterialsFound') }}
+    </div>
+
+    <div v-else class="materials-list">
+      <!-- Filtri e opzioni di paginazione -->
+      <div class="table-controls">
+        <div class="search-filter">
+          <input type="text" v-model="searchQuery" :placeholder="$t('materials.searchPlaceholder')" @input="filterMaterials">
+        </div>
+        <div class="pagination-controls">
+          <label for="itemsPerPage">{{ $t('common.itemsPerPage') }}:</label>
+          <select id="itemsPerPage" v-model="itemsPerPage" @change="updatePagination">
+            <option value="5">5</option>
+            <option value="10">10</option>
+            <option value="20">20</option>
+            <option value="50">50</option>
+          </select>
+        </div>
+      </div>
+
+      <table>
+        <thead>
+          <tr>
+            <th @click="sortBy('sku')" class="sortable">
+              {{ $t('materials.sku') }}
+              <span v-if="sortKey === 'sku'" class="sort-icon">
+                {{ sortOrder === 'asc' ? '▲' : '▼' }}
+              </span>
+            </th>
+            <th @click="sortBy('name')" class="sortable">
+              {{ $t('materials.name') }}
+              <span v-if="sortKey === 'name'" class="sort-icon">
+                {{ sortOrder === 'asc' ? '▲' : '▼' }}
+              </span>
+            </th>
+            <th @click="sortBy('unitOfMeasure')" class="sortable">
+              {{ $t('materials.unitOfMeasure') }}
+              <span v-if="sortKey === 'unitOfMeasure'" class="sort-icon">
+                {{ sortOrder === 'asc' ? '▲' : '▼' }}
+              </span>
+            </th>
+            <th @click="sortBy('costPerUnit')" class="sortable">
+              {{ $t('materials.costPerUnit') }}
+              <span v-if="sortKey === 'costPerUnit'" class="sort-icon">
+                {{ sortOrder === 'asc' ? '▲' : '▼' }}
+              </span>
+            </th>
+            <th @click="sortBy('currentStock')" class="sortable">
+              {{ $t('materials.currentStock') }}
+              <span v-if="sortKey === 'currentStock'" class="sort-icon">
+                {{ sortOrder === 'asc' ? '▲' : '▼' }}
+              </span>
+            </th>
+            <th @click="sortBy('minStockLevel')" class="sortable">
+              {{ $t('materials.minStockLevel') }}
+              <span v-if="sortKey === 'minStockLevel'" class="sort-icon">
+                {{ sortOrder === 'asc' ? '▲' : '▼' }}
+              </span>
+            </th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr v-for="material in paginatedMaterials" :key="material.id" style="position:relative;">
+            <td>
+              <router-link :to="`/materials/${material.id}/view`" class="sku-link">
+                <strong>{{ material.sku || 'N/A' }}</strong>
+              </router-link>
+            </td>
+            <td>{{ material.name }}</td>
+            <td>{{ material.unitOfMeasure }}</td>
+            <td>{{ $formatCost(material.costPerUnit) }}</td>
+            <td>{{ $formatQuantity(material.currentStock !== undefined && material.currentStock !== null ? material.currentStock : 0) }} {{ material.unitOfMeasure }}</td>
+            <td style="position:relative;">
+              {{ material.minStockLevel ? $formatQuantity(material.minStockLevel) : 'N/A' }}
+              <div class="actions-menu-row" @mousedown.stop @click.stop>
+                <button @mousedown.stop @click.stop="toggleMenu(material.id)" class="btn btn-sm btn-menu">&#8942;</button>
+                <div v-if="openMenuId === material.id" class="menu-dropdown" @mousedown.stop @click.stop>
+                  <button @click="viewMaterial(material.id)" class="btn btn-sm btn-view">{{ $t('common.view') }}</button>
+                  <button @click="editMaterial(material.id)" class="btn btn-sm btn-edit">{{ $t('common.edit') }}</button>
+                  <button @click="deleteMaterial(material.id)" class="btn btn-sm btn-danger">{{ $t('common.delete') }}</button>
+                </div>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+
+      <!-- Paginazione -->
+      <div class="pagination">
+        <button @click="goToPage(currentPage - 1)" :disabled="currentPage === 1" class="btn btn-sm">
+          {{ $t('common.previous') }}
+        </button>
+
+        <div class="page-numbers">
+          <button v-for="page in totalPages" :key="page" @click="goToPage(page)"
+            :class="['btn', 'btn-sm', currentPage === page ? 'btn-active' : '']">
+            {{ page }}
+          </button>
+        </div>
+
+        <button @click="goToPage(currentPage + 1)" :disabled="currentPage === totalPages" class="btn btn-sm">
+          {{ $t('common.next') }}
         </button>
       </div>
-    </div>
 
-    <div v-if="loading" class="card text-center">
-      <div class="loading">
-        <div class="spinner"></div>
-        {{ $t('common.loading') }}
-      </div>
-    </div>
-
-    <div v-else-if="error" class="card text-center">
-      <div class="text-danger">
-        <i class="fas fa-exclamation-triangle"></i>
-        {{ error }}
-      </div>
-    </div>
-
-    <div v-else-if="materials.length === 0" class="card text-center">
-      <div class="text-muted">
-        <i class="fas fa-box-open text-2xl"></i>
-        <p class="text-lg">{{ $t('materials.noMaterialsFound') }}</p>
-      </div>
-    </div>
-
-    <div v-else class="materials-content">
-      <!-- Controls Card -->
-      <div class="card">
-        <div class="flex flex-md-col gap-4 justify-between items-center">
-          <div class="form-group flex-1" style="margin-bottom: 0;">
-            <div class="flex items-center gap-2">
-              <i class="fas fa-search text-muted"></i>
-              <input 
-                type="text" 
-                v-model="searchQuery" 
-                :placeholder="$t('materials.searchPlaceholder')" 
-                @input="filterMaterials"
-                class="form-input"
-                style="margin: 0;"
-              >
-            </div>
-          </div>
-          <div class="flex items-center gap-2">
-            <label for="itemsPerPage" class="form-label text-sm" style="margin: 0;">{{ $t('common.itemsPerPage') }}:</label>
-            <select id="itemsPerPage" v-model="itemsPerPage" @change="updatePagination" class="form-select">
-              <option value="5">5</option>
-              <option value="10">10</option>
-              <option value="20">20</option>
-              <option value="50">50</option>
-            </select>
-          </div>
-        </div>
-      </div>
-
-      <!-- Desktop Table View -->
-      <div class="table-responsive hidden-mobile">
-        <table class="table">
-          <thead>
-            <tr>
-              <th @click="sortBy('sku')" class="sortable cursor-pointer">
-                {{ $t('materials.sku') }}
-                <i v-if="sortKey === 'sku'" :class="sortOrder === 'asc' ? 'fas fa-sort-up' : 'fas fa-sort-down'" class="ml-1"></i>
-              </th>
-              <th @click="sortBy('name')" class="sortable cursor-pointer">
-                {{ $t('materials.name') }}
-                <i v-if="sortKey === 'name'" :class="sortOrder === 'asc' ? 'fas fa-sort-up' : 'fas fa-sort-down'" class="ml-1"></i>
-              </th>
-              <th @click="sortBy('unitOfMeasure')" class="sortable cursor-pointer">
-                {{ $t('materials.unitOfMeasure') }}
-                <i v-if="sortKey === 'unitOfMeasure'" :class="sortOrder === 'asc' ? 'fas fa-sort-up' : 'fas fa-sort-down'" class="ml-1"></i>
-              </th>
-              <th @click="sortBy('costPerUnit')" class="sortable cursor-pointer">
-                {{ $t('materials.costPerUnit') }}
-                <i v-if="sortKey === 'costPerUnit'" :class="sortOrder === 'asc' ? 'fas fa-sort-up' : 'fas fa-sort-down'" class="ml-1"></i>
-              </th>
-              <th @click="sortBy('currentStock')" class="sortable cursor-pointer">
-                {{ $t('materials.currentStock') }}
-                <i v-if="sortKey === 'currentStock'" :class="sortOrder === 'asc' ? 'fas fa-sort-up' : 'fas fa-sort-down'" class="ml-1"></i>
-              </th>
-              <th @click="sortBy('minStockLevel')" class="sortable cursor-pointer">
-                {{ $t('materials.minStockLevel') }}
-                <i v-if="sortKey === 'minStockLevel'" :class="sortOrder === 'asc' ? 'fas fa-sort-up' : 'fas fa-sort-down'" class="ml-1"></i>
-              </th>
-              <th>{{ $t('common.actions') }}</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr v-for="material in paginatedMaterials" :key="material.id" :class="{ 'low-stock-row': isLowStock(material) }">
-              <td>
-                <router-link :to="`/materials/${material.id}/view`" class="text-primary font-medium">
-                  {{ material.sku || $t('common.notApplicable') }}
-                </router-link>
-              </td>
-              <td class="font-medium">{{ material.name }}</td>
-              <td>{{ material.unitOfMeasure }}</td>
-              <td class="font-medium">{{ $formatCost(material.costPerUnit) }}</td>
-              <td>
-                <span :class="{ 'text-warning': isLowStock(material) }">
-                  {{ $formatQuantity(material.currentStock !== undefined && material.currentStock !== null ? material.currentStock : 0) }} {{ material.unitOfMeasure }}
-                </span>
-                <span v-if="isLowStock(material)" class="badge badge-warning ml-2">
-                  <i class="fas fa-exclamation-triangle"></i>
-                  {{ $t('common.lowStock') }}
-                </span>
-              </td>
-              <td>{{ material.minStockLevel ? $formatQuantity(material.minStockLevel) : $t('common.notApplicable') }}</td>
-              <td>
-                <ActionMenu 
-                  :actions="getMaterialActions(material)" 
-                  @action="handleMaterialAction($event, material)"
-                />
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-
-      <!-- Mobile Card View -->
-      <div class="visible-mobile">
-        <div class="grid gap-4">
-          <div v-for="material in paginatedMaterials" :key="material.id" class="card" :class="{ 'low-stock-card': isLowStock(material) }">
-            <div class="flex justify-between items-start mb-3">
-              <div>
-                <router-link :to="`/materials/${material.id}/view`" class="text-lg font-bold text-primary">
-                  {{ material.name }}
-                </router-link>
-                <p class="text-sm text-muted">{{ $t('common.sku') }}: {{ material.sku || $t('common.notApplicable') }}</p>
-              </div>
-              <div v-if="isLowStock(material)" class="badge badge-warning">
-                <i class="fas fa-exclamation-triangle"></i>
-                {{ $t('common.lowStock') }}
-              </div>
-            </div>
-            
-            <div class="grid grid-2 gap-3 mb-4">
-              <div>
-                <p class="text-xs text-muted font-medium">{{ $t('materials.unitOfMeasure') }}</p>
-                <p class="font-medium">{{ material.unitOfMeasure }}</p>
-              </div>
-              <div>
-                <p class="text-xs text-muted font-medium">{{ $t('materials.costPerUnit') }}</p>
-                <p class="font-medium">{{ $formatCost(material.costPerUnit) }}</p>
-              </div>
-              <div>
-                <p class="text-xs text-muted font-medium">{{ $t('materials.currentStock') }}</p>
-                <p class="font-medium" :class="{ 'text-warning': isLowStock(material) }">
-                  {{ $formatQuantity(material.currentStock !== undefined && material.currentStock !== null ? material.currentStock : 0) }} {{ material.unitOfMeasure }}
-                </p>
-              </div>
-              <div>
-                <p class="text-xs text-muted font-medium">{{ $t('materials.minStockLevel') }}</p>
-                <p class="font-medium">{{ material.minStockLevel ? $formatQuantity(material.minStockLevel) : $t('common.notApplicable') }}</p>
-              </div>
-            </div>
-            
-            <div class="mobile-actions">
-              <ActionMenu 
-                :actions="getMaterialActions(material)" 
-                @action="handleMaterialAction($event, material)"
-              />
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Pagination -->
-      <div class="card">
-        <div class="flex flex-md-col gap-4 justify-between items-center">
-          <div class="flex items-center gap-2">
-            <button @click="goToPage(currentPage - 1)" :disabled="currentPage === 1" class="btn btn-secondary btn-sm">
-              <i class="fas fa-chevron-left"></i>
-              <span class="hidden-mobile">{{ $t('common.previous') }}</span>
-            </button>
-
-            <div class="flex gap-1">
-              <button 
-                v-for="page in visiblePages" 
-                :key="page" 
-                @click="goToPage(page)"
-                :class="['btn', 'btn-sm', currentPage === page ? 'btn-primary' : 'btn-secondary']"
-              >
-                {{ page }}
-              </button>
-            </div>
-
-            <button @click="goToPage(currentPage + 1)" :disabled="currentPage === totalPages" class="btn btn-secondary btn-sm">
-              <span class="hidden-mobile">{{ $t('common.next') }}</span>
-              <i class="fas fa-chevron-right"></i>
-            </button>
-          </div>
-
-          <div class="text-sm text-muted text-center">
-            {{ $t('common.paginationInfo', { start: startIndex + 1, end: endIndex, total: filteredMaterials.length }) }}
-          </div>
-        </div>
+      <div class="pagination-info">
+        {{ $t('common.paginationInfo', { start: startIndex + 1, end: endIndex, total: filteredMaterials.length }) }}
       </div>
     </div>
   </div>
@@ -218,12 +133,8 @@
 
 <script>
 import materialService from '../services/materialService';
-import ActionMenu from '../components/ActionMenu.vue';
 
 export default {
-  components: {
-    ActionMenu
-  },
   name: 'MaterialsView',
   data() {
     return {
@@ -252,24 +163,6 @@ export default {
     },
     paginatedMaterials() {
       return this.filteredMaterials.slice(this.startIndex, this.endIndex);
-    },
-    visiblePages() {
-      const pages = [];
-      const maxVisible = window.innerWidth < 768 ? 3 : 7;
-      const half = Math.floor(maxVisible / 2);
-      
-      let start = Math.max(1, this.currentPage - half);
-      let end = Math.min(this.totalPages, start + maxVisible - 1);
-      
-      if (end - start + 1 < maxVisible) {
-        start = Math.max(1, end - maxVisible + 1);
-      }
-      
-      for (let i = start; i <= end; i++) {
-        pages.push(i);
-      }
-      
-      return pages;
     }
   },
   created() {
@@ -299,7 +192,7 @@ export default {
         this.filterMaterials();
       } catch (error) {
         console.error('Error fetching materials:', error);
-        this.error = this.$t('errors.fetchMaterials');
+        this.error = 'Si è verificato un errore durante il recupero dei materiali. Riprova più tardi.';
       } finally {
         this.loading = false;
       }
@@ -411,7 +304,7 @@ export default {
     },
 
     async deleteMaterial(id) {
-      if (!confirm(this.$t('confirmations.deleteMaterial'))) {
+      if (!confirm('Sei sicuro di voler eliminare questo materiale?')) {
         return;
       }
       try {
@@ -420,67 +313,9 @@ export default {
         this.filterMaterials();
       } catch (error) {
         console.error('Error deleting material:', error);
-        alert(this.$t('errors.deleteMaterial'));
+        alert('Si è verificato un errore durante l\'eliminazione del materiale.');
       }
       this.openMenuId = null;
-    },
-
-    getMaterialActions(material) {
-      return [
-        {
-          key: 'view',
-          label: this.$t('common.view'),
-          icon: 'fas fa-eye',
-          variant: 'default',
-          tooltip: 'View material details'
-        },
-        {
-          key: 'edit',
-          label: this.$t('common.edit'),
-          icon: 'fas fa-edit',
-          variant: 'primary',
-          tooltip: 'Edit material'
-        },
-        {
-          key: 'duplicate',
-          label: this.$t('common.duplicate'),
-          icon: 'fas fa-copy',
-          variant: 'default',
-          tooltip: 'Duplicate material'
-        },
-        {
-          key: 'delete',
-          label: this.$t('common.delete'),
-          icon: 'fas fa-trash',
-          variant: 'danger',
-          tooltip: 'Delete material'
-        }
-      ];
-    },
-
-    handleMaterialAction(actionKey, material) {
-      switch (actionKey) {
-        case 'view':
-          this.viewMaterial(material.id);
-          break;
-        case 'edit':
-          this.editMaterial(material.id);
-          break;
-        case 'duplicate':
-          this.duplicateMaterial(material);
-          break;
-        case 'delete':
-          this.deleteMaterial(material.id);
-          break;
-      }
-    },
-
-    duplicateMaterial(material) {
-      // Navigate to create form with pre-filled data
-      this.$router.push({
-        path: '/materials/new',
-        query: { duplicate: material.id }
-      });
     },
 
     async refreshMaterials() {
@@ -497,145 +332,281 @@ export default {
 </script>
 
 <style scoped>
-.page-header {
-  margin-bottom: 32px;
-  padding-bottom: 24px;
-  border-bottom: 2px solid #f1f3f4;
+.materials {
+  padding: 20px;
 }
 
-.materials-content {
+h1 {
+  margin-bottom: 20px;
+}
+
+.materials-header-divider {
+  width: 100%;
+  height: 1px;
+  background: #e5e5e5;
+  margin-bottom: 18px;
+}
+
+.actions {
+  margin-bottom: 20px;
+}
+
+.btn {
+  display: inline-block;
+  padding: 8px 16px;
+  border-radius: 4px;
+  text-decoration: none;
+  cursor: pointer;
+  border: none;
+  font-size: 14px;
+}
+
+.btn-primary {
+  background-color: var(--secondary);
+  color: var(--surface);
+}
+
+.btn-secondary {
+  background-color: var(--oxford-blue-muted);
+  color: var(--surface);
+}
+
+.btn-sm {
+  padding: 4px 8px;
+  font-size: 12px;
+  height: 28px;
+  /* Altezza fissa per i pulsanti */
+  line-height: 20px;
+  /* Allineamento verticale del testo */
+}
+
+.btn-danger {
+  background-color: var(--danger);
+  color: var(--surface);
+}
+
+.btn-edit {
+  background-color: var(--oxford-blue-light);
+  color: var(--surface);
+}
+
+.btn-active {
+  background-color: var(--secondary);
+  color: var(--surface);
+}
+
+.loading,
+.error,
+.empty-state {
+  text-align: center;
+  padding: 20px;
+  background-color: var(--snow-dark);
+  border-radius: 4px;
+}
+
+.error {
+  color: var(--danger);
+}
+
+.table-controls {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15px;
+}
+
+.search-filter input {
+  padding: 8px;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  width: 250px;
+}
+
+.pagination-controls {
+  display: flex;
+  align-items: center;
+}
+
+.pagination-controls label {
+  margin-right: 8px;
+}
+
+.pagination-controls select {
+  padding: 6px;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 20px;
+}
+
+th,
+td {
+  padding: 8px 12px;
+  text-align: left;
+  border-bottom: 1px solid var(--border);
+  vertical-align: middle;
+  /* Allineamento verticale al centro */
+  height: 44px;
+  /* Altezza fissa per tutte le celle */
+}
+
+th {
+  background-color: var(--snow-dark);
+  font-weight: bold;
+}
+
+th.sortable {
+  cursor: pointer;
+  position: relative;
+}
+
+th.sortable:hover {
+  background-color: var(--border);
+}
+
+.sort-icon {
+  margin-left: 5px;
+  font-size: 12px;
+}
+
+.low-stock {
+  background-color: var(--fulvous-light);
+}
+
+.actions {
+  display: flex;
+  gap: 8px;
+  margin: 0;
+  /* Reset del margine */
+  padding: 0;
+  /* Reset del padding */
+  justify-content: center;
+  /* Centra orizzontalmente */
+  align-items: center;
+  /* Allineamento verticale */
+}
+
+.pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-top: 20px;
+  margin-bottom: 10px;
+}
+
+.page-numbers {
+  display: flex;
+  gap: 5px;
+  margin: 0 10px;
+}
+
+.pagination-info {
+  text-align: center;
+  color: #6c757d;
+  font-size: 14px;
+}
+
+.sku-link {
+  color: #3498db;
+  text-decoration: none;
+}
+
+.sku-link:hover {
+  text-decoration: underline;
+}
+
+.btn-view {
+  background-color: #17a2b8;
+  color: white;
+}
+
+.actions-menu-row {
+  position: absolute;
+  right: 12px;
+  bottom: 8px;
+  display: flex;
+  align-items: flex-end;
+  z-index: 20;
+}
+
+.menu-dropdown {
+  position: absolute;
+  right: 0;
+  bottom: 36px;
+  background: #fff;
+  border: 1px solid #ddd;
+  border-radius: 10px;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.14);
+  z-index: 30;
   display: flex;
   flex-direction: column;
-  gap: 24px;
+  min-width: 150px;
+  padding: 18px 16px;
+  gap: 14px;
 }
 
-.cursor-pointer {
-  cursor: pointer;
-}
-
-.sortable:hover {
-  background-color: #f8f9fa !important;
-}
-
-.low-stock-row {
-  background-color: #fff8e1 !important;
-}
-
-.low-stock-card {
-  border-left: 4px solid #ff9800;
-  background: linear-gradient(to right, #fff8e1, #ffffff);
-}
-
-.ml-1 {
-  margin-left: 4px;
-}
-
-.ml-2 {
-  margin-left: 8px;
-}
-
-/* Mobile specific styles */
-@media (max-width: 768px) {
-  .page-header h1 {
-    font-size: 24px;
-    margin-bottom: 16px;
-  }
-  
-  .materials-content {
-    gap: 16px;
-  }
-  
-  .card {
-    padding: 16px;
-  }
-  
-  .btn-group {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-  }
-  
-  .btn-group .btn {
-    width: 100%;
-    justify-content: center;
-  }
-}
-
-@media (max-width: 480px) {
-  .page-header {
-    margin-bottom: 20px;
-    padding-bottom: 16px;
-  }
-  
-  .page-header h1 {
-    font-size: 20px;
-  }
-  
-  .grid-2 {
-    grid-template-columns: 1fr;
-  }
-}
-
-/* Loading animation */
-@keyframes fadeIn {
-  from { opacity: 0; transform: translateY(10px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-
-.card {
-  animation: fadeIn 0.3s ease-out;
-}
-
-/* Hover effects */
-.card:hover {
-  transform: translateY(-2px);
-}
-
-.btn:hover {
-  transform: translateY(-1px);
-}
-
-/* Focus states for accessibility */
-.btn:focus,
-.form-input:focus,
-.form-select:focus {
-  outline: 2px solid #42b983;
-  outline-offset: 2px;
-}
-
-/* Status indicators */
-.text-warning {
-  color: #f57c00 !important;
-}
-
-.badge-warning {
-  background-color: #fff3cd;
-  color: #856404;
-  border: 1px solid #ffeaa7;
-}
-
-/* Smooth transitions */
-* {
-  transition: all 0.2s ease;
-}
-
-/* Mobile Actions */
-.mobile-actions {
+.menu-dropdown .btn {
+  margin: 0;
+  width: 100%;
+  text-align: left;
+  padding: 10px 16px;
+  border-radius: 8px;
+  background: none;
+  color: #222;
+  font-size: 16px;
+  font-weight: 500;
+  box-shadow: none;
+  border: none;
+  transition: box-shadow 0.2s, background 0.2s;
   display: flex;
-  justify-content: flex-end;
-  padding-top: 12px;
-  border-top: 1px solid #e5e7eb;
+  align-items: center;
+  min-height: 40px;
 }
 
-/* Print styles */
-@media print {
-  .btn, .pagination, .page-header .flex, .mobile-actions {
-    display: none !important;
-  }
-  
-  .card {
-    box-shadow: none;
-    border: 1px solid #ddd;
-  }
+.menu-dropdown .btn:hover {
+  background: #f5f5f5;
+  box-shadow: 0 2px 8px rgba(66,185,131,0.12);
+  color: #222;
+}
+
+.menu-dropdown .btn-danger {
+  color: #dc3545;
+}
+
+.menu-dropdown .btn-danger:hover {
+  background: #fbeaea;
+  box-shadow: 0 2px 8px rgba(220,53,69,0.12);
+}
+
+.menu-dropdown .btn-view {
+  color: #17a2b8;
+}
+
+.menu-dropdown .btn-edit {
+  color: #3498db;
+}
+
+.menu-dropdown .btn-view:hover {
+  background: #e6f7fa;
+  box-shadow: 0 2px 8px rgba(23,162,184,0.12);
+}
+
+.menu-dropdown .btn-edit:hover {
+  background: #eaf4fb;
+  box-shadow: 0 2px 8px rgba(52,152,219,0.12);
+}
+
+.btn-menu {
+  background: none !important;
+  color: #333;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  font-size: 16px;
+  box-shadow: none;
 }
 </style>

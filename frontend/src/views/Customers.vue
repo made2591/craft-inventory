@@ -630,7 +630,7 @@ export default {
 .btn:focus,
 .form-input:focus,
 .form-select:focus {
-  outline: 2px solid #42b983;
+  outline: 2px solid var(--primary);
   outline-offset: 2px;
 }
 

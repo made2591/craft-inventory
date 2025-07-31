@@ -177,9 +177,9 @@ export default {
 }
 
 .login-card {
-  background-color: #fff;
+  background-color: var(--surface);
   border-radius: 8px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 12px rgba(0, 0, 34, 0.1);
   padding: 30px;
   width: 100%;
   max-width: 400px;
@@ -188,7 +188,7 @@ export default {
 h1 {
   text-align: center;
   margin-bottom: 24px;
-  color: #42b983;
+  color: var(--primary);
 }
 
 .form-group {
@@ -204,9 +204,10 @@ label {
 input {
   width: 100%;
   padding: 10px;
-  border: 1px solid #ddd;
+  border: 1px solid var(--border);
   border-radius: 4px;
   font-size: 16px;
+  background-color: var(--surface);
 }
 
 .form-actions {
@@ -226,8 +227,8 @@ input {
 }
 
 .btn-primary {
-  background-color: #42b983;
-  color: white;
+  background-color: var(--secondary);
+  color: var(--surface);
   width: 100%;
 }
 
@@ -237,8 +238,8 @@ input {
 }
 
 .error-message {
-  background-color: #f8d7da;
-  color: #721c24;
+  background-color: var(--rusty-red-light);
+  color: var(--danger);
   padding: 10px;
   border-radius: 4px;
   margin-bottom: 20px;
@@ -251,7 +252,7 @@ input {
 }
 
 .toggle-form a {
-  color: #42b983;
+  color: var(--secondary);
   text-decoration: none;
   font-weight: bold;
 }
@@ -259,9 +260,9 @@ input {
 .loading-spinner {
   width: 20px;
   height: 20px;
-  border: 3px solid rgba(255, 255, 255, 0.3);
+  border: 3px solid rgba(251, 245, 243, 0.3);
   border-radius: 50%;
-  border-top-color: #fff;
+  border-top-color: var(--surface);
   animation: spin 1s ease-in-out infinite;
   margin-left: 10px;
 }

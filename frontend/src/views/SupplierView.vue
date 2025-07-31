@@ -232,7 +232,7 @@ h2 {
 }
 
 .btn-primary {
-  background-color: #42b983;
+  background-color: var(--primary);
   color: white;
 }
 

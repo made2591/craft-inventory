@@ -117,7 +117,7 @@ export default {
 
 .action-trigger:hover .dot,
 .action-trigger.active .dot {
-  background: #42b983;
+  background: var(--primary);
 }
 
 .action-dropdown {
@@ -168,7 +168,7 @@ export default {
 }
 
 .action-item.primary {
-  color: #42b983;
+  color: var(--primary);
 }
 
 .action-item.primary:hover {
