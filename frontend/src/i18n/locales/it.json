@@ -73,7 +73,8 @@
     "lowStock": "Scorte Basse",
     "calculating": "Calcolo...",
     "calculateCost": "Calcola Costo",
-    "sku": "SKU"
+    "sku": "SKU",
+    "all": "Tutti"
   },
   "dashboard": {
     "title": "Dashboard",
@@ -113,6 +114,7 @@
     "totalCustomers": "Clienti Totali",
     "transactions": "Transazioni",
     "newMaterial": "Nuovo Materiale",
+    "newComponent": "Nuovo Componente",
     "newModel": "Nuovo Modello",
     "newInventoryItem": "Nuovo Articolo",
     "newSupplier": "Nuovo Fornitore",
@@ -349,7 +351,10 @@
     "totalSales": "Totale Vendite",
     "balance": "Bilancio",
     "backToTransactions": "Torna alle Transazioni",
-    "notFound": "Transazione non trovata."
+    "notFound": "Transazione non trovata.",
+    "searchPlaceholder": "Cerca transazioni...",
+    "selectCustomer": "Seleziona un cliente",
+    "selectSupplier": "Seleziona un fornitore"
   },
   "inventory": {
     "title": "Gestione Inventario",

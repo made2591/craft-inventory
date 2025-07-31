@@ -10,7 +10,7 @@
         <div class="stat-content">
           <h3>{{ $t('navigation.materials') }}</h3>
           <p class="stat-value">{{ stats.materials || 0 }}</p>
-          <p class="stat-subtitle">€{{ $formatCurrency(stats.materialValue) }}</p>
+          <p class="stat-subtitle">€{{ $formatNumber(stats.materialValue) }}</p>
         </div>
       </router-link>
       
@@ -54,7 +54,7 @@
         <div class="stat-content">
           <h3>{{ $t('navigation.customers') }}</h3>
           <p class="stat-value">{{ stats.customers || 0 }}</p>
-          <p class="stat-subtitle">€{{ $formatCurrency(stats.totalSales) }}</p>
+          <p class="stat-subtitle">€{{ $formatNumber(stats.totalSales) }}</p>
         </div>
       </router-link>
       
@@ -64,7 +64,7 @@
         </div>
         <div class="stat-content">
           <h3>{{ $t('dashboard.monthlyRevenue') }}</h3>
-          <p class="stat-value">€{{ $formatCurrency(stats.monthlyRevenue) }}</p>
+          <p class="stat-value">€{{ $formatNumber(stats.monthlyRevenue) }}</p>
           <p class="stat-subtitle" :class="{ 'positive': stats.revenueGrowth > 0, 'negative': stats.revenueGrowth < 0 }">
             <i :class="stats.revenueGrowth > 0 ? 'fas fa-arrow-up' : 'fas fa-arrow-down'"></i>
             {{ Math.abs(stats.revenueGrowth).toFixed(1) }}%
@@ -124,6 +124,9 @@
       <div class="actions-grid">
         <router-link to="/materials/new" class="action-btn">
           <i class="fas fa-plus"></i> {{ $t('dashboard.newMaterial') }}
+        </router-link>
+        <router-link to="/components/new" class="action-btn">
+          <i class="fas fa-plus"></i> {{ $t('dashboard.newComponent') }}
         </router-link>
         <router-link to="/models/new" class="action-btn">
           <i class="fas fa-plus"></i> {{ $t('dashboard.newModel') }}
@@ -658,7 +661,7 @@ export default {
       });
     },
     
-    $formatCurrency(value) {
+    $formatNumber(value) {
       return new Intl.NumberFormat('it-IT', {
         minimumFractionDigits: 0,
         maximumFractionDigits: 0

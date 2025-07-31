@@ -1,85 +1,85 @@
 <template>
-  <!-- Mobile Overlay -->
-  <div v-if="isMobileMenuOpen" class="mobile-overlay" @click="closeMobileMenu"></div>
-  
-  <!-- Mobile Menu Button -->
-  <button class="mobile-menu-btn" @click="toggleMobileMenu" :class="{ 'active': isMobileMenuOpen }">
-    <span class="hamburger-line"></span>
-    <span class="hamburger-line"></span>
-    <span class="hamburger-line"></span>
-  </button>
-
   <div class="sidebar" :class="{ 
     'collapsed': isCollapsed, 
     'mobile-open': isMobileMenuOpen,
     'mobile-closed': !isMobileMenuOpen 
   }">
     <div class="sidebar-header">
-      <router-link to="/" class="logo" @click="closeMobileMenu">
-        <div class="logo-icon">
-          <i class="fas fa-cube"></i>
-        </div>
-        <div class="logo-text" v-if="!isCollapsed">
+      <router-link to="/" class="logo" @click="$emit('close-mobile-menu')" v-if="!isCollapsed">
+        <div class="logo-text">
           <span class="logo-title">{{ $t('app.title') }}</span>
           <span class="logo-subtitle">Inventory</span>
         </div>
       </router-link>
-      <button class="toggle-btn desktop-only" @click="toggleSidebar" :title="isCollapsed ? 'Expand sidebar' : 'Collapse sidebar'">
-        <i :class="isCollapsed ? 'fas fa-angle-right' : 'fas fa-angle-left'"></i>
+      
+      <!-- Collapsed state: logo becomes expand button -->
+      <div class="logo collapsed-logo" @click="toggleSidebar" v-if="isCollapsed" :title="'Expand sidebar'">
+        <div class="logo-icon">
+          <i class="fas fa-cube"></i>
+        </div>
+      </div>
+      
+      <button class="toggle-btn desktop-only" @click="toggleSidebar" :title="'Collapse sidebar'" v-if="!isCollapsed">
+        <i class="fas fa-angle-left"></i>
       </button>
     </div>
     
     <div class="sidebar-content">
       <div class="sidebar-menu">
         <!-- Dashboard -->
-        <router-link to="/" class="menu-item dashboard-item" :title="isCollapsed ? $t('navigation.dashboard') : ''" @click="closeMobileMenu">
+        <router-link to="/" class="menu-item dashboard-item" :title="isCollapsed ? $t('navigation.dashboard') : ''" @click="$emit('close-mobile-menu')">
           <div class="menu-icon">
             <i class="fas fa-home"></i>
           </div>
-          <span class="menu-text" v-if="!isCollapsed">{{ $t('navigation.dashboard') }}</span>
+          <span class="menu-text" v-if="!isCollapsed || isMobile">{{ $t('navigation.dashboard') }}</span>
           <div class="menu-indicator"></div>
         </router-link>
         
         <!-- Sezione Inventario -->
         <div class="menu-section">
-          <div class="section-header" @click="toggleSection('inventory')" :title="isCollapsed ? $t('navigation.inventory') : ''">
+          <div 
+            class="section-header" 
+            @click="handleSectionClick('inventory')" 
+            :title="isCollapsed ? $t('navigation.inventory') : ''"
+            :class="{ 'clickable': !isCollapsed }"
+          >
             <div class="section-icon">
               <i class="fas fa-warehouse"></i>
             </div>
-            <span class="section-text" v-if="!isCollapsed">{{ $t('navigation.inventory') }}</span>
-            <i v-if="!isCollapsed" class="section-chevron" :class="['fas', sections.inventory ? 'fa-chevron-down' : 'fa-chevron-right']"></i>
+            <span class="section-text" v-if="!isCollapsed || isMobile">{{ $t('navigation.inventory') }}</span>
+            <i v-if="!isCollapsed || isMobile" class="section-chevron" :class="['fas', sections.inventory ? 'fa-chevron-down' : 'fa-chevron-right']"></i>
           </div>
           
           <div class="section-items" v-if="sections.inventory || isCollapsed">
-            <router-link to="/materials" class="menu-item" :title="isCollapsed ? $t('navigation.materials') : ''" @click="closeMobileMenu">
+            <router-link to="/materials" class="menu-item" :title="isCollapsed ? $t('navigation.materials') : ''" @click="$emit('close-mobile-menu')">
               <div class="menu-icon">
                 <i class="fas fa-box"></i>
               </div>
-              <span class="menu-text" v-if="!isCollapsed">{{ $t('navigation.materials') }}</span>
+              <span class="menu-text" v-if="!isCollapsed || isMobile">{{ $t('navigation.materials') }}</span>
               <div class="menu-indicator"></div>
             </router-link>
             
-            <router-link to="/components" class="menu-item" :title="isCollapsed ? $t('navigation.components') : ''" @click="closeMobileMenu">
+            <router-link to="/components" class="menu-item" :title="isCollapsed ? $t('navigation.components') : ''" @click="$emit('close-mobile-menu')">
               <div class="menu-icon">
                 <i class="fas fa-cogs"></i>
               </div>
-              <span class="menu-text" v-if="!isCollapsed">{{ $t('navigation.components') }}</span>
+              <span class="menu-text" v-if="!isCollapsed || isMobile">{{ $t('navigation.components') }}</span>
               <div class="menu-indicator"></div>
             </router-link>
             
-            <router-link to="/models" class="menu-item" :title="isCollapsed ? $t('navigation.products') : ''" @click="closeMobileMenu">
+            <router-link to="/models" class="menu-item" :title="isCollapsed ? $t('navigation.models') : ''" @click="$emit('close-mobile-menu')">
               <div class="menu-icon">
                 <i class="fas fa-cubes"></i>
               </div>
-              <span class="menu-text" v-if="!isCollapsed">{{ $t('navigation.products') }}</span>
+              <span class="menu-text" v-if="!isCollapsed || isMobile">{{ $t('navigation.models') }}</span>
               <div class="menu-indicator"></div>
             </router-link>
             
-            <router-link to="/inventory" class="menu-item" :title="isCollapsed ? $t('navigation.inventory') : ''" @click="closeMobileMenu">
+            <router-link to="/inventory" class="menu-item" :title="isCollapsed ? $t('navigation.inventory') : ''" @click="$emit('close-mobile-menu')">
               <div class="menu-icon">
                 <i class="fas fa-dolly-flatbed"></i>
               </div>
-              <span class="menu-text" v-if="!isCollapsed">{{ $t('navigation.inventory') }}</span>
+              <span class="menu-text" v-if="!isCollapsed || isMobile">{{ $t('navigation.inventory') }}</span>
               <div class="menu-indicator"></div>
             </router-link>
           </div>
@@ -87,28 +87,33 @@
         
         <!-- Sezione Contatti -->
         <div class="menu-section">
-          <div class="section-header" @click="toggleSection('contacts')" :title="isCollapsed ? $t('navigation.contacts') : ''">
+          <div 
+            class="section-header" 
+            @click="handleSectionClick('contacts')" 
+            :title="isCollapsed ? $t('navigation.contacts') : ''"
+            :class="{ 'clickable': !isCollapsed }"
+          >
             <div class="section-icon">
               <i class="fas fa-address-book"></i>
             </div>
-            <span class="section-text" v-if="!isCollapsed">{{ $t('navigation.contacts') }}</span>
-            <i v-if="!isCollapsed" class="section-chevron" :class="['fas', sections.contacts ? 'fa-chevron-down' : 'fa-chevron-right']"></i>
+            <span class="section-text" v-if="!isCollapsed || isMobile">{{ $t('navigation.contacts') }}</span>
+            <i v-if="!isCollapsed || isMobile" class="section-chevron" :class="['fas', sections.contacts ? 'fa-chevron-down' : 'fa-chevron-right']"></i>
           </div>
           
           <div class="section-items" v-if="sections.contacts || isCollapsed">
-            <router-link to="/suppliers" class="menu-item" :title="isCollapsed ? $t('navigation.suppliers') : ''" @click="closeMobileMenu">
+            <router-link to="/suppliers" class="menu-item" :title="isCollapsed ? $t('navigation.suppliers') : ''" @click="$emit('close-mobile-menu')">
               <div class="menu-icon">
                 <i class="fas fa-truck"></i>
               </div>
-              <span class="menu-text" v-if="!isCollapsed">{{ $t('navigation.suppliers') }}</span>
+              <span class="menu-text" v-if="!isCollapsed || isMobile">{{ $t('navigation.suppliers') }}</span>
               <div class="menu-indicator"></div>
             </router-link>
             
-            <router-link to="/customers" class="menu-item" :title="isCollapsed ? $t('navigation.customers') : ''" @click="closeMobileMenu">
+            <router-link to="/customers" class="menu-item" :title="isCollapsed ? $t('navigation.customers') : ''" @click="$emit('close-mobile-menu')">
               <div class="menu-icon">
                 <i class="fas fa-users"></i>
               </div>
-              <span class="menu-text" v-if="!isCollapsed">{{ $t('navigation.customers') }}</span>
+              <span class="menu-text" v-if="!isCollapsed || isMobile">{{ $t('navigation.customers') }}</span>
               <div class="menu-indicator"></div>
             </router-link>
           </div>
@@ -116,28 +121,33 @@
         
         <!-- Sezione Transazioni -->
         <div class="menu-section">
-          <div class="section-header" @click="toggleSection('transactions')" :title="isCollapsed ? $t('navigation.transactions') : ''">
+          <div 
+            class="section-header" 
+            @click="handleSectionClick('transactions')" 
+            :title="isCollapsed ? $t('navigation.transactions') : ''"
+            :class="{ 'clickable': !isCollapsed }"
+          >
             <div class="section-icon">
               <i class="fas fa-exchange-alt"></i>
             </div>
-            <span class="section-text" v-if="!isCollapsed">{{ $t('navigation.transactions') }}</span>
+            <span class="section-text" v-if="!isCollapsed || isMobile">{{ $t('navigation.transactions') }}</span>
             <i v-if="!isCollapsed" class="section-chevron" :class="['fas', sections.transactions ? 'fa-chevron-down' : 'fa-chevron-right']"></i>
           </div>
           
           <div class="section-items" v-if="sections.transactions || isCollapsed">
-            <router-link to="/transactions" class="menu-item" :title="isCollapsed ? $t('transactions.allTransactions') : ''" @click="closeMobileMenu">
+            <router-link to="/transactions" class="menu-item" :title="isCollapsed ? $t('transactions.allTransactions') : ''" @click="$emit('close-mobile-menu')">
               <div class="menu-icon">
                 <i class="fas fa-list"></i>
               </div>
-              <span class="menu-text" v-if="!isCollapsed">{{ $t('transactions.allTransactions') }}</span>
+              <span class="menu-text" v-if="!isCollapsed || isMobile">{{ $t('transactions.allTransactions') }}</span>
               <div class="menu-indicator"></div>
             </router-link>
             
-            <router-link to="/transactions/new" class="menu-item new-transaction" :title="isCollapsed ? $t('transactions.newTransaction') : ''" @click="closeMobileMenu">
+            <router-link to="/transactions/new" class="menu-item new-transaction" :title="isCollapsed ? $t('transactions.newTransaction') : ''" @click="$emit('close-mobile-menu')">
               <div class="menu-icon">
                 <i class="fas fa-plus-circle"></i>
               </div>
-              <span class="menu-text" v-if="!isCollapsed">{{ $t('transactions.newTransaction') }}</span>
+              <span class="menu-text" v-if="!isCollapsed || isMobile">{{ $t('transactions.newTransaction') }}</span>
               <div class="menu-indicator"></div>
             </router-link>
           </div>
@@ -145,27 +155,32 @@
         
         <!-- Sezione Sistema -->
         <div class="menu-section">
-          <div class="section-header" @click="toggleSection('system')" :title="isCollapsed ? $t('navigation.system') : ''">
+          <div 
+            class="section-header" 
+            @click="handleSectionClick('system')" 
+            :title="isCollapsed ? $t('navigation.system') : ''"
+            :class="{ 'clickable': !isCollapsed }"
+          >
             <div class="section-icon">
               <i class="fas fa-cogs"></i>
             </div>
-            <span class="section-text" v-if="!isCollapsed">{{ $t('navigation.system') }}</span>
+            <span class="section-text" v-if="!isCollapsed || isMobile">{{ $t('navigation.system') }}</span>
             <i v-if="!isCollapsed" class="section-chevron" :class="['fas', sections.system ? 'fa-chevron-down' : 'fa-chevron-right']"></i>
           </div>
           
           <div class="section-items" v-if="sections.system || isCollapsed">
-            <router-link to="/settings" class="menu-item" :title="isCollapsed ? $t('navigation.settings') : ''" @click="closeMobileMenu">
+            <router-link to="/settings" class="menu-item" :title="isCollapsed ? $t('navigation.settings') : ''" @click="$emit('close-mobile-menu')">
               <div class="menu-icon">
                 <i class="fas fa-cog"></i>
               </div>
-              <span class="menu-text" v-if="!isCollapsed">{{ $t('navigation.settings') }}</span>
+              <span class="menu-text" v-if="!isCollapsed || isMobile">{{ $t('navigation.settings') }}</span>
               <div class="menu-indicator"></div>
             </router-link>
-            <router-link to="/database" class="menu-item" :title="isCollapsed ? $t('navigation.database') : ''" @click="closeMobileMenu">
+            <router-link to="/database" class="menu-item" :title="isCollapsed ? $t('navigation.database') : ''" @click="$emit('close-mobile-menu')">
               <div class="menu-icon">
                 <i class="fas fa-database"></i>
               </div>
-              <span class="menu-text" v-if="!isCollapsed">{{ $t('navigation.database') }}</span>
+              <span class="menu-text" v-if="!isCollapsed || isMobile">{{ $t('navigation.database') }}</span>
               <div class="menu-indicator"></div>
             </router-link>
           </div>
@@ -188,10 +203,16 @@
 <script>
 export default {
   name: 'Sidebar',
+  props: {
+    isMobileMenuOpen: {
+      type: Boolean,
+      default: false
+    }
+  },
+  emits: ['close-mobile-menu', 'sidebar-toggle'],
   data() {
     return {
       isCollapsed: false,
-      isMobileMenuOpen: false,
       isMobile: false,
       sections: {
         inventory: true,
@@ -208,45 +229,29 @@ export default {
       this.$emit('sidebar-toggle', this.isCollapsed);
     },
     
-    toggleMobileMenu() {
-      this.isMobileMenuOpen = !this.isMobileMenuOpen;
-      // Prevent body scroll when mobile menu is open
-      if (this.isMobileMenuOpen) {
-        document.body.style.overflow = 'hidden';
-      } else {
-        document.body.style.overflow = '';
+    handleSectionClick(section) {
+      // On collapsed desktop mode, don't allow toggling (sections are always visible)
+      // On mobile or expanded desktop mode, allow toggling
+      if (!this.isCollapsed || this.isMobile) {
+        this.toggleSection(section);
       }
-    },
-    
-    closeMobileMenu() {
-      this.isMobileMenuOpen = false;
-      document.body.style.overflow = '';
     },
     
     toggleSection(section) {
-      if (!this.isCollapsed || this.isMobile) {
-        this.sections[section] = !this.sections[section];
-        // Save section states
-        localStorage.setItem('sidebarSections', JSON.stringify(this.sections));
-      }
+      this.sections[section] = !this.sections[section];
+      // Save section states
+      localStorage.setItem('sidebarSections', JSON.stringify(this.sections));
     },
     
     checkMobile() {
       const wasMobile = this.isMobile;
       this.isMobile = window.innerWidth <= 768;
       
-      // Auto-collapse sidebar on mobile
-      if (this.isMobile && !wasMobile) {
-        this.isCollapsed = true;
-        localStorage.setItem('sidebarCollapsed', true);
-      } else if (!this.isMobile && wasMobile) {
-        // Restore previous desktop state
+      // Don't auto-collapse on mobile - keep text visible
+      if (!this.isMobile && wasMobile) {
+        // Restore previous desktop state when switching back to desktop
         const savedState = localStorage.getItem('sidebarCollapsed');
         this.isCollapsed = savedState === 'true';
-      }
-      
-      if (!this.isMobile && this.isMobileMenuOpen) {
-        this.closeMobileMenu();
       }
       
       // Emit sidebar state change
@@ -255,12 +260,6 @@ export default {
     
     handleResize() {
       this.checkMobile();
-    },
-    
-    handleClickOutside(event) {
-      if (this.isMobileMenuOpen && !this.$el.contains(event.target)) {
-        this.closeMobileMenu();
-      }
     }
   },
   
@@ -285,20 +284,17 @@ export default {
   mounted() {
     this.checkMobile();
     window.addEventListener('resize', this.handleResize);
-    document.addEventListener('click', this.handleClickOutside);
   },
   
   beforeUnmount() {
     window.removeEventListener('resize', this.handleResize);
-    document.removeEventListener('click', this.handleClickOutside);
-    document.body.style.overflow = '';
   },
   
   watch: {
     $route() {
       // Close mobile menu when route changes
       if (this.isMobileMenuOpen) {
-        this.closeMobileMenu();
+        this.$emit('close-mobile-menu');
       }
     }
   }
@@ -306,68 +302,6 @@ export default {
 </script>
 
 <style scoped>
-/* Mobile Menu Button */
-.mobile-menu-btn {
-  display: none;
-  position: fixed;
-  top: 20px;
-  left: 20px;
-  z-index: 1100;
-  background: linear-gradient(135deg, #42b983 0%, #369970 100%);
-  border: none;
-  border-radius: 12px;
-  width: 48px;
-  height: 48px;
-  cursor: pointer;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 4px;
-  box-shadow: 0 4px 12px rgba(66, 185, 131, 0.3);
-  transition: all 0.3s ease;
-}
-
-.mobile-menu-btn:hover {
-  box-shadow: 0 6px 20px rgba(66, 185, 131, 0.4);
-}
-
-.mobile-menu-btn.active {
-  background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
-}
-
-.hamburger-line {
-  width: 20px;
-  height: 2px;
-  background: white;
-  border-radius: 1px;
-  transition: all 0.3s ease;
-}
-
-.mobile-menu-btn.active .hamburger-line:nth-child(1) {
-  transform: rotate(45deg) translate(5px, 5px);
-}
-
-.mobile-menu-btn.active .hamburger-line:nth-child(2) {
-  opacity: 0;
-}
-
-.mobile-menu-btn.active .hamburger-line:nth-child(3) {
-  transform: rotate(-45deg) translate(7px, -6px);
-}
-
-/* Mobile Overlay */
-.mobile-overlay {
-  display: none;
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(0, 0, 0, 0.5);
-  z-index: 999;
-  backdrop-filter: blur(4px);
-}
-
 /* Sidebar */
 .sidebar {
   width: 280px;
@@ -414,6 +348,18 @@ export default {
   opacity: 0.9;
 }
 
+.collapsed-logo {
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+}
+
+.collapsed-logo:hover {
+  opacity: 0.9;
+}
+
 .logo-icon {
   width: 40px;
   height: 40px;
@@ -422,7 +368,7 @@ export default {
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 18px;
+  font-size: 20px;
   box-shadow: 0 4px 12px rgba(66, 185, 131, 0.3);
 }
 
@@ -433,12 +379,12 @@ export default {
 
 .logo-title {
   font-weight: 700;
-  font-size: 1.2rem;
+  font-size: 1.5rem;
   line-height: 1;
 }
 
 .logo-subtitle {
-  font-size: 0.75rem;
+  font-size: 0.95rem;
   opacity: 0.7;
   font-weight: 400;
 }
@@ -501,17 +447,20 @@ export default {
   display: flex;
   align-items: center;
   padding: 12px 20px;
-  cursor: pointer;
   transition: all 0.3s ease;
   position: relative;
   font-weight: 600;
-  font-size: 0.9rem;
+  font-size: 1rem;
   text-transform: uppercase;
   letter-spacing: 0.5px;
   opacity: 0.8;
 }
 
-.section-header:hover {
+.section-header.clickable {
+  cursor: pointer;
+}
+
+.section-header.clickable:hover {
   background: rgba(255, 255, 255, 0.1);
   opacity: 1;
 }
@@ -523,7 +472,7 @@ export default {
   align-items: center;
   justify-content: center;
   margin-right: 12px;
-  font-size: 14px;
+  font-size: 16px;
 }
 
 .section-text {
@@ -531,7 +480,7 @@ export default {
 }
 
 .section-chevron {
-  font-size: 12px;
+  font-size: 14px;
   transition: transform 0.3s ease;
 }
 
@@ -553,6 +502,7 @@ export default {
   margin: 2px 0;
   position: relative;
   font-weight: 500;
+  font-size: 1rem;
 }
 
 .menu-item:hover {
@@ -596,7 +546,7 @@ export default {
   align-items: center;
   justify-content: center;
   margin-right: 12px;
-  font-size: 16px;
+  font-size: 18px;
 }
 
 .menu-text {
@@ -635,7 +585,7 @@ export default {
 .app-version {
   display: flex;
   align-items: center;
-  font-size: 0.8rem;
+  font-size: 0.9rem;
   opacity: 0.6;
 }
 
@@ -674,17 +624,6 @@ export default {
 
 /* Mobile Styles */
 @media (max-width: 768px) {
-  .mobile-menu-btn {
-    display: flex;
-  }
-  
-  .mobile-overlay {
-    display: block;
-    opacity: 0;
-    visibility: hidden;
-    transition: all 0.3s ease;
-  }
-  
   .sidebar {
     width: 280px;
     transform: translateX(-100%);
@@ -693,11 +632,6 @@ export default {
   
   .sidebar.mobile-open {
     transform: translateX(0);
-  }
-  
-  .sidebar.mobile-open ~ .mobile-overlay {
-    opacity: 1;
-    visibility: visible;
   }
   
   .sidebar.collapsed {
@@ -709,12 +643,52 @@ export default {
     transform: translateX(0);
   }
   
+  /* Force show text and elements on mobile even when collapsed */
+  .sidebar.collapsed .section-text,
+  .sidebar.collapsed .menu-text,
+  .sidebar.collapsed .section-chevron {
+    display: block !important;
+  }
+  
+  .sidebar.collapsed .section-header {
+    justify-content: flex-start;
+    padding: 16px 20px;
+  }
+  
+  .sidebar.collapsed .section-icon {
+    margin-right: 12px;
+  }
+  
+  .sidebar.collapsed .menu-item {
+    justify-content: flex-start;
+    padding: 16px 20px;
+  }
+  
+  .sidebar.collapsed .menu-icon {
+    margin-right: 12px;
+  }
+  
+  .sidebar.collapsed .section-items {
+    padding-left: 20px;
+  }
+  
   .desktop-only {
     display: none;
   }
   
   .section-header {
     padding: 16px 20px;
+    cursor: pointer; /* Always clickable on mobile */
+  }
+  
+  .section-header.clickable {
+    cursor: pointer;
+  }
+  
+  .section-header:hover,
+  .section-header.clickable:hover {
+    background: rgba(255, 255, 255, 0.1);
+    opacity: 1;
   }
   
   .menu-item {
@@ -738,7 +712,7 @@ export default {
   }
   
   .logo-title {
-    font-size: 1.1rem;
+    font-size: 1.2rem;
   }
 }
 
@@ -756,26 +730,6 @@ export default {
 
 .menu-item {
   animation: slideIn 0.3s ease-out;
-}
-
-/* Focus states for accessibility */
-.menu-item:focus,
-.section-header:focus,
-.toggle-btn:focus,
-.mobile-menu-btn:focus {
-  outline: 2px solid #42b983;
-  outline-offset: 2px;
-}
-
-/* High contrast mode support */
-@media (prefers-contrast: high) {
-  .sidebar {
-    border-right: 2px solid #fff;
-  }
-  
-  .menu-item.router-link-active {
-    border: 2px solid #fff;
-  }
 }
 
 /* Reduced motion support */

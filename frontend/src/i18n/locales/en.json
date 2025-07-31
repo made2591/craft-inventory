@@ -73,7 +73,8 @@
     "lowStock": "Low Stock",
     "calculating": "Calculating...",
     "calculateCost": "Calculate Cost",
-    "sku": "SKU"
+    "sku": "SKU",
+    "all": "All"
   },
   "dashboard": {
     "title": "Dashboard",
@@ -113,6 +114,7 @@
     "totalCustomers": "Total Customers",
     "transactions": "Transactions",
     "newMaterial": "New Material",
+    "newComponent": "New Component",
     "newModel": "New Model",
     "newInventoryItem": "New Inventory Item",
     "newSupplier": "New Supplier",
@@ -349,7 +351,10 @@
     "totalSales": "Total Sales",
     "balance": "Balance",
     "backToTransactions": "Back to Transactions",
-    "notFound": "Transaction not found."
+    "notFound": "Transaction not found.",
+    "searchPlaceholder": "Search transactions...",
+    "selectCustomer": "Select a customer",
+    "selectSupplier": "Select a supplier"
   },
   "inventory": {
     "title": "Inventory Management",
