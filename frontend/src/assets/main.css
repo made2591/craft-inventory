@@ -336,9 +336,9 @@ a:not(.btn):hover {
 }
 
 .status-completed {
-  background: var(--success);
-  color: var(--surface);
-  border-color: var(--fulvous-dark);
+  background: transparent;
+  color: var(--success);
+  border: 1px solid var(--success);
 }
 
 .status-cancelled {
