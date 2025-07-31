@@ -815,7 +815,7 @@ th.sortable:hover {
 }
 
 .menu-dropdown .btn-edit {
-  color: #3498db;
+  color: var(--secondary);
 }
 
 .menu-dropdown .btn-view:hover {

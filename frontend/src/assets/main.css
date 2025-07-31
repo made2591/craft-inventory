@@ -9,6 +9,7 @@
   /* Derived colors for better contrast and usability */
   --snow-dark: #F0E8E5;
   --fulvous-light: #F5C670;
+  --fulvous-lighter: #FDF4E6;
   --fulvous-dark: #B8690F;
   --oxford-blue-light: #2A2A2A;
   --oxford-blue-muted: #4A4A4A;
@@ -32,6 +33,11 @@
   --surface: #FFFFFF;
   --border: var(--snow-dark);
   --border-light: #F8F3F0;
+  
+  /* Transparency variants */
+  --primary-transparent: rgba(20, 20, 20, 0.1);
+  --secondary-transparent: rgba(226, 132, 19, 0.1);
+  --danger-transparent: rgba(222, 60, 75, 0.1);
 }
 
 /* Reset di base */

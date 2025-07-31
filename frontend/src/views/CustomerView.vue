@@ -398,7 +398,7 @@ h2 {
 }
 
 .detail-value a {
-  color: #3498db;
+  color: var(--secondary);
   text-decoration: none;
 }
 
@@ -452,7 +452,7 @@ th {
 }
 
 .material-link {
-  color: #3498db;
+  color: var(--secondary);
   text-decoration: none;
 }
 

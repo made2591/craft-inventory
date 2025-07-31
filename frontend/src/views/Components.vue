@@ -879,7 +879,7 @@ th.sortable:hover {
   color: #17a2b8;
 }
 .menu-dropdown .btn-edit {
-  color: #3498db;
+  color: var(--secondary);
 }
 .menu-dropdown .btn-view:hover {
   background: #e6f7fa;

@@ -460,11 +460,13 @@ h2 {
 }
 
 .sku-link {
-  color: #3498db;
+  color: var(--secondary);
   text-decoration: none;
+  font-weight: 600;
 }
 
 .sku-link:hover {
+  color: var(--fulvous-dark);
   text-decoration: underline;
 }
 

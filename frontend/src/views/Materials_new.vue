@@ -118,10 +118,17 @@
               <td class="font-medium">{{ formatCurrency(material.unitCost) }}</td>
               <td class="font-medium text-accent">{{ formatCurrency((material.quantity || 0) * (material.unitCost || 0)) }}</td>
               <td>
-                <ActionMenu 
-                  :actions="getMaterialActions(material)" 
-                  @action="handleMaterialAction($event, material)"
-                />
+                <div class="action-buttons">
+                  <router-link :to="`/materials/${material.id}/view`" class="btn btn-sm btn-outline" :title="$t('common.view')">
+                    <i class="fas fa-eye"></i>
+                  </router-link>
+                  <router-link :to="`/materials/${material.id}/edit`" class="btn btn-sm btn-outline" :title="$t('common.edit')">
+                    <i class="fas fa-edit"></i>
+                  </router-link>
+                  <button @click="deleteMaterial(material)" class="btn btn-sm btn-danger" :title="$t('common.delete')">
+                    <i class="fas fa-trash"></i>
+                  </button>
+                </div>
               </td>
             </tr>
           </tbody>
@@ -141,10 +148,15 @@
               </span>
             </div>
             <div class="card-actions">
-              <ActionMenu 
-                :actions="getMaterialActions(material)" 
-                @action="handleMaterialAction($event, material)"
-              />
+              <router-link :to="`/materials/${material.id}/view`" class="btn btn-sm btn-outline">
+                <i class="fas fa-eye"></i>
+              </router-link>
+              <router-link :to="`/materials/${material.id}/edit`" class="btn btn-sm btn-outline">
+                <i class="fas fa-edit"></i>
+              </router-link>
+              <button @click="deleteMaterial(material)" class="btn btn-sm btn-danger">
+                <i class="fas fa-trash"></i>
+              </button>
             </div>
           </div>
           <div class="card-body">
@@ -219,13 +231,9 @@
 
 <script>
 import materialService from '../services/materialService';
-import ActionMenu from '../components/ActionMenu.vue';
 
 export default {
   name: 'MaterialsView',
-  components: {
-    ActionMenu
-  },
   data() {
     return {
       materials: [],
@@ -406,46 +414,6 @@ export default {
       } catch (error) {
         console.error('Error deleting material:', error);
         alert('Si è verificato un errore durante l\'eliminazione del materiale.');
-      }
-    },
-
-    getMaterialActions(material) {
-      return [
-        {
-          key: 'view',
-          label: this.$t('common.view'),
-          icon: 'fas fa-eye',
-          variant: 'default',
-          tooltip: 'View material details'
-        },
-        {
-          key: 'edit',
-          label: this.$t('common.edit'),
-          icon: 'fas fa-edit',
-          variant: 'primary',
-          tooltip: 'Edit material'
-        },
-        {
-          key: 'delete',
-          label: this.$t('common.delete'),
-          icon: 'fas fa-trash',
-          variant: 'danger',
-          tooltip: 'Delete material'
-        }
-      ];
-    },
-
-    handleMaterialAction(actionKey, material) {
-      switch (actionKey) {
-        case 'view':
-          this.$router.push(`/materials/${material.id}/view`);
-          break;
-        case 'edit':
-          this.$router.push(`/materials/${material.id}/edit`);
-          break;
-        case 'delete':
-          this.deleteMaterial(material);
-          break;
       }
     }
   }
@@ -649,17 +617,13 @@ export default {
   background: var(--snow-dark);
 }
 
-/* Low Stock Styling - Now highlighting normal stock instead */
-.table tbody tr {
-  background: transparent;
+/* Low Stock Styling */
+.table tbody tr.low-stock {
+  background: linear-gradient(135deg, var(--fulvous-light) 0%, #FFEAA7 100%);
 }
 
-.table tbody tr:not(.low-stock) {
-  background: linear-gradient(135deg, var(--fulvous-lighter) 0%, rgba(253, 244, 230, 0.3) 100%);
-}
-
-.table tbody tr:not(.low-stock):hover {
-  background: linear-gradient(135deg, var(--fulvous-lighter) 0%, rgba(253, 244, 230, 0.5) 100%);
+.table tbody tr.low-stock:hover {
+  background: linear-gradient(135deg, var(--fulvous) 0%, #FDCB6E 100%);
 }
 
 .quantity-badge {
@@ -674,9 +638,14 @@ export default {
 }
 
 .quantity-badge.low-stock {
-  background: rgba(222, 60, 75, 0.1);
-  color: var(--danger);
-  border: 1px solid rgba(222, 60, 75, 0.3);
+  background: linear-gradient(135deg, var(--warning) 0%, var(--fulvous-dark) 100%);
+  color: white;
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.8; }
 }
 
 /* Action Buttons */
@@ -705,9 +674,9 @@ export default {
   box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
 }
 
-.material-card:not(.low-stock) {
-  border-left: 4px solid var(--fulvous-lighter);
-  background: linear-gradient(135deg, var(--surface) 0%, var(--fulvous-lighter) 100%);
+.material-card.low-stock {
+  border-left: 4px solid var(--warning);
+  background: linear-gradient(135deg, var(--surface) 0%, var(--fulvous-light) 100%);
 }
 
 .card-header {
@@ -726,7 +695,8 @@ export default {
 }
 
 .low-stock-indicator {
-  color: var(--danger);
+  color: var(--warning);
+  animation: pulse 2s infinite;
 }
 
 .card-actions {

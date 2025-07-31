@@ -503,9 +503,9 @@ export default {
     getTransactionTypeClass(type) {
       switch (type) {
         case 'sale':
-          return 'badge-success';
+          return 'badge-sale';
         case 'purchase':
-          return 'badge-info';
+          return 'badge-purchase';
         default:
           return 'badge-secondary';
       }
@@ -708,6 +708,18 @@ export default {
 }
 
 /* Badge styles for transaction types and status */
+.badge-sale {
+  background: linear-gradient(135deg, var(--danger) 0%, var(--cardinal) 100%);
+  color: white;
+  border: 1px solid var(--danger);
+}
+
+.badge-purchase {
+  background: linear-gradient(135deg, var(--primary) 0%, var(--oxford-blue-light) 100%);
+  color: white;
+  border: 1px solid var(--primary);
+}
+
 .badge-info {
   background-color: #d1ecf1;
   color: #0c5460;
@@ -842,7 +854,9 @@ th {
 }
 
 .status-pending {
-  background-color: #fff3cd;
+  background: linear-gradient(135deg, var(--secondary) 0%, var(--fulvous-light) 100%);
+  color: var(--oxford-blue);
+  border: 1px solid var(--secondary);
 }
 
 .status-completed {

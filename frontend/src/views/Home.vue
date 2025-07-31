@@ -519,7 +519,7 @@ export default {
             label: this.$t('dashboard.costPerUnit'),
             data: data,
             backgroundColor: [
-              '#e74c3c', '#f39c12', '#f1c40f', '#27ae60', '#3498db'
+              'var(--danger)', 'var(--warning)', 'var(--fulvous-light)', 'var(--success)', 'var(--secondary)'
             ]
           }]
         },
@@ -576,7 +576,7 @@ export default {
           datasets: [{
             label: this.$t('charts.quantity'),
             data: data,
-            backgroundColor: '#3498db'
+            backgroundColor: 'var(--secondary)'
           }]
         },
         options: {
@@ -772,7 +772,7 @@ export default {
           datasets: [{
             label: this.$t('dashboard.materialPurchases'),
             data: purchaseData,
-            backgroundColor: '#3498db'
+            backgroundColor: 'var(--secondary)'
           }]
         },
         options: {

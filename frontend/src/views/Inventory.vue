@@ -625,7 +625,7 @@ export default {
 }
 
 .sku-link {
-  color: #3498db;
+  color: var(--secondary);
   text-decoration: none;
   font-weight: bold;
 }

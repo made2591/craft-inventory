@@ -415,11 +415,12 @@ h1 {
 }
 
 .sku-badge {
-  background-color: #17a2b8;
+  background: linear-gradient(135deg, var(--secondary) 0%, var(--fulvous-dark) 100%);
   color: white;
   padding: 8px 16px;
-  border-radius: 4px;
+  border-radius: 20px;
   font-weight: bold;
+  box-shadow: 0 2px 8px rgba(226, 132, 19, 0.3);
 }
 
 .actions {
@@ -473,7 +474,7 @@ h1 {
 }
 
 .detail-value a {
-  color: #3498db;
+  color: var(--secondary);
   text-decoration: none;
 }
 

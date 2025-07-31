@@ -270,7 +270,7 @@ h2 {
 }
 
 .detail-value a {
-  color: #3498db;
+  color: var(--secondary);
   text-decoration: none;
 }
 
@@ -314,11 +314,13 @@ th {
 }
 
 .sku-link {
-  color: #3498db;
+  color: var(--secondary);
   text-decoration: none;
+  font-weight: 600;
 }
 
 .sku-link:hover {
+  color: var(--fulvous-dark);
   text-decoration: underline;
 }
 </style>
