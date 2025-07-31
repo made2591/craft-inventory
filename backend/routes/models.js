@@ -63,7 +63,7 @@ export default function modelsRoutes(pool, toCamelCase) {
 
       // Ottieni i componenti del modello
       const componentsResult = await pool.query(
-        `SELECT mc.*, c.name as component_name
+        `SELECT mc.*, c.name as component_name, c.sku as component_sku
          FROM model_components mc 
          JOIN components c ON mc.component_id = c.id 
          WHERE mc.model_id = $1`,
