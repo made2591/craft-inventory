@@ -754,19 +754,6 @@ export default {
   border: 1px solid #ddd;
 }
 
-.btn {
-  display: inline-block;
-  padding: 8px 16px;
-  border-radius: 4px;
-  text-decoration: none;
-  cursor: pointer;
-  border: none;
-  font-size: 14px;
-  line-height: 1.2;
-  text-align: center;
-  vertical-align: middle;
-}
-
 .btn-primary {
   background-color: var(--secondary);
   color: var(--surface);

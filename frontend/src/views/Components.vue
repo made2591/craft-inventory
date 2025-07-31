@@ -639,16 +639,6 @@ h1 {
   margin-bottom: 20px;
 }
 
-.btn {
-  display: inline-block;
-  padding: 8px 16px;
-  border-radius: 4px;
-  text-decoration: none;
-  cursor: pointer;
-  border: none;
-  font-size: 14px;
-}
-
 .btn-primary {
   background-color: var(--secondary);
   color: var(--surface);
@@ -657,13 +647,6 @@ h1 {
 .btn-secondary {
   background-color: var(--oxford-blue-muted);
   color: var(--surface);
-}
-
-.btn-sm {
-  padding: 4px 8px;
-  font-size: 12px;
-  height: 28px; /* Altezza fissa per i pulsanti */
-  line-height: 20px; /* Allineamento verticale del testo */
 }
 
 .btn-danger {

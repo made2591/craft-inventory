@@ -573,16 +573,6 @@ export default {
   border-radius: 4px;
 }
 
-.btn {
-  display: inline-block;
-  padding: 8px 16px;
-  border-radius: 4px;
-  text-decoration: none;
-  cursor: pointer;
-  border: none;
-  font-size: 14px;
-}
-
 .btn-primary {
   background-color: var(--secondary);
   color: var(--surface);

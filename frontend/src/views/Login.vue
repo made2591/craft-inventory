@@ -217,15 +217,6 @@ input {
   margin-top: 30px;
 }
 
-.btn {
-  padding: 10px 20px;
-  border-radius: 4px;
-  cursor: pointer;
-  border: none;
-  font-size: 16px;
-  font-weight: bold;
-}
-
 .btn-primary {
   background-color: var(--secondary);
   color: var(--surface);

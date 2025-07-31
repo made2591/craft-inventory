@@ -322,16 +322,6 @@ export default {
   gap: 10px;
 }
 
-.btn {
-  display: inline-block;
-  padding: 8px 16px;
-  border-radius: 4px;
-  text-decoration: none;
-  cursor: pointer;
-  border: none;
-  font-size: 14px;
-}
-
 .btn-secondary {
   background-color: #6c757d;
   color: white;

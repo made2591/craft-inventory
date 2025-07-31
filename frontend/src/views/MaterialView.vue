@@ -558,24 +558,6 @@ h1 {
   gap: 10px;
 }
 
-.btn {
-  padding: 8px 16px;
-  border-radius: 4px;
-  cursor: pointer;
-  border: none;
-  font-size: 14px;
-}
-
-.btn-primary {
-  background-color: var(--secondary);
-  color: var(--surface);
-}
-
-.btn-secondary {
-  background-color: var(--oxford-blue-muted);
-  color: var(--surface);
-}
-
 .detail-card {
   background-color: #fff;
   border-radius: 8px;

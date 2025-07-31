@@ -263,14 +263,6 @@ input, textarea, select {
   margin-top: 20px;
 }
 
-.btn {
-  padding: 8px 16px;
-  border-radius: 4px;
-  cursor: pointer;
-  border: none;
-  font-size: 14px;
-}
-
 .btn-primary {
   background-color: var(--secondary);
   color: var(--surface);

@@ -766,13 +766,16 @@ export default {
       }
       
       this.materialPurchasesChart = this.createChart(this.$refs.materialPurchasesChart, {
-        type: 'bar',
+        type: 'line',
         data: {
           labels: labels,
           datasets: [{
             label: this.$t('dashboard.materialPurchases'),
             data: purchaseData,
-            backgroundColor: '#FFB347'
+            borderColor: '#4CAF50',
+            backgroundColor: 'rgba(76, 175, 80, 0.1)',
+            fill: true,
+            tension: 0.4
           }]
         },
         options: {
@@ -791,6 +794,13 @@ export default {
           plugins: {
             legend: {
               display: true
+            },
+            tooltip: {
+              callbacks: {
+                label: function(context) {
+                  return `${context.dataset.label}: €${context.raw.toLocaleString()}`;
+                }
+              }
             }
           }
         }
@@ -878,13 +888,16 @@ export default {
       }
       
       this.salesVolumeChart = this.createChart(this.$refs.salesVolumeChart, {
-        type: 'bar',
+        type: 'line',
         data: {
           labels: labels,
           datasets: [{
             label: this.$t('dashboard.transactions'),
             data: volumeData,
-            backgroundColor: '#FF8C42'
+            borderColor: '#FF9800',
+            backgroundColor: 'rgba(255, 152, 0, 0.1)',
+            fill: true,
+            tension: 0.4
           }]
         },
         options: {
@@ -895,6 +908,18 @@ export default {
               beginAtZero: true,
               ticks: {
                 precision: 0
+              }
+            }
+          },
+          plugins: {
+            legend: {
+              display: true
+            },
+            tooltip: {
+              callbacks: {
+                label: function(context) {
+                  return `${context.dataset.label}: ${context.raw}`;
+                }
               }
             }
           }
