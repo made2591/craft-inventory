@@ -538,13 +538,13 @@ export default {
     getStatusClass(status) {
       switch (status) {
         case 'pending':
-          return 'status-pending';
+          return 'badge status-pending';
         case 'completed':
-          return 'status-completed';
+          return 'badge status-completed';
         case 'cancelled':
-          return 'status-cancelled';
+          return 'badge status-cancelled';
         default:
-          return '';
+          return 'badge badge-info';
       }
     },
     
@@ -707,37 +707,6 @@ export default {
   margin-right: 4px;
 }
 
-/* Badge styles for transaction types and status */
-.badge-sale {
-  background: linear-gradient(135deg, var(--danger) 0%, var(--cardinal) 100%);
-  color: white;
-  border: 1px solid var(--danger);
-}
-
-.badge-purchase {
-  background: linear-gradient(135deg, var(--primary) 0%, var(--oxford-blue-light) 100%);
-  color: white;
-  border: 1px solid var(--primary);
-}
-
-.badge-info {
-  background-color: #d1ecf1;
-  color: #0c5460;
-  border: 1px solid #bee5eb;
-}
-
-.badge-success {
-  background-color: #d4edda;
-  color: #155724;
-  border: 1px solid #c3e6cb;
-}
-
-.badge-warning {
-  background-color: #fff3cd;
-  color: #856404;
-  border: 1px solid #ffeaa7;
-}
-
 .badge-danger {
   background-color: #f8d7da;
   color: #721c24;
@@ -851,20 +820,6 @@ th, td {
 th {
   background-color: #f8f9fa;
   font-weight: bold;
-}
-
-.status-pending {
-  background: linear-gradient(135deg, var(--secondary) 0%, var(--fulvous-light) 100%);
-  color: var(--oxford-blue);
-  border: 1px solid var(--secondary);
-}
-
-.status-completed {
-  background-color: #d4edda;
-}
-
-.status-cancelled {
-  background-color: #f8d7da;
 }
 
 .actions {

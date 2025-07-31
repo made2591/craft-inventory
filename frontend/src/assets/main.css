@@ -166,6 +166,19 @@ input:focus, textarea:focus, select:focus {
   font-size: 1rem; /* Aumentato da 0.875rem a 1rem */
 }
 
+/* Classi per bottoni uniformi */
+.btn-large {
+  padding: 0.75rem 1.5rem;
+  font-size: 1.1rem;
+  min-width: 120px;
+}
+
+.btn-medium {
+  padding: 0.5rem 1rem;
+  font-size: 1.1rem;
+  min-width: 100px;
+}
+
 /* Stili per le tabelle */
 table {
   width: 100%;
@@ -248,6 +261,119 @@ a:not(.btn) {
 a:not(.btn):hover {
   text-decoration: underline;
   color: var(--fulvous-dark);
+}
+
+/* Sistema Badge Unificato */
+.badge {
+  display: inline-block;
+  padding: 0.25rem 0.75rem;
+  border-radius: 20px;
+  font-weight: 600;
+  font-size: 0.875rem;
+  text-align: center;
+  line-height: 1.2;
+  border: 1px solid transparent;
+  transition: all 0.2s ease;
+}
+
+/* Badge Primari */
+.badge-primary {
+  background: var(--primary);
+  color: var(--surface);
+  border-color: var(--oxford-blue-light);
+}
+
+.badge-secondary {
+  background: var(--secondary);
+  color: var(--surface);
+  border-color: var(--fulvous-dark);
+}
+
+/* Badge di Stato */
+.badge-success {
+  background: var(--success);
+  color: var(--surface);
+  border-color: var(--fulvous-dark);
+}
+
+.badge-info {
+  background: var(--info);
+  color: var(--surface);
+  border-color: var(--oxford-blue-muted);
+}
+
+.badge-warning {
+  background: var(--warning);
+  color: var(--oxford-blue);
+  border-color: var(--fulvous-light);
+}
+
+.badge-error,
+.badge-danger {
+  background: var(--danger);
+  color: var(--surface);
+  border-color: var(--cardinal);
+}
+
+/* Badge Transazioni */
+.badge-sale {
+  background: var(--rusty-red);
+  color: var(--surface);
+  border-color: var(--cardinal);
+}
+
+.badge-purchase {
+  background: var(--oxford-blue);
+  color: var(--surface);
+  border-color: var(--oxford-blue-light);
+}
+
+/* Badge di Status */
+.status-pending {
+  background: var(--fulvous);
+  color: var(--oxford-blue);
+  border-color: var(--fulvous-light);
+}
+
+.status-completed {
+  background: var(--success);
+  color: var(--surface);
+  border-color: var(--fulvous-dark);
+}
+
+.status-cancelled {
+  background: var(--danger);
+  color: var(--surface);
+  border-color: var(--cardinal);
+}
+
+/* Badge Varianti Leggere */
+.badge-light {
+  background: rgba(226, 132, 19, 0.1);
+  color: var(--secondary);
+  border-color: rgba(226, 132, 19, 0.2);
+}
+
+.badge-outline {
+  background: transparent;
+  color: var(--secondary);
+  border-color: var(--secondary);
+}
+
+.badge-outline:hover {
+  background: var(--secondary);
+  color: var(--surface);
+}
+
+/* Badge Dimensioni */
+.badge-sm {
+  padding: 0.125rem 0.5rem;
+  font-size: 0.75rem;
+}
+
+.badge-lg {
+  padding: 0.375rem 1rem;
+  font-size: 1rem;
 }
 
 /* Stili per il layout a griglia */

@@ -526,13 +526,6 @@ export default {
   margin-right: 4px;
 }
 
-/* Badge styles for inventory items */
-.badge-info {
-  background-color: #d1ecf1;
-  color: #0c5460;
-  border: 1px solid #bee5eb;
-}
-
 /* Mobile Actions */
 .mobile-actions {
   display: flex;

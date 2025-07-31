@@ -705,8 +705,8 @@ export default {
           datasets: [{
             label: this.$t('dashboard.sales'),
             data: salesData,
-            borderColor: 'var(--primary)',
-            backgroundColor: 'var(--primary-transparent)',
+            borderColor: '#141414',
+            backgroundColor: 'rgba(20, 20, 20, 0.1)',
             fill: true,
             tension: 0.4
           }]
@@ -772,7 +772,7 @@ export default {
           datasets: [{
             label: this.$t('dashboard.materialPurchases'),
             data: purchaseData,
-            backgroundColor: 'var(--secondary)'
+            backgroundColor: 'var(--oxford-blue-muted)'
           }]
         },
         options: {
@@ -831,8 +831,8 @@ export default {
           datasets: [{
             label: this.$t('dashboard.totalCustomers'),
             data: customerData,
-            borderColor: '#e74c3c',
-            backgroundColor: 'rgba(231, 76, 60, 0.1)',
+            borderColor: 'var(--rusty-red)',
+            backgroundColor: 'rgba(222, 60, 75, 0.1)',
             fill: true,
             tension: 0.4
           }]
@@ -884,7 +884,7 @@ export default {
           datasets: [{
             label: this.$t('dashboard.transactions'),
             data: volumeData,
-            backgroundColor: '#f1c40f'
+            backgroundColor: 'var(--fulvous-light)'
           }]
         },
         options: {
@@ -1009,27 +1009,27 @@ h2 {
 }
 
 .material-icon {
-  background: linear-gradient(135deg, var(--fulvous), var(--fulvous-dark));
+  background: var(--fulvous);
 }
 
 .model-icon {
-  background: linear-gradient(135deg, var(--oxford-blue-light), var(--oxford-blue));
+  background: var(--oxford-blue-light);
 }
 
 .inventory-icon {
-  background: linear-gradient(135deg, var(--fulvous-light), var(--fulvous));
+  background: var(--fulvous-light);
 }
 
 .supplier-icon {
-  background: linear-gradient(135deg, var(--cardinal), var(--rusty-red));
+  background: var(--cardinal);
 }
 
 .customer-icon {
-  background: linear-gradient(135deg, var(--rusty-red), var(--cardinal));
+  background: var(--rusty-red);
 }
 
 .revenue-icon {
-  background: linear-gradient(135deg, var(--fulvous), var(--fulvous-dark));
+  background: var(--fulvous);
 }
 
 .stat-content {

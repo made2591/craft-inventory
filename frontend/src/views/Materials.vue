@@ -655,11 +655,11 @@ export default {
 }
 
 .table tbody tr:not(.low-stock) {
-  background: linear-gradient(135deg, var(--fulvous-lighter) 0%, rgba(253, 244, 230, 0.3) 100%);
+  background: var(--fulvous-lighter);
 }
 
 .table tbody tr:not(.low-stock):hover {
-  background: linear-gradient(135deg, var(--fulvous-lighter) 0%, rgba(253, 244, 230, 0.5) 100%);
+  background: rgba(253, 244, 230, 0.7);
 }
 
 .quantity-badge {
@@ -707,7 +707,7 @@ export default {
 
 .material-card:not(.low-stock) {
   border-left: 4px solid var(--fulvous-lighter);
-  background: linear-gradient(135deg, var(--surface) 0%, var(--fulvous-lighter) 100%);
+  background: var(--fulvous-lighter);
 }
 
 .card-header {

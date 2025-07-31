@@ -48,6 +48,10 @@
     "noSupplier": "No supplier",
     "unknownSupplier": "Unknown supplier",
     "unknownCustomer": "Unknown customer",
+    "selectType": "Select Type",
+    "linkPlaceholder": "Enter URL link",
+    "additionalNotesPlaceholder": "Additional notes...",
+    "totalValue": "Total Value",
     "unknownItem": "Unknown item",
     "unknownMaterial": "Unknown material",
     "unknownModel": "Unknown model",
@@ -154,7 +158,11 @@
     "useMaterialCost": "Use material cost",
     "customCostPerUnit": "Custom cost per unit",
     "materialNumber": "Material {number}",
-    "loadingMaterials": "Loading materials..."
+    "loadingMaterials": "Loading materials...",
+    "quantity": "Quantity",
+    "unitCost": "Unit Cost",
+    "salesHistory": "Sales History",
+    "noSalesHistory": "No sales history for this material."
   },
   "components": {
     "title": "Components",
@@ -313,6 +321,8 @@
     "confirmDelete": "Are you sure you want to delete this transaction?",
     "purchase": "Purchase",
     "sale": "Sale",
+    "purchases": "Purchases",
+    "sales": "Sales",
     "pending": "Pending",
     "completed": "Completed",
     "cancelled": "Cancelled",

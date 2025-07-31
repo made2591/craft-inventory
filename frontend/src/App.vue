@@ -135,7 +135,7 @@ body {
   top: 20px;
   left: 20px;
   z-index: 1100;
-  background: linear-gradient(135deg, var(--secondary) 0%, var(--fulvous-dark) 100%);
+  background: var(--secondary);
   border: none;
   border-radius: 12px;
   width: 48px;
@@ -151,10 +151,11 @@ body {
 
 .mobile-menu-btn:hover {
   box-shadow: 0 6px 20px rgba(226, 132, 19, 0.4);
+  background: var(--fulvous-dark);
 }
 
 .mobile-menu-btn.active {
-  background: linear-gradient(135deg, var(--danger) 0%, var(--cardinal) 100%);
+  background: var(--danger);
 }
 
 .hamburger-line {

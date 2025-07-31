@@ -384,28 +384,3 @@
   text-transform: uppercase;
   letter-spacing: 0.5px;
 }
-
-.badge-success {
-  background: var(--fulvous-light);
-  color: var(--fulvous-dark);
-}
-
-.badge-warning {
-  background: var(--fulvous-light);
-  color: var(--fulvous-dark);
-}
-
-.badge-danger {
-  background: var(--rusty-red-light);
-  color: var(--danger);
-}
-
-.badge-info {
-  background: var(--snow-dark);
-  color: var(--oxford-blue-light);
-}
-
-.badge-secondary {
-  background: var(--border);
-  color: var(--text-secondary);
-}

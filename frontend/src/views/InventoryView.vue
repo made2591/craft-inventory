@@ -323,15 +323,15 @@ export default {
     },
     
     getStatusClass(status) {
-      if (!status) return '';
+      if (!status) return 'badge badge-info';
       
       const statusClassMap = {
-        'pending': 'status-pending',
-        'completed': 'status-completed',
-        'cancelled': 'status-cancelled'
+        'pending': 'badge status-pending',
+        'completed': 'badge status-completed',
+        'cancelled': 'badge status-cancelled'
       };
       
-      return statusClassMap[status] || '';
+      return statusClassMap[status] || 'badge badge-info';
     },
 
     getTransactionActions(transaction) {
@@ -550,17 +550,5 @@ th {
 .btn-active {
   background-color: var(--primary);
   color: white;
-}
-
-.status-pending {
-  background-color: #fff3cd;
-}
-
-.status-completed {
-  background-color: #d4edda;
-}
-
-.status-cancelled {
-  background-color: #f8d7da;
 }
 </style>

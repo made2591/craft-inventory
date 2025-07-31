@@ -675,7 +675,7 @@ export default {
 }
 
 .item-card {
-  background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+  background: var(--surface);
   border: 2px solid #e2e8f0;
   border-radius: 12px;
   padding: 20px;
@@ -705,14 +705,14 @@ export default {
 }
 
 .total-display {
-  background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+  background: var(--secondary);
   color: white;
   padding: 12px 16px;
   border-radius: 8px;
   font-weight: bold;
   font-size: 1.1rem;
   text-align: center;
-  box-shadow: 0 2px 8px rgba(66, 185, 131, 0.3);
+  box-shadow: 0 2px 8px rgba(226, 132, 19, 0.3);
 }
 
 .add-item-section {
@@ -727,8 +727,8 @@ export default {
 }
 
 .summary-card {
-  background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
-  border: 2px solid var(--primary);
+  background: var(--surface);
+  border: 2px solid var(--secondary);
 }
 
 .summary-grid {
@@ -753,7 +753,7 @@ export default {
 }
 
 .summary-item.total-summary {
-  background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+  background: var(--secondary);
   color: white;
 }
 
