@@ -544,31 +544,6 @@ export default {
   margin-right: 4px;
 }
 
-/* Badge styles for customer types */
-.badge-info {
-  background-color: #d1ecf1;
-  color: #0c5460;
-  border: 1px solid #bee5eb;
-}
-
-.badge-success {
-  background-color: #d4edda;
-  color: #155724;
-  border: 1px solid #c3e6cb;
-}
-
-.badge-warning {
-  background-color: #fff3cd;
-  color: #856404;
-  border: 1px solid #ffeaa7;
-}
-
-.badge-secondary {
-  background-color: #e2e3e5;
-  color: #383d41;
-  border: 1px solid #d6d8db;
-}
-
 /* Mobile specific styles */
 @media (max-width: 768px) {
   .page-header h1 {
@@ -630,7 +605,7 @@ export default {
 .btn:focus,
 .form-input:focus,
 .form-select:focus {
-  outline: 2px solid #42b983;
+  outline: 2px solid var(--primary);
   outline-offset: 2px;
 }
 

@@ -343,15 +343,6 @@ h1 {
   justify-content: center;
 }
 
-.btn {
-  padding: 10px 20px;
-  border-radius: 4px;
-  cursor: pointer;
-  border: none;
-  font-size: 14px;
-  font-weight: bold;
-}
-
 .btn-danger {
   background-color: #dc3545;
   color: white;

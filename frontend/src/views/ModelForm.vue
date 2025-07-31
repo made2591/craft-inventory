@@ -522,18 +522,8 @@ h2 {
   gap: 10px;
 }
 
-.btn {
-  display: inline-block;
-  padding: 8px 16px;
-  border-radius: 4px;
-  text-decoration: none;
-  cursor: pointer;
-  border: none;
-  font-size: 14px;
-}
-
 .btn-primary {
-  background-color: #42b983;
+  background-color: var(--primary);
   color: white;
 }
 

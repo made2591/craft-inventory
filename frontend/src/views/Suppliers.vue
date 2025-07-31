@@ -455,6 +455,12 @@ export default {
 </script>
 
 <style scoped>
+.page-header {
+  margin-bottom: 32px;
+  padding-bottom: 24px;
+  border-bottom: 2px solid #f1f3f4;
+}
+
 .suppliers {
   padding: 20px;
 }
@@ -467,55 +473,39 @@ h1 {
   margin-bottom: 20px;
 }
 
-.btn {
-  display: inline-block;
-  padding: 8px 16px;
-  border-radius: 4px;
-  text-decoration: none;
-  cursor: pointer;
-  border: none;
-  font-size: 14px;
-}
-
 .btn-primary {
-  background-color: #42b983;
-  color: white;
-}
-
-.btn-sm {
-  padding: 4px 8px;
-  font-size: 12px;
-  height: 28px; /* Altezza fissa per i pulsanti */
-  line-height: 20px; /* Allineamento verticale del testo */
+  background-color: var(--secondary);
+  color: var(--surface);
 }
 
 .btn-danger {
-  background-color: #dc3545;
-  color: white;
+  background-color: var(--danger);
+  color: var(--surface);
 }
 
 .btn-edit {
-  background-color: #3498db;
-  color: white;
+  background-color: var(--oxford-blue-light);
+  color: var(--surface);
 }
 
 .btn-view {
-  background-color: #17a2b8;
-  color: white;
+  background-color: var(--info);
+  color: var(--surface);
 }
 
 .btn-active {
-  background-color: #42b983;
-  color: white;
+  background-color: var(--secondary);
+  color: var(--surface);
 }
 
 .name-link {
-  color: #3498db;
+  color: var(--secondary);
   text-decoration: none;
 }
 
 .name-link:hover {
   text-decoration: underline;
+  color: var(--fulvous-dark);
 }
 
 .loading, .error, .empty-state {

@@ -81,47 +81,115 @@
         </div>
       </div>
       
-      <h2 class="section-title">{{ $t('materials.purchaseHistory') }}</h2>
-      <div v-if="purchaseTransactions.length === 0" class="empty-transactions">
-        {{ $t('materials.noPurchaseHistory') }}
-      </div>
-      <div v-else class="transactions-table">
-        <table>
-          <thead>
-            <tr>
-              <th>{{ $t('transactions.date') }}</th>
-              <th>{{ $t('transactions.supplier') }}</th>
-              <th>{{ $t('transactions.quantity') }}</th>
-              <th>{{ $t('transactions.unitPrice') }}</th>
-              <th>{{ $t('transactions.total') }}</th>
-              <th>{{ $t('transactions.status') }}</th>
-              <th>{{ $t('common.actions') }}</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr v-for="transaction in paginatedPurchases" :key="transaction.id" :class="getStatusClass(transaction.status)">
-              <td>{{ formatDate(transaction.date) }}</td>
-              <td>{{ transaction.supplierName || 'N/A' }}</td>
-              <td>{{ $formatQuantity(transaction.quantity) }} {{ material.unitOfMeasure }}</td>
-              <td>{{ $formatCost(transaction.unitPrice) }}</td>
-              <td>{{ $formatCost(transaction.totalPrice) }}</td>
-              <td>{{ formatStatus(transaction.status) }}</td>
-              <td>
-                <ActionMenu 
-                  :actions="getTransactionActions(transaction)" 
-                  @action="handleTransactionAction($event, transaction)"
-                />
-              </td>
-            </tr>
-          </tbody>
-        </table>
-        
+      <!-- Sezione Transazioni con Tabs -->
+      <div class="transactions-section">
+        <div class="transaction-tabs">
+          <button 
+            :class="['tab-button', activeTab === 'purchases' ? 'active' : '']" 
+            @click="activeTab = 'purchases'"
+          >
+            {{ $t('transactions.purchases') }} ({{ purchaseTransactions.length }})
+          </button>
+          <button 
+            :class="['tab-button', activeTab === 'sales' ? 'active' : '']" 
+            @click="activeTab = 'sales'"
+          >
+            {{ $t('transactions.sales') }} ({{ saleTransactions.length }})
+          </button>
+        </div>
+
+        <!-- Tab Acquisti -->
+        <div v-if="activeTab === 'purchases'" class="tab-content">
+          <h3 class="section-subtitle">{{ $t('materials.purchaseHistory') }}</h3>
+          <div v-if="purchaseTransactions.length === 0" class="empty-transactions">
+            {{ $t('materials.noPurchaseHistory') }}
+          </div>
+          <div v-else class="transactions-table">
+            <table>
+              <thead>
+                <tr>
+                  <th>{{ $t('transactions.date') }}</th>
+                  <th>{{ $t('transactions.supplier') }}</th>
+                  <th>{{ $t('transactions.quantity') }}</th>
+                  <th>{{ $t('transactions.unitPrice') }}</th>
+                  <th>{{ $t('transactions.total') }}</th>
+                  <th>{{ $t('transactions.status') }}</th>
+                  <th>{{ $t('common.actions') }}</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr v-for="transaction in paginatedPurchases" :key="transaction.id">
+                  <td>{{ formatDate(transaction.date) }}</td>
+                  <td>{{ transaction.supplierName || 'N/A' }}</td>
+                  <td>{{ $formatQuantity(transaction.quantity) }} {{ material.unitOfMeasure }}</td>
+                  <td>{{ $formatCost(transaction.unitPrice) }}</td>
+                  <td>{{ $formatCost(transaction.totalPrice) }}</td>
+                  <td>
+                    <span :class="getStatusClass(transaction.status)">
+                      {{ formatStatus(transaction.status) }}
+                    </span>
+                  </td>
+                  <td>
+                    <ActionMenu 
+                      :actions="getTransactionActions(transaction)" 
+                      @action="handleTransactionAction($event, transaction)"
+                    />
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Tab Vendite -->
+        <div v-if="activeTab === 'sales'" class="tab-content">
+          <h3 class="section-subtitle">{{ $t('materials.salesHistory') }}</h3>
+          <div v-if="saleTransactions.length === 0" class="empty-transactions">
+            {{ $t('materials.noSalesHistory') }}
+          </div>
+          <div v-else class="transactions-table">
+            <table>
+              <thead>
+                <tr>
+                  <th>{{ $t('transactions.date') }}</th>
+                  <th>{{ $t('transactions.customer') }}</th>
+                  <th>{{ $t('transactions.quantity') }}</th>
+                  <th>{{ $t('transactions.unitPrice') }}</th>
+                  <th>{{ $t('transactions.total') }}</th>
+                  <th>{{ $t('transactions.status') }}</th>
+                  <th>{{ $t('common.actions') }}</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr v-for="transaction in paginatedSales" :key="transaction.id">
+                  <td>{{ formatDate(transaction.date) }}</td>
+                  <td>{{ transaction.customerName || 'N/A' }}</td>
+                  <td>{{ $formatQuantity(transaction.quantity) }} {{ material.unitOfMeasure }}</td>
+                  <td>{{ $formatCost(transaction.unitPrice) }}</td>
+                  <td>{{ $formatCost(transaction.totalPrice) }}</td>
+                  <td>
+                    <span :class="getStatusClass(transaction.status)">
+                      {{ formatStatus(transaction.status) }}
+                    </span>
+                  </td>
+                  <td>
+                    <ActionMenu 
+                      :actions="getTransactionActions(transaction)" 
+                      @action="handleTransactionAction($event, transaction)"
+                    />
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
         <!-- Paginazione -->
-        <div class="pagination" v-if="purchaseTransactions.length > itemsPerPage">
+        <div class="pagination" v-if="currentTransactions.length > itemsPerPage">
           <button 
             @click="goToPage(currentPage - 1)" 
             :disabled="currentPage === 1" 
-            class="btn btn-sm"
+            class="btn btn-medium"
           >
             {{ $t('common.previous') }}
           </button>
@@ -131,7 +199,7 @@
               v-for="page in totalPages" 
               :key="page" 
               @click="goToPage(page)" 
-              :class="['btn', 'btn-sm', currentPage === page ? 'btn-active' : '']"
+              :class="['btn', 'btn-medium', currentPage === page ? 'btn-active' : '']"
             >
               {{ page }}
             </button>
@@ -140,14 +208,14 @@
           <button 
             @click="goToPage(currentPage + 1)" 
             :disabled="currentPage === totalPages" 
-            class="btn btn-sm"
+            class="btn btn-medium"
           >
             {{ $t('common.next') }}
           </button>
         </div>
-        
-        <div class="pagination-info" v-if="purchaseTransactions.length > 0">
-          {{ $t('common.paginationInfo', { start: startIndex + 1, end: endIndex, total: totalItems || purchaseTransactions.length }) }}
+
+        <div class="pagination-info" v-if="currentTransactions.length > 0">
+          {{ $t('common.paginationInfo', { start: startIndex + 1, end: Math.min(startIndex + itemsPerPage, currentTransactions.length), total: currentTransactions.length }) }}
         </div>
       </div>
     </div>
@@ -175,8 +243,10 @@ export default {
       material: {},
       supplier: null,
       purchaseTransactions: [],
+      saleTransactions: [],
       loading: true,
       error: null,
+      activeTab: 'purchases',
       currentPage: 1,
       itemsPerPage: 5,
       totalItems: 0,
@@ -187,13 +257,17 @@ export default {
     supplierName() {
       return this.supplier ? this.supplier.name : this.$t('common.noSupplier');
     },
+    currentTransactions() {
+      return this.activeTab === 'purchases' ? this.purchaseTransactions : this.saleTransactions;
+    },
     paginatedPurchases() {
-      // Non facciamo più lo slice qui perché i dati sono già paginati dal server
       return this.purchaseTransactions;
     },
+    paginatedSales() {
+      return this.saleTransactions;
+    },
     totalPages() {
-      // Utilizziamo la variabile totalPagesCount che viene impostata dalla risposta del server
-      return this.totalPagesCount || Math.ceil(this.purchaseTransactions.length / this.itemsPerPage);
+      return this.totalPagesCount || Math.ceil(this.currentTransactions.length / this.itemsPerPage);
     },
     startIndex() {
       return (this.currentPage - 1) * this.itemsPerPage;
@@ -203,9 +277,20 @@ export default {
       return end > this.totalItems ? this.totalItems : end;
     }
   },
+  watch: {
+    activeTab(newTab) {
+      this.currentPage = 1;
+      if (newTab === 'purchases') {
+        this.fetchPurchaseTransactions(1);
+      } else {
+        this.fetchSaleTransactions(1);
+      }
+    }
+  },
   created() {
     this.fetchMaterial();
     this.fetchPurchaseTransactions();
+    this.fetchSaleTransactions();
   },
   methods: {
     async fetchMaterial() {
@@ -318,6 +403,47 @@ export default {
         console.error('Error fetching purchase transactions:', error);
       }
     },
+
+    async fetchSaleTransactions(page = 1) {
+      try {
+        // Ottieni le transazioni di vendita per questo materiale con paginazione
+        const response = await fetch(`/api/transactions?type=sale&materialId=${this.id}&page=${page}&limit=${this.itemsPerPage}`);
+        const data = await response.json();
+        
+        if (!data || !data.transactions) {
+          console.error('Formato di risposta non valido:', data);
+          return;
+        }
+        
+        // Array per memorizzare le promesse di recupero dei dettagli delle transazioni
+        const transactionPromises = data.transactions.map(async transaction => {
+          // Recupera i dettagli completi della transazione, inclusi gli elementi
+          const detailResponse = await fetch(`/api/transactions/${transaction.id}`);
+          const detailData = await detailResponse.json();
+          
+          // Cerca gli elementi della transazione relativi a questo materiale
+          const items = detailData.items ? detailData.items.filter(item => item.materialId === this.id) : [];
+          const item = items.length > 0 ? items[0] : {};
+          
+          return {
+            id: transaction.id,
+            transactionId: transaction.id,
+            date: transaction.date,
+            customerName: transaction.customerName,
+            customerId: transaction.customerId,
+            quantity: item.quantity || 0,
+            unitPrice: item.unitPrice || 0,
+            totalPrice: (item.quantity || 0) * (item.unitPrice || 0),
+            status: transaction.status
+          };
+        });
+        
+        // Attendi che tutte le promesse siano risolte
+        this.saleTransactions = await Promise.all(transactionPromises);
+      } catch (error) {
+        console.error('Error fetching sale transactions:', error);
+      }
+    },
     
     formatStatus(status) {
       switch (status) {
@@ -335,19 +461,23 @@ export default {
     getStatusClass(status) {
       switch (status) {
         case 'pending':
-          return 'status-pending';
+          return 'badge status-pending';
         case 'completed':
-          return 'status-completed';
+          return 'badge status-completed';
         case 'cancelled':
-          return 'status-cancelled';
+          return 'badge status-cancelled';
         default:
-          return '';
+          return 'badge badge-info';
       }
     },
     
     goToPage(page) {
       if (page >= 1 && page <= this.totalPages) {
-        this.fetchPurchaseTransactions(page);
+        if (this.activeTab === 'purchases') {
+          this.fetchPurchaseTransactions(page);
+        } else {
+          this.fetchSaleTransactions(page);
+        }
       }
     },
 
@@ -415,34 +545,17 @@ h1 {
 }
 
 .sku-badge {
-  background-color: #17a2b8;
+  background: var(--secondary);
   color: white;
   padding: 8px 16px;
-  border-radius: 4px;
+  border-radius: 20px;
   font-weight: bold;
+  box-shadow: 0 2px 8px rgba(226, 132, 19, 0.3);
 }
 
 .actions {
   display: flex;
   gap: 10px;
-}
-
-.btn {
-  padding: 8px 16px;
-  border-radius: 4px;
-  cursor: pointer;
-  border: none;
-  font-size: 14px;
-}
-
-.btn-primary {
-  background-color: #42b983;
-  color: white;
-}
-
-.btn-secondary {
-  background-color: #6c757d;
-  color: white;
 }
 
 .detail-card {
@@ -473,7 +586,7 @@ h1 {
 }
 
 .detail-value a {
-  color: #3498db;
+  color: var(--secondary);
   text-decoration: none;
 }
 
@@ -529,18 +642,6 @@ h1 {
   color: #555;
 }
 
-.status-pending {
-  background-color: #fff3cd;
-}
-
-.status-completed {
-  background-color: #d4edda;
-}
-
-.status-cancelled {
-  background-color: #f8d7da;
-}
-
 .pagination {
   display: flex;
   justify-content: center;
@@ -563,7 +664,7 @@ h1 {
 }
 
 .btn-active {
-  background-color: #42b983;
+  background-color: var(--primary);
   color: white;
 }
 
@@ -572,5 +673,55 @@ h1 {
   color: #6c757d;
   font-size: 14px;
   margin-top: 10px;
+}
+
+/* Transaction Tabs Styling */
+.transactions-section {
+  margin-top: 2rem;
+}
+
+.transaction-tabs {
+  display: flex;
+  border-bottom: 2px solid var(--border);
+  margin-bottom: 1.5rem;
+}
+
+.tab-button {
+  background: none;
+  border: none;
+  padding: 1rem 1.5rem;
+  cursor: pointer;
+  font-size: 1rem;
+  font-weight: 500;
+  color: var(--text-secondary);
+  border-bottom: 3px solid transparent;
+  transition: all 0.3s ease;
+}
+
+.tab-button:hover {
+  color: var(--secondary);
+  background-color: var(--fulvous-lighter);
+}
+
+.tab-button.active {
+  color: var(--secondary);
+  border-bottom-color: var(--secondary);
+  background-color: var(--fulvous-lighter);
+}
+
+.tab-content {
+  animation: fadeIn 0.3s ease;
+}
+
+.section-subtitle {
+  font-size: 1.25rem;
+  color: var(--text-primary);
+  margin-bottom: 1rem;
+  font-weight: 600;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 </style>

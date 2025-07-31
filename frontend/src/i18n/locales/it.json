@@ -48,6 +48,10 @@
     "noSupplier": "Nessun fornitore",
     "unknownSupplier": "Fornitore sconosciuto",
     "unknownCustomer": "Cliente sconosciuto",
+    "selectType": "Seleziona Tipo", 
+    "linkPlaceholder": "Inserisci link URL",
+    "additionalNotesPlaceholder": "Note aggiuntive...",
+    "totalValue": "Valore Totale",
     "unknownItem": "Elemento sconosciuto",
     "unknownMaterial": "Materiale sconosciuto",
     "unknownModel": "Modello sconosciuto",
@@ -154,7 +158,11 @@
     "useMaterialCost": "Usa costo materiale",
     "customCostPerUnit": "Costo personalizzato per unità",
     "materialNumber": "Materiale {number}",
-    "loadingMaterials": "Caricamento materiali..."
+    "loadingMateriali": "Caricamento materiali...",
+    "quantity": "Quantità",
+    "unitCost": "Costo Unitario",
+    "salesHistory": "Storico Vendite",
+    "noSalesHistory": "Nessuna vendita registrata per questo materiale."
   },
   "components": {
     "title": "Componenti",
@@ -313,6 +321,8 @@
     "confirmDelete": "Sei sicuro di voler eliminare questa transazione?",
     "purchase": "Acquisto",
     "sale": "Vendita",
+    "purchases": "Acquisti",
+    "sales": "Vendite",
     "pending": "In attesa",
     "completed": "Completata",
     "cancelled": "Annullata",

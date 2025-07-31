@@ -526,13 +526,6 @@ export default {
   margin-right: 4px;
 }
 
-/* Badge styles for inventory items */
-.badge-info {
-  background-color: #d1ecf1;
-  color: #0c5460;
-  border: 1px solid #bee5eb;
-}
-
 /* Mobile Actions */
 .mobile-actions {
   display: flex;
@@ -580,19 +573,9 @@ export default {
   border-radius: 4px;
 }
 
-.btn {
-  display: inline-block;
-  padding: 8px 16px;
-  border-radius: 4px;
-  text-decoration: none;
-  cursor: pointer;
-  border: none;
-  font-size: 14px;
-}
-
 .btn-primary {
-  background-color: #42b983;
-  color: white;
+  background-color: var(--secondary);
+  color: var(--surface);
 }
 
 .btn-sm {
@@ -605,27 +588,27 @@ export default {
 }
 
 .btn-danger {
-  background-color: #dc3545;
-  color: white;
+  background-color: var(--danger);
+  color: var(--surface);
 }
 
 .btn-edit {
-  background-color: #3498db;
-  color: white;
+  background-color: var(--oxford-blue-light);
+  color: var(--surface);
 }
 
 .btn-view {
-  background-color: #17a2b8;
-  color: white;
+  background-color: var(--info);
+  color: var(--surface);
 }
 
 .btn-active {
-  background-color: #42b983;
-  color: white;
+  background-color: var(--secondary);
+  color: var(--surface);
 }
 
 .sku-link {
-  color: #3498db;
+  color: var(--secondary);
   text-decoration: none;
   font-weight: bold;
 }
@@ -804,7 +787,7 @@ animation: fadeIn 0.3s ease-out;
 .btn:focus,
 .form-input:focus,
 .form-select:focus {
-outline: 2px solid #42b983;
+outline: 2px solid var(--primary);
 outline-offset: 2px;
 }
 

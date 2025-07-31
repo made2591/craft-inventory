@@ -503,9 +503,9 @@ export default {
     getTransactionTypeClass(type) {
       switch (type) {
         case 'sale':
-          return 'badge-success';
+          return 'badge-sale';
         case 'purchase':
-          return 'badge-info';
+          return 'badge-purchase';
         default:
           return 'badge-secondary';
       }
@@ -538,13 +538,13 @@ export default {
     getStatusClass(status) {
       switch (status) {
         case 'pending':
-          return 'status-pending';
+          return 'badge status-pending';
         case 'completed':
-          return 'status-completed';
+          return 'badge status-completed';
         case 'cancelled':
-          return 'status-cancelled';
+          return 'badge status-cancelled';
         default:
-          return '';
+          return 'badge badge-info';
       }
     },
     
@@ -707,25 +707,6 @@ export default {
   margin-right: 4px;
 }
 
-/* Badge styles for transaction types and status */
-.badge-info {
-  background-color: #d1ecf1;
-  color: #0c5460;
-  border: 1px solid #bee5eb;
-}
-
-.badge-success {
-  background-color: #d4edda;
-  color: #155724;
-  border: 1px solid #c3e6cb;
-}
-
-.badge-warning {
-  background-color: #fff3cd;
-  color: #856404;
-  border: 1px solid #ffeaa7;
-}
-
 .badge-danger {
   background-color: #f8d7da;
   color: #721c24;
@@ -773,22 +754,9 @@ export default {
   border: 1px solid #ddd;
 }
 
-.btn {
-  display: inline-block;
-  padding: 8px 16px;
-  border-radius: 4px;
-  text-decoration: none;
-  cursor: pointer;
-  border: none;
-  font-size: 14px;
-  line-height: 1.2;
-  text-align: center;
-  vertical-align: middle;
-}
-
 .btn-primary {
-  background-color: #42b983;
-  color: white;
+  background-color: var(--secondary);
+  color: var(--surface);
 }
 
 .btn-sm {
@@ -798,18 +766,18 @@ export default {
 }
 
 .btn-success {
-  background-color: #28a745;
-  color: white;
+  background-color: var(--success);
+  color: var(--surface);
 }
 
 .btn-warning {
-  background-color: #ffc107;
-  color: #212529;
+  background-color: var(--warning);
+  color: var(--oxford-blue);
 }
 
 .btn-danger {
-  background-color: #dc3545;
-  color: white;
+  background-color: var(--danger);
+  color: var(--surface);
 }
 
 .loading, .error, .empty-state {
@@ -839,18 +807,6 @@ th, td {
 th {
   background-color: #f8f9fa;
   font-weight: bold;
-}
-
-.status-pending {
-  background-color: #fff3cd;
-}
-
-.status-completed {
-  background-color: #d4edda;
-}
-
-.status-cancelled {
-  background-color: #f8d7da;
 }
 
 .actions {
@@ -988,7 +944,7 @@ th {
 }
 
 .btn-active {
-  background-color: #42b983;
+  background-color: var(--primary);
   color: white;
 }
 

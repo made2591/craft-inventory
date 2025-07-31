@@ -77,62 +77,65 @@
           <tbody>
             <tr v-for="component in components" :key="component.id">
               <td>
-                <router-link :to="`/components/${component.componentId}/view`" class="sku-link">
-                  {{ component.sku || 'N/A' }}
+                <router-link :to="`/components/${component.componentId || component.id}/view`" class="sku-link">
+                  {{ component.componentSku || component.sku || 'N/A' }}
                 </router-link>
               </td>
-              <td>{{ component.componentName }}</td>
+              <td>{{ component.componentName || component.name }}</td>
               <td>{{ $formatQuantity(component.quantity) }}</td>
             </tr>
           </tbody>
         </table>
       </div>
       
-      <h2>{{ $t('inventory.salesHistory') }}</h2>
-      <div v-if="saleTransactions.length === 0" class="empty-transactions">
-        {{ $t('inventory.noSales') }}
-      </div>
-      <div v-else class="transactions-table">
-        <table>
-          <thead>
-            <tr>
-              <th>{{ $t('transactions.date') }}</th>
-              <th>{{ $t('transactions.customer') }}</th>
-              <th>{{ $t('transactions.quantity') }}</th>
-              <th>{{ $t('transactions.unitPrice') }}</th>
-              <th>{{ $t('transactions.total') }}</th>
-              <th>{{ $t('transactions.status') }}</th>
-              <th>{{ $t('common.actions') }}</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr v-for="transaction in paginatedSales" :key="transaction.id" :class="getStatusClass(transaction.status)">
-              <td>{{ formatDate(transaction.date) }}</td>
-              <td>{{ transaction.customerName || 'N/A' }}</td>
-              <td>
-                {{ transaction.items && transaction.items.length > 0 ? transaction.items[0].quantity : 'N/A' }}
-              </td>
-              <td>
-                € {{ transaction.items && transaction.items.length > 0 ? formatCost(transaction.items[0].unitPrice) : '0.00' }}
-              </td>
-              <td>{{ $formatCost(transaction.totalAmount) }}</td>
-              <td>{{ formatStatus(transaction.status) }}</td>
-              <td>
-                <ActionMenu 
-                  :actions="getTransactionActions(transaction)" 
-                  @action="handleTransactionAction($event, transaction)"
-                />
-              </td>
-            </tr>
-          </tbody>
-        </table>
+      <!-- Sezione Storico Vendite -->
+      <div class="transactions-section">
+        <h2 class="section-subtitle">{{ $t('inventory.salesHistory') }}</h2>
+        <div v-if="saleTransactions.length === 0" class="empty-transactions">
+          {{ $t('inventory.noSales') }}
+        </div>
+        <div v-else class="transactions-table">
+          <table>
+            <thead>
+              <tr>
+                <th>{{ $t('transactions.date') }}</th>
+                <th>{{ $t('transactions.customer') }}</th>
+                <th>{{ $t('transactions.quantity') }}</th>
+                <th>{{ $t('transactions.unitPrice') }}</th>
+                <th>{{ $t('transactions.total') }}</th>
+                <th>{{ $t('transactions.status') }}</th>
+                <th>{{ $t('common.actions') }}</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-for="transaction in paginatedSales" :key="transaction.id">
+                <td>{{ formatDate(transaction.date) }}</td>
+                <td>{{ transaction.customerName || 'N/A' }}</td>
+                <td>{{ $formatQuantity(transaction.quantity || (transaction.items && transaction.items.length > 0 ? transaction.items[0].quantity : 0)) }}</td>
+                <td>{{ $formatCost(transaction.unitPrice || (transaction.items && transaction.items.length > 0 ? transaction.items[0].unitPrice : 0)) }}</td>
+                <td>{{ $formatCost(transaction.totalPrice || transaction.totalAmount) }}</td>
+                <td>
+                  <span :class="getStatusClass(transaction.status)">
+                    {{ formatStatus(transaction.status) }}
+                  </span>
+                </td>
+                <td>
+                  <ActionMenu 
+                    :actions="getTransactionActions(transaction)" 
+                    @action="handleTransactionAction($event, transaction)"
+                  />
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
         
         <!-- Paginazione -->
         <div class="pagination" v-if="saleTransactions.length > itemsPerPage">
           <button 
             @click="goToPage(currentPage - 1)" 
             :disabled="currentPage === 1" 
-            class="btn btn-sm"
+            class="btn btn-medium"
           >
             {{ $t('common.previous') }}
           </button>
@@ -142,7 +145,7 @@
               v-for="page in totalPages" 
               :key="page" 
               @click="goToPage(page)" 
-              :class="['btn', 'btn-sm', currentPage === page ? 'btn-active' : '']"
+              :class="['btn', 'btn-medium', currentPage === page ? 'btn-active' : '']"
             >
               {{ page }}
             </button>
@@ -151,7 +154,7 @@
           <button 
             @click="goToPage(currentPage + 1)" 
             :disabled="currentPage === totalPages" 
-            class="btn btn-sm"
+            class="btn btn-medium"
           >
             {{ $t('common.next') }}
           </button>
@@ -323,15 +326,15 @@ export default {
     },
     
     getStatusClass(status) {
-      if (!status) return '';
+      if (!status) return 'badge badge-info';
       
       const statusClassMap = {
-        'pending': 'status-pending',
-        'completed': 'status-completed',
-        'cancelled': 'status-cancelled'
+        'pending': 'badge status-pending',
+        'completed': 'badge status-completed',
+        'cancelled': 'badge status-cancelled'
       };
       
-      return statusClassMap[status] || '';
+      return statusClassMap[status] || 'badge badge-info';
     },
 
     getTransactionActions(transaction) {
@@ -413,16 +416,8 @@ h2 {
   gap: 10px;
 }
 
-.btn {
-  padding: 8px 16px;
-  border-radius: 4px;
-  cursor: pointer;
-  border: none;
-  font-size: 14px;
-}
-
 .btn-primary {
-  background-color: #42b983;
+  background-color: var(--primary);
   color: white;
 }
 
@@ -460,11 +455,13 @@ h2 {
 }
 
 .sku-link {
-  color: #3498db;
+  color: var(--secondary);
   text-decoration: none;
+  font-weight: 600;
 }
 
 .sku-link:hover {
+  color: var(--fulvous-dark);
   text-decoration: underline;
 }
 
@@ -546,19 +543,20 @@ th {
 }
 
 .btn-active {
-  background-color: #42b983;
+  background-color: var(--primary);
   color: white;
 }
 
-.status-pending {
-  background-color: #fff3cd;
+/* Transaction Section Styling */
+.transactions-section {
+  margin-top: 2rem;
 }
 
-.status-completed {
-  background-color: #d4edda;
-}
-
-.status-cancelled {
-  background-color: #f8d7da;
+.section-subtitle {
+  font-size: 1.5rem;
+  color: var(--text-primary);
+  margin-bottom: 1rem;
+  font-weight: 600;
+  margin-top: 30px;
 }
 </style>

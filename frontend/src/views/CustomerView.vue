@@ -351,16 +351,8 @@ h2 {
   gap: 10px;
 }
 
-.btn {
-  padding: 8px 16px;
-  border-radius: 4px;
-  cursor: pointer;
-  border: none;
-  font-size: 14px;
-}
-
 .btn-primary {
-  background-color: #42b983;
+  background-color: var(--primary);
   color: white;
 }
 
@@ -398,7 +390,7 @@ h2 {
 }
 
 .detail-value a {
-  color: #3498db;
+  color: var(--secondary);
   text-decoration: none;
 }
 
@@ -452,7 +444,7 @@ th {
 }
 
 .material-link {
-  color: #3498db;
+  color: var(--secondary);
   text-decoration: none;
 }
 

@@ -221,11 +221,12 @@ h2 {
 }
 
 .sku-badge {
-  background-color: #17a2b8;
+  background: linear-gradient(135deg, var(--secondary) 0%, var(--fulvous-dark) 100%);
   color: white;
   padding: 8px 16px;
-  border-radius: 4px;
+  border-radius: 20px;
   font-weight: bold;
+  box-shadow: 0 2px 8px rgba(226, 132, 19, 0.3);
 }
 
 .actions {
@@ -233,16 +234,8 @@ h2 {
   gap: 10px;
 }
 
-.btn {
-  padding: 8px 16px;
-  border-radius: 4px;
-  cursor: pointer;
-  border: none;
-  font-size: 14px;
-}
-
 .btn-primary {
-  background-color: #42b983;
+  background-color: var(--primary);
   color: white;
 }
 
@@ -323,7 +316,7 @@ tfoot {
 
 .total-value {
   font-weight: bold;
-  color: #42b983;
+  color: var(--secondary);
 }
 
 .loading-cost {
@@ -339,7 +332,7 @@ tfoot {
   height: 16px;
   margin-right: 8px;
   border: 2px solid rgba(0, 0, 0, 0.1);
-  border-top-color: #42b983;
+  border-top-color: var(--secondary);
   border-radius: 50%;
   animation: spin 1s linear infinite;
 }
@@ -351,7 +344,7 @@ tfoot {
 }
 
 a {
-  color: #3498db;
+  color: var(--secondary);
   text-decoration: none;
 }
 

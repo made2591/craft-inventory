@@ -159,7 +159,7 @@ export default {
 .page-header {
   margin-bottom: 32px;
   padding-bottom: 24px;
-  border-bottom: 2px solid #f1f3f4;
+  border-bottom: 2px solid var(--border-light);
 }
 
 .card-header h2 {
@@ -177,7 +177,7 @@ export default {
   right: 12px;
   top: 50%;
   transform: translateY(-50%);
-  color: #6b7280;
+  color: var(--text-muted);
   pointer-events: none;
   font-size: 12px;
 }
@@ -185,9 +185,9 @@ export default {
 .language-preview {
   margin-top: 24px;
   padding: 20px;
-  background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+  background: linear-gradient(135deg, var(--snow-dark) 0%, var(--border) 100%);
   border-radius: 12px;
-  border-left: 4px solid #42b983;
+  border-left: 4px solid var(--secondary);
   position: relative;
   overflow: hidden;
 }
@@ -199,21 +199,21 @@ export default {
   right: 0;
   width: 100px;
   height: 100px;
-  background: radial-gradient(circle, rgba(66, 185, 131, 0.1) 0%, transparent 70%);
+  background: radial-gradient(circle, rgba(226, 132, 19, 0.1) 0%, transparent 70%);
   border-radius: 50%;
   transform: translate(30px, -30px);
 }
 
 .language-preview h3 {
   margin: 0 0 8px 0;
-  color: #42b983;
+  color: var(--secondary);
   font-size: 1.1rem;
   font-weight: 600;
 }
 
 .preview-text {
   margin: 0;
-  color: #4a5568;
+  color: var(--text-secondary);
   font-style: italic;
 }
 
@@ -225,12 +225,12 @@ export default {
 }
 
 .theme-card {
-  border: 2px solid #e2e8f0;
+  border: 2px solid var(--border);
   border-radius: 12px;
   padding: 16px;
   cursor: pointer;
   transition: all 0.3s ease;
-  background: #ffffff;
+  background: var(--surface);
   position: relative;
   overflow: hidden;
 }
@@ -242,15 +242,15 @@ export default {
   left: 0;
   right: 0;
   bottom: 0;
-  background: linear-gradient(135deg, transparent 0%, rgba(66, 185, 131, 0.05) 100%);
+  background: linear-gradient(135deg, transparent 0%, rgba(226, 132, 19, 0.05) 100%);
   opacity: 0;
   transition: opacity 0.3s ease;
 }
 
 .theme-card:hover {
-  border-color: #42b983;
+  border-color: var(--secondary);
   transform: translateY(-2px);
-  box-shadow: 0 8px 25px rgba(66, 185, 131, 0.15);
+  box-shadow: 0 8px 25px rgba(226, 132, 19, 0.15);
 }
 
 .theme-card:hover::before {
@@ -258,9 +258,9 @@ export default {
 }
 
 .theme-card.active {
-  border-color: #42b983;
-  background: linear-gradient(135deg, #ffffff 0%, #f0fdf4 100%);
-  box-shadow: 0 4px 20px rgba(66, 185, 131, 0.2);
+  border-color: var(--secondary);
+  background: linear-gradient(135deg, var(--surface) 0%, var(--snow-dark) 100%);
+  box-shadow: 0 4px 20px rgba(226, 132, 19, 0.2);
 }
 
 .theme-card.active::before {
@@ -273,7 +273,7 @@ export default {
   margin-bottom: 12px;
   position: relative;
   overflow: hidden;
-  border: 1px solid #e2e8f0;
+  border: 1px solid var(--border);
 }
 
 .theme-header {
@@ -350,12 +350,12 @@ export default {
 
 .theme-icon {
   font-size: 18px;
-  color: #42b983;
+  color: var(--secondary);
 }
 
 .theme-name {
   font-weight: 500;
-  color: #2d3748;
+  color: var(--text-primary);
 }
 
 .note {
@@ -363,11 +363,11 @@ export default {
   align-items: flex-start;
   gap: 8px;
   font-size: 0.875rem;
-  color: #6b7280;
-  background-color: #f8fafc;
+  color: var(--text-muted);
+  background-color: var(--snow-dark);
   padding: 12px;
   border-radius: 8px;
-  border-left: 3px solid #42b983;
+  border-left: 3px solid var(--secondary);
 }
 
 /* Transitions */
@@ -445,12 +445,12 @@ export default {
 
 /* Accessibility improvements */
 .theme-card:focus {
-  outline: 2px solid #42b983;
+  outline: 2px solid var(--secondary);
   outline-offset: 2px;
 }
 
 .form-select:focus {
-  outline: 2px solid #42b983;
+  outline: 2px solid var(--secondary);
   outline-offset: 2px;
 }
 

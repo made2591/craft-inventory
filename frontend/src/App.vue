@@ -135,7 +135,7 @@ body {
   top: 20px;
   left: 20px;
   z-index: 1100;
-  background: linear-gradient(135deg, #42b983 0%, #369970 100%);
+  background: var(--secondary);
   border: none;
   border-radius: 12px;
   width: 48px;
@@ -145,22 +145,23 @@ body {
   align-items: center;
   justify-content: center;
   gap: 4px;
-  box-shadow: 0 4px 12px rgba(66, 185, 131, 0.3);
+  box-shadow: 0 4px 12px rgba(226, 132, 19, 0.3);
   transition: all 0.3s ease;
 }
 
 .mobile-menu-btn:hover {
-  box-shadow: 0 6px 20px rgba(66, 185, 131, 0.4);
+  box-shadow: 0 6px 20px rgba(226, 132, 19, 0.4);
+  background: var(--fulvous-dark);
 }
 
 .mobile-menu-btn.active {
-  background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
+  background: var(--danger);
 }
 
 .hamburger-line {
   width: 20px;
   height: 2px;
-  background: white;
+  background: var(--surface);
   border-radius: 1px;
   transition: all 0.3s ease;
 }
@@ -212,10 +213,10 @@ main {
 
 footer {
   padding: 20px;
-  border-top: 1px solid #eee;
+  border-top: 1px solid var(--border);
   text-align: center;
   font-size: 0.9em;
-  color: #666;
+  color: var(--text-muted);
 }
 
 /* Mobile Responsive */
@@ -251,7 +252,7 @@ label {
 input, textarea, select {
   width: 100%;
   padding: 8px;
-  border: 1px solid #ddd;
+  border: 1px solid var(--border);
   border-radius: 4px;
   font-size: 14px;
 }
@@ -265,30 +266,30 @@ input, textarea, select {
 }
 
 .btn-primary {
-  background-color: #42b983;
-  color: white;
+  background-color: var(--secondary);
+  color: var(--surface);
 }
 
 .btn-secondary {
-  background-color: #6c757d;
-  color: white;
+  background-color: var(--oxford-blue-muted);
+  color: var(--surface);
 }
 
 .btn-danger {
-  background-color: #dc3545;
-  color: white;
+  background-color: var(--danger);
+  color: var(--surface);
 }
 
 .loading, .error, .empty-state {
   text-align: center;
   padding: 20px;
-  background-color: #f8f9fa;
+  background-color: var(--snow-dark);
   border-radius: 4px;
   margin-bottom: 20px;
 }
 
 .error {
-  color: #dc3545;
+  color: var(--danger);
 }
 
 @media (max-width: 768px) {

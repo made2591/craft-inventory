@@ -321,11 +321,12 @@ h2 {
 }
 
 .sku-badge {
-  background-color: #17a2b8;
+  background: linear-gradient(135deg, var(--secondary) 0%, var(--fulvous-dark) 100%);
   color: white;
   padding: 8px 16px;
-  border-radius: 4px;
+  border-radius: 20px;
   font-weight: bold;
+  box-shadow: 0 2px 8px rgba(226, 132, 19, 0.3);
 }
 
 .actions {
@@ -333,22 +334,14 @@ h2 {
   gap: 10px;
 }
 
-.btn {
-  padding: 8px 16px;
-  border-radius: 4px;
-  cursor: pointer;
-  border: none;
-  font-size: 14px;
-}
-
 .btn-primary {
-  background-color: #42b983;
-  color: white;
+  background-color: var(--secondary);
+  color: var(--surface);
 }
 
 .btn-secondary {
-  background-color: #6c757d;
-  color: white;
+  background-color: var(--oxford-blue-muted);
+  color: var(--surface);
 }
 
 .detail-card {
@@ -424,11 +417,11 @@ tfoot {
 
 .total-value {
   font-weight: bold;
-  color: #42b983;
+  color: var(--secondary);
 }
 
 a {
-  color: #3498db;
+  color: var(--secondary);
   text-decoration: none;
 }
 
