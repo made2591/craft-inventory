@@ -59,8 +59,10 @@
             </div>
             <div class="info-item">
               <span class="label">{{ $t('transactions.status') }}:</span>
-              <span class="value" :class="getStatusClass(transaction.status)">
-                {{ formatStatus(transaction.status) }}
+              <span class="value">
+                <span :class="getStatusClass(transaction.status)">
+                  {{ formatStatus(transaction.status) }}
+                </span>
               </span>
             </div>
             <div class="info-item">
@@ -262,13 +264,13 @@ export default {
     getStatusClass(status) {
       switch (status) {
         case 'pending':
-          return 'status-pending';
+          return 'badge status-pending';
         case 'completed':
-          return 'status-completed';
+          return 'badge status-completed';
         case 'cancelled':
-          return 'status-cancelled';
+          return 'badge status-cancelled';
         default:
-          return '';
+          return 'badge badge-info';
       }
     },
     

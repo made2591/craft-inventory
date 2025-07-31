@@ -469,7 +469,7 @@ export default {
             label: this.$t('dashboard.currentStock'),
             data: data,
             backgroundColor: [
-              'var(--secondary)', 'var(--oxford-blue-light)', 'var(--fulvous-light)', 'var(--danger)', 'var(--cardinal)', 'var(--info)'
+              '#A8E6CF', '#FFD3A5', '#FD8A8A', '#A8D8EA', '#FFAAA5', '#D4A5FF'
             ]
           }]
         },
@@ -519,7 +519,7 @@ export default {
             label: this.$t('dashboard.costPerUnit'),
             data: data,
             backgroundColor: [
-              'var(--danger)', 'var(--warning)', 'var(--fulvous-light)', 'var(--success)', 'var(--secondary)'
+              '#FD8A8A', '#FFE066', '#A8E6CF', '#A8D8EA', '#D4A5FF'
             ]
           }]
         },
@@ -576,7 +576,7 @@ export default {
           datasets: [{
             label: this.$t('charts.quantity'),
             data: data,
-            backgroundColor: 'var(--secondary)'
+            backgroundColor: '#A8E6CF'
           }]
         },
         options: {
@@ -626,12 +626,12 @@ export default {
             {
               label: this.$t('dashboard.currentStock'),
               data: currentStock,
-              backgroundColor: 'var(--secondary)'
+              backgroundColor: '#A8E6CF'
             },
             {
               label: this.$t('dashboard.minimumStock'),
               data: minStock,
-              backgroundColor: 'var(--danger)'
+              backgroundColor: '#FD8A8A'
             }
           ]
         },
@@ -705,8 +705,8 @@ export default {
           datasets: [{
             label: this.$t('dashboard.sales'),
             data: salesData,
-            borderColor: '#141414',
-            backgroundColor: 'rgba(20, 20, 20, 0.1)',
+            borderColor: '#4A90E2',
+            backgroundColor: 'rgba(74, 144, 226, 0.1)',
             fill: true,
             tension: 0.4
           }]
@@ -772,7 +772,7 @@ export default {
           datasets: [{
             label: this.$t('dashboard.materialPurchases'),
             data: purchaseData,
-            backgroundColor: 'var(--oxford-blue-muted)'
+            backgroundColor: '#FFB347'
           }]
         },
         options: {
@@ -831,8 +831,8 @@ export default {
           datasets: [{
             label: this.$t('dashboard.totalCustomers'),
             data: customerData,
-            borderColor: 'var(--rusty-red)',
-            backgroundColor: 'rgba(222, 60, 75, 0.1)',
+            borderColor: '#FF6B6B',
+            backgroundColor: 'rgba(255, 107, 107, 0.1)',
             fill: true,
             tension: 0.4
           }]
@@ -884,7 +884,7 @@ export default {
           datasets: [{
             label: this.$t('dashboard.transactions'),
             data: volumeData,
-            backgroundColor: 'var(--fulvous-light)'
+            backgroundColor: '#FF8C42'
           }]
         },
         options: {

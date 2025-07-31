@@ -455,6 +455,12 @@ export default {
 </script>
 
 <style scoped>
+.page-header {
+  margin-bottom: 32px;
+  padding-bottom: 24px;
+  border-bottom: 2px solid #f1f3f4;
+}
+
 .suppliers {
   padding: 20px;
 }
