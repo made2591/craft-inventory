@@ -70,8 +70,11 @@
       </div>
       
       <h2>{{ $t('customers.materialsSold') }}</h2>
-      <div v-if="transactions.length === 0" class="empty-transactions">
-        {{ $t('customers.noTransactions') }}
+      <div v-if="transactionsError" class="error-message">
+        {{ transactionsError }}
+      </div>
+      <div v-else-if="materialTransactions.length === 0" class="empty-transactions">
+        {{ $t('customers.noMaterialTransactions') }}
       </div>
       <div v-else class="transactions-table">
         <table>
@@ -85,39 +88,70 @@
             </tr>
           </thead>
           <tbody>
-            <tr v-for="transaction in transactions" :key="transaction.id">
+            <tr v-for="transaction in materialTransactions" :key="`material-${transaction.id}`">
               <td>{{ formatDate(transaction.date) }}</td>
               <td>
-                <template v-if="transaction.items && transaction.items.length > 0">
-                  <div v-for="item in transaction.items" :key="item.id">
-                    <router-link v-if="item.materialId" :to="`/materials/${item.materialId}/view`" class="material-link">
-                      {{ item.materialName || $t('common.notAvailable') }}
-                    </router-link>
-                    <router-link v-else-if="item.productModelId" :to="`/models/${item.productModelId}/view`" class="material-link">
-                      {{ item.modelName || $t('common.notAvailable') }}
-                    </router-link>
-                    <span v-else>{{ $t('common.notAvailable') }}</span>
-                  </div>
-                </template>
-                <span v-else>{{ $t('common.notAvailable') }}</span>
+                <div v-for="item in transaction.materialItems" :key="item.id">
+                  <router-link :to="`/materials/${item.materialId}/view`" class="material-link">
+                    {{ item.materialName || $t('common.notAvailable') }}
+                  </router-link>
+                </div>
               </td>
               <td>
-                <template v-if="transaction.items && transaction.items.length > 0">
-                  <div v-for="item in transaction.items" :key="item.id">
-                    {{ item.quantity }} {{ item.unitOfMeasure || '' }}
-                  </div>
-                </template>
-                <span v-else>{{ $t('common.notAvailable') }}</span>
+                <div v-for="item in transaction.materialItems" :key="item.id">
+                  {{ item.quantity }} {{ item.unitOfMeasure || '' }}
+                </div>
               </td>
               <td>
-                <template v-if="transaction.items && transaction.items.length > 0">
-                  <div v-for="item in transaction.items" :key="item.id">
-                    {{ $formatCost(item.unitPrice) }}
-                  </div>
-                </template>
-                <span v-else>{{ $t('common.notAvailable') }}</span>
+                <div v-for="item in transaction.materialItems" :key="item.id">
+                  {{ $formatCurrency(item.unitPrice) }}
+                </div>
               </td>
-              <td>{{ $formatCost(transaction.totalAmount) }}</td>
+              <td>{{ $formatCurrency(transaction.materialTotal) }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h2>{{ $t('customers.modelsSold') }}</h2>
+      <div v-if="transactionsError" class="error-message">
+        {{ transactionsError }}
+      </div>
+      <div v-else-if="modelTransactions.length === 0" class="empty-transactions">
+        {{ $t('customers.noModelTransactions') }}
+      </div>
+      <div v-else class="transactions-table">
+        <table>
+          <thead>
+            <tr>
+              <th>{{ $t('transactions.date') }}</th>
+              <th>{{ $t('transactions.model') }}</th>
+              <th>{{ $t('transactions.quantity') }}</th>
+              <th>{{ $t('transactions.unitPrice') }}</th>
+              <th>{{ $t('transactions.total') }}</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-for="transaction in modelTransactions" :key="`model-${transaction.id}`">
+              <td>{{ formatDate(transaction.date) }}</td>
+              <td>
+                <div v-for="item in transaction.modelItems" :key="item.id">
+                  <router-link :to="`/models/${item.productModelId}/view`" class="material-link">
+                    {{ item.modelName || $t('common.notAvailable') }}
+                  </router-link>
+                </div>
+              </td>
+              <td>
+                <div v-for="item in transaction.modelItems" :key="item.id">
+                  {{ item.quantity }} {{ item.unitOfMeasure || '' }}
+                </div>
+              </td>
+              <td>
+                <div v-for="item in transaction.modelItems" :key="item.id">
+                  {{ $formatCurrency(item.unitPrice) }}
+                </div>
+              </td>
+              <td>{{ $formatCurrency(transaction.modelTotal) }}</td>
             </tr>
           </tbody>
         </table>
@@ -128,9 +162,11 @@
 
 <script>
 import api from '../services/api';
+import { FormatterMixin } from '../utils/formatterMixin';
 
 export default {
   name: 'CustomerView',
+  mixins: [FormatterMixin],
   props: {
     id: {
       type: String,
@@ -141,8 +177,11 @@ export default {
     return {
       customer: {},
       transactions: [],
+      materialTransactions: [],
+      modelTransactions: [],
       loading: true,
-      error: null
+      error: null,
+      transactionsError: null
     };
   },
   created() {
@@ -171,10 +210,61 @@ export default {
     async fetchTransactions() {
       try {
         const response = await api.get(`/api/transactions?customerId=${this.id}&type=sale`);
-        this.transactions = response.data || [];
+        console.log('Transactions response:', response.data);
+        
+        // Il backend restituisce { transactions: [...], pagination: {...} }
+        if (response.data && response.data.transactions) {
+          this.transactions = response.data.transactions;
+        } else if (Array.isArray(response.data)) {
+          this.transactions = response.data;
+        } else {
+          this.transactions = [];
+        }
+        
+        this.transactionsError = null;
+        this.processTransactions();
       } catch (error) {
-        this.error = this.$t('errors.fetchTransactions');
+        this.transactionsError = this.$t('errors.fetchTransactions');
+        console.error('Error fetching transactions:', error);
       }
+    },
+
+    processTransactions() {
+      const materialTxns = [];
+      const modelTxns = [];
+
+      this.transactions.forEach(transaction => {
+        // Separa gli items per materiali e modelli
+        const materialItems = (transaction.items || []).filter(item => item.materialId);
+        const modelItems = (transaction.items || []).filter(item => item.productModelId);
+
+        // Se ci sono materiali, crea una transazione per materiali
+        if (materialItems.length > 0) {
+          const materialTotal = materialItems.reduce((sum, item) => 
+            sum + (item.quantity * item.unitPrice), 0);
+          
+          materialTxns.push({
+            ...transaction,
+            materialItems,
+            materialTotal
+          });
+        }
+
+        // Se ci sono modelli, crea una transazione per modelli
+        if (modelItems.length > 0) {
+          const modelTotal = modelItems.reduce((sum, item) => 
+            sum + (item.quantity * item.unitPrice), 0);
+          
+          modelTxns.push({
+            ...transaction,
+            modelItems,
+            modelTotal
+          });
+        }
+      });
+
+      this.materialTransactions = materialTxns;
+      this.modelTransactions = modelTxns;
     },
     
     formatCustomerType(type) {
@@ -322,6 +412,16 @@ h2 {
   background-color: #f8f9fa;
   border-radius: 4px;
   color: #6c757d;
+  margin-bottom: 20px;
+}
+
+.error-message {
+  text-align: center;
+  padding: 15px;
+  background-color: #f8d7da;
+  border: 1px solid #f5c6cb;
+  color: #721c24;
+  border-radius: 4px;
   margin-bottom: 20px;
 }
 

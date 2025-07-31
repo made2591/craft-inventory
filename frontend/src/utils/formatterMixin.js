@@ -1,4 +1,4 @@
-import { formatCost, formatPrice, formatQuantity, formatInputNumber, parseFormattedNumber } from './formatters';
+import { formatCost, formatPrice, formatQuantity, formatInputNumber, parseFormattedNumber, formatCurrency } from './formatters';
 
 /**
  * Global mixin for formatting utilities
@@ -11,6 +11,13 @@ export const FormatterMixin = {
      */
     $formatCost(cost, currency = '€') {
       return formatCost(cost, currency);
+    },
+
+    /**
+     * Format currency values
+     */
+    $formatCurrency(value, currency = '€') {
+      return formatCurrency(value, currency);
     },
 
     /**
@@ -51,6 +58,7 @@ export function installFormatters(app) {
   
   // Also make them available as global properties
   app.config.globalProperties.$formatCost = formatCost;
+  app.config.globalProperties.$formatCurrency = formatCurrency;
   app.config.globalProperties.$formatPrice = formatPrice;
   app.config.globalProperties.$formatQuantity = formatQuantity;
   app.config.globalProperties.$formatInputNumber = formatInputNumber;

@@ -10,7 +10,7 @@
         <div class="stat-content">
           <h3>{{ $t('navigation.materials') }}</h3>
           <p class="stat-value">{{ stats.materials || 0 }}</p>
-          <p class="stat-subtitle">€{{ $formatCurrency(stats.materialValue) }}</p>
+          <p class="stat-subtitle">€{{ $formatNumber(stats.materialValue) }}</p>
         </div>
       </router-link>
       
@@ -54,7 +54,7 @@
         <div class="stat-content">
           <h3>{{ $t('navigation.customers') }}</h3>
           <p class="stat-value">{{ stats.customers || 0 }}</p>
-          <p class="stat-subtitle">€{{ $formatCurrency(stats.totalSales) }}</p>
+          <p class="stat-subtitle">€{{ $formatNumber(stats.totalSales) }}</p>
         </div>
       </router-link>
       
@@ -64,7 +64,7 @@
         </div>
         <div class="stat-content">
           <h3>{{ $t('dashboard.monthlyRevenue') }}</h3>
-          <p class="stat-value">€{{ $formatCurrency(stats.monthlyRevenue) }}</p>
+          <p class="stat-value">€{{ $formatNumber(stats.monthlyRevenue) }}</p>
           <p class="stat-subtitle" :class="{ 'positive': stats.revenueGrowth > 0, 'negative': stats.revenueGrowth < 0 }">
             <i :class="stats.revenueGrowth > 0 ? 'fas fa-arrow-up' : 'fas fa-arrow-down'"></i>
             {{ Math.abs(stats.revenueGrowth).toFixed(1) }}%
@@ -125,6 +125,9 @@
         <router-link to="/materials/new" class="action-btn">
           <i class="fas fa-plus"></i> {{ $t('dashboard.newMaterial') }}
         </router-link>
+        <router-link to="/components/new" class="action-btn">
+          <i class="fas fa-plus"></i> {{ $t('dashboard.newComponent') }}
+        </router-link>
         <router-link to="/models/new" class="action-btn">
           <i class="fas fa-plus"></i> {{ $t('dashboard.newModel') }}
         </router-link>
@@ -157,9 +160,10 @@
             <td>{{ $formatQuantity(material.current_stock) }} {{ material.unit_of_measure }}</td>
             <td>{{ $formatQuantity(material.min_stock_level) }} {{ material.unit_of_measure }}</td>
             <td>
-              <router-link :to="`/materials/${material.id}`" class="btn btn-sm">
-                {{ $t('common.edit') }}
-              </router-link>
+              <ActionMenu 
+                :actions="getMaterialActions(material)" 
+                @action="handleMaterialAction($event, material)"
+              />
             </td>
           </tr>
         </tbody>
@@ -171,9 +175,13 @@
 <script>
 import api from '../services/api';
 import Chart from 'chart.js/auto';
+import ActionMenu from '../components/ActionMenu.vue';
 
 export default {
   name: 'HomeView',
+  components: {
+    ActionMenu
+  },
   data() {
     return {
       stats: {
@@ -653,7 +661,7 @@ export default {
       });
     },
     
-    $formatCurrency(value) {
+    $formatNumber(value) {
       return new Intl.NumberFormat('it-IT', {
         minimumFractionDigits: 0,
         maximumFractionDigits: 0
@@ -894,6 +902,46 @@ export default {
       });
       } catch (error) {
         console.error('Error initializing sales volume chart:', error);
+      }
+    },
+
+    getMaterialActions(material) {
+      return [
+        {
+          key: 'view',
+          label: this.$t('common.view'),
+          icon: 'fas fa-eye',
+          variant: 'default',
+          tooltip: 'View material details'
+        },
+        {
+          key: 'edit',
+          label: this.$t('common.edit'),
+          icon: 'fas fa-edit',
+          variant: 'primary',
+          tooltip: 'Edit material'
+        },
+        {
+          key: 'restock',
+          label: this.$t('materials.restock'),
+          icon: 'fas fa-plus-circle',
+          variant: 'warning',
+          tooltip: 'Add stock for this material'
+        }
+      ];
+    },
+
+    handleMaterialAction(actionKey, material) {
+      switch (actionKey) {
+        case 'view':
+          this.$router.push(`/materials/${material.id}/view`);
+          break;
+        case 'edit':
+          this.$router.push(`/materials/${material.id}/edit`);
+          break;
+        case 'restock':
+          this.$router.push(`/materials/${material.id}/restock`);
+          break;
       }
     }
   }

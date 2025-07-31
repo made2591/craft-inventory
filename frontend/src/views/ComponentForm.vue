@@ -195,7 +195,7 @@ export default {
         }
       } catch (error) {
         console.error('Error fetching component:', error);
-        this.error = 'Si è verificato un errore durante il recupero del componente. Riprova più tardi.';
+        this.error = this.$t('errors.fetchComponent');
       } finally {
         this.loading = false;
       }
@@ -214,7 +214,7 @@ export default {
         });
       } catch (error) {
         console.error('Error fetching materials:', error);
-        this.error = 'Si è verificato un errore durante il recupero dei materiali. Riprova più tardi.';
+        this.error = this.$t('errors.fetchMaterials');
       } finally {
         this.loadingMaterials = false;
       }
@@ -269,13 +269,13 @@ export default {
     async saveComponent() {
       // Validazione
       if (!this.component.name) {
-        alert('Il nome del componente è obbligatorio.');
+        alert(this.$t('errors.componentNameRequired'));
         return;
       }
 
       // Verifica che ci sia almeno un materiale
       if (this.component.materials.length === 0) {
-        alert('Aggiungi almeno un materiale al componente.');
+        alert(this.$t('errors.atLeastOneMaterial'));
         return;
       }
 
@@ -285,7 +285,7 @@ export default {
       );
 
       if (invalidMaterial) {
-        alert('Tutti i materiali devono avere un materiale selezionato e una quantità maggiore di zero.');
+        alert(this.$t('errors.invalidMaterial'));
         return;
       }
 
@@ -295,7 +295,7 @@ export default {
       );
 
       if (invalidCustomCost) {
-        alert('I materiali con costo personalizzato devono avere un valore di costo specificato.');
+        alert(this.$t('errors.customCostRequired'));
         return;
       }
 
@@ -318,7 +318,7 @@ export default {
         this.$router.push('/components');
       } catch (error) {
         console.error('Error saving component:', error);
-        alert('Si è verificato un errore durante il salvataggio del componente. Riprova più tardi.');
+        alert(this.$t('errors.saveComponent'));
       } finally {
         this.saving = false;
       }

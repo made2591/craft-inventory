@@ -1,56 +1,117 @@
 <template>
-  <div class="settings-page">
-    <h1>{{ $t('settings.title') }}</h1>
+  <div class="container">
+    <div class="page-header">
+      <h1 class="text-3xl font-bold text-center">
+        <i class="fas fa-cog mr-2"></i>
+        {{ $t('settings.title') }}
+      </h1>
+    </div>
 
+    <!-- Language Settings Card -->
     <div class="card">
       <div class="card-header">
-        <h2>{{ $t('settings.languageSettings') }}</h2>
+        <h2 class="flex items-center gap-2">
+          <i class="fas fa-language text-primary"></i>
+          {{ $t('settings.languageSettings') }}
+        </h2>
       </div>
       <div class="card-body">
         <div class="form-group">
-          <label for="language">{{ $t('settings.selectLanguage') }}</label>
-          <select id="language" v-model="selectedLocale" @change="changeLanguage">
-            <option value="it">{{ $t('settings.italian') }}</option>
-            <option value="en">{{ $t('settings.english') }}</option>
-          </select>
+          <label for="language" class="form-label">
+            <i class="fas fa-globe mr-2"></i>
+            {{ $t('settings.selectLanguage') }}
+          </label>
+          <div class="select-wrapper">
+            <select id="language" v-model="selectedLocale" @change="changeLanguage" class="form-select">
+              <option value="it">🇮🇹 {{ $t('settings.italian') }}</option>
+              <option value="en">🇺🇸 {{ $t('settings.english') }}</option>
+            </select>
+            <i class="fas fa-chevron-down select-icon"></i>
+          </div>
         </div>
 
         <div class="language-preview">
-          <h3>{{ $t('settings.languagePreview') }}</h3>
-          <p>{{ $t('dashboard.welcome') }}</p>
+          <div class="flex items-center gap-2 mb-2">
+            <i class="fas fa-eye text-primary"></i>
+            <h3>{{ $t('settings.languagePreview') }}</h3>
+          </div>
+          <p class="preview-text">{{ $t('dashboard.welcome') }}</p>
         </div>
       </div>
     </div>
 
+    <!-- Theme Settings Card -->
     <div class="card">
       <div class="card-header">
-        <h2>{{ $t('settings.theme') }}</h2>
+        <h2 class="flex items-center gap-2">
+          <i class="fas fa-palette text-primary"></i>
+          {{ $t('settings.theme') }}
+        </h2>
       </div>
       <div class="card-body">
         <div class="form-group">
-          <label>{{ $t('settings.selectTheme') }}</label>
-          <div class="theme-options">
-            <div class="theme-option" :class="{ active: selectedTheme === 'light' }" @click="selectTheme('light')">
-              <div class="theme-preview light-theme"></div>
-              <span>{{ $t('settings.lightTheme') }}</span>
+          <label class="form-label">
+            <i class="fas fa-brush mr-2"></i>
+            {{ $t('settings.selectTheme') }}
+          </label>
+          <div class="theme-grid">
+            <div class="theme-card" :class="{ active: selectedTheme === 'light' }" @click="selectTheme('light')">
+              <div class="theme-preview light-theme">
+                <div class="theme-header"></div>
+                <div class="theme-content">
+                  <div class="theme-line"></div>
+                  <div class="theme-line short"></div>
+                </div>
+              </div>
+              <div class="theme-info">
+                <i class="fas fa-sun theme-icon"></i>
+                <span class="theme-name">{{ $t('settings.lightTheme') }}</span>
+              </div>
             </div>
-            <div class="theme-option" :class="{ active: selectedTheme === 'dark' }" @click="selectTheme('dark')">
-              <div class="theme-preview dark-theme"></div>
-              <span>{{ $t('settings.darkTheme') }}</span>
+            
+            <div class="theme-card" :class="{ active: selectedTheme === 'dark' }" @click="selectTheme('dark')">
+              <div class="theme-preview dark-theme">
+                <div class="theme-header"></div>
+                <div class="theme-content">
+                  <div class="theme-line"></div>
+                  <div class="theme-line short"></div>
+                </div>
+              </div>
+              <div class="theme-info">
+                <i class="fas fa-moon theme-icon"></i>
+                <span class="theme-name">{{ $t('settings.darkTheme') }}</span>
+              </div>
             </div>
-            <div class="theme-option" :class="{ active: selectedTheme === 'system' }" @click="selectTheme('system')">
-              <div class="theme-preview system-theme"></div>
-              <span>{{ $t('settings.systemTheme') }}</span>
+            
+            <div class="theme-card" :class="{ active: selectedTheme === 'system' }" @click="selectTheme('system')">
+              <div class="theme-preview system-theme">
+                <div class="theme-header"></div>
+                <div class="theme-content">
+                  <div class="theme-line"></div>
+                  <div class="theme-line short"></div>
+                </div>
+              </div>
+              <div class="theme-info">
+                <i class="fas fa-desktop theme-icon"></i>
+                <span class="theme-name">{{ $t('settings.systemTheme') }}</span>
+              </div>
             </div>
           </div>
-          <p class="note">{{ $t('settings.themeNote') }}</p>
+          <div class="note">
+            <i class="fas fa-info-circle mr-2"></i>
+            {{ $t('settings.themeNote') }}
+          </div>
         </div>
       </div>
     </div>
 
-    <div v-if="showSuccessMessage" class="alert alert-success">
-      {{ $t('settings.settingsSaved') }}
-    </div>
+    <!-- Success Message -->
+    <transition name="fade">
+      <div v-if="showSuccessMessage" class="alert alert-success">
+        <i class="fas fa-check-circle mr-2"></i>
+        {{ $t('settings.settingsSaved') }}
+      </div>
+    </transition>
   </div>
 </template>
 
@@ -95,160 +156,312 @@ export default {
 </script>
 
 <style scoped>
-.settings-page {
-  max-width: 800px;
-  margin: 0 auto;
-}
-
-.card {
-  background-color: #fff;
-  border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  margin-bottom: 20px;
-  overflow: hidden;
-}
-
-.card-header {
-  background-color: #f8f9fa;
-  padding: 15px 20px;
-  border-bottom: 1px solid #eee;
+.page-header {
+  margin-bottom: 32px;
+  padding-bottom: 24px;
+  border-bottom: 2px solid #f1f3f4;
 }
 
 .card-header h2 {
   margin: 0;
-  font-size: 1.5rem;
+  font-size: 1.25rem;
+  font-weight: 600;
 }
 
-.card-body {
-  padding: 20px;
+.select-wrapper {
+  position: relative;
 }
 
-.form-group {
-  margin-bottom: 20px;
-}
-
-label {
-  display: block;
-  margin-bottom: 8px;
-  font-weight: bold;
-}
-
-select {
-  width: 100%;
-  padding: 10px;
-  border: 1px solid #ddd;
-  border-radius: 4px;
-  font-size: 16px;
-  background-color: #fff;
+.select-icon {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #6b7280;
+  pointer-events: none;
+  font-size: 12px;
 }
 
 .language-preview {
-  margin-top: 20px;
-  padding: 15px;
-  background-color: #f8f9fa;
-  border-radius: 4px;
+  margin-top: 24px;
+  padding: 20px;
+  background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+  border-radius: 12px;
   border-left: 4px solid #42b983;
+  position: relative;
+  overflow: hidden;
+}
+
+.language-preview::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 100px;
+  height: 100px;
+  background: radial-gradient(circle, rgba(66, 185, 131, 0.1) 0%, transparent 70%);
+  border-radius: 50%;
+  transform: translate(30px, -30px);
 }
 
 .language-preview h3 {
-  margin-top: 0;
+  margin: 0 0 8px 0;
   color: #42b983;
+  font-size: 1.1rem;
+  font-weight: 600;
 }
 
-.theme-options {
-  display: flex;
+.preview-text {
+  margin: 0;
+  color: #4a5568;
+  font-style: italic;
+}
+
+.theme-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
   gap: 20px;
-  flex-wrap: wrap;
+  margin-bottom: 20px;
 }
 
-.theme-option {
-  width: 120px;
-  text-align: center;
+.theme-card {
+  border: 2px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 16px;
   cursor: pointer;
-  padding: 10px;
-  border-radius: 4px;
-  transition: all 0.2s;
+  transition: all 0.3s ease;
+  background: #ffffff;
+  position: relative;
+  overflow: hidden;
 }
 
-.theme-option:hover {
-  background-color: #f0f0f0;
+.theme-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(135deg, transparent 0%, rgba(66, 185, 131, 0.05) 100%);
+  opacity: 0;
+  transition: opacity 0.3s ease;
 }
 
-.theme-option.active {
-  background-color: #e3f2fd;
-  border: 1px solid #42b983;
+.theme-card:hover {
+  border-color: #42b983;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(66, 185, 131, 0.15);
+}
+
+.theme-card:hover::before {
+  opacity: 1;
+}
+
+.theme-card.active {
+  border-color: #42b983;
+  background: linear-gradient(135deg, #ffffff 0%, #f0fdf4 100%);
+  box-shadow: 0 4px 20px rgba(66, 185, 131, 0.2);
+}
+
+.theme-card.active::before {
+  opacity: 1;
 }
 
 .theme-preview {
-  height: 80px;
-  border-radius: 4px;
-  margin-bottom: 10px;
-  border: 1px solid #ddd;
+  height: 100px;
+  border-radius: 8px;
+  margin-bottom: 12px;
+  position: relative;
+  overflow: hidden;
+  border: 1px solid #e2e8f0;
 }
 
+.theme-header {
+  height: 20px;
+  width: 100%;
+  border-radius: 8px 8px 0 0;
+}
+
+.theme-content {
+  padding: 8px;
+  height: calc(100% - 20px);
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.theme-line {
+  height: 6px;
+  border-radius: 3px;
+  width: 100%;
+}
+
+.theme-line.short {
+  width: 60%;
+}
+
+/* Light Theme Preview */
 .light-theme {
   background-color: #ffffff;
-  position: relative;
 }
 
-.light-theme::after {
-  content: "";
-  position: absolute;
-  top: 10px;
-  left: 10px;
-  right: 10px;
-  height: 10px;
-  background-color: #f0f0f0;
-  border-radius: 2px;
+.light-theme .theme-header {
+  background-color: #f8fafc;
 }
 
+.light-theme .theme-line {
+  background-color: #e2e8f0;
+}
+
+/* Dark Theme Preview */
 .dark-theme {
-  background-color: #333333;
-  position: relative;
+  background-color: #1a202c;
 }
 
-.dark-theme::after {
-  content: "";
-  position: absolute;
-  top: 10px;
-  left: 10px;
-  right: 10px;
-  height: 10px;
-  background-color: #555555;
-  border-radius: 2px;
+.dark-theme .theme-header {
+  background-color: #2d3748;
 }
 
+.dark-theme .theme-line {
+  background-color: #4a5568;
+}
+
+/* System Theme Preview */
 .system-theme {
-  background: linear-gradient(to right, #ffffff 50%, #333333 50%);
-  position: relative;
+  background: linear-gradient(to right, #ffffff 50%, #1a202c 50%);
 }
 
-.system-theme::after {
-  content: "";
-  position: absolute;
-  top: 10px;
-  left: 10px;
-  right: 10px;
-  height: 10px;
-  background: linear-gradient(to right, #f0f0f0 50%, #555555 50%);
-  border-radius: 2px;
+.system-theme .theme-header {
+  background: linear-gradient(to right, #f8fafc 50%, #2d3748 50%);
+}
+
+.system-theme .theme-line {
+  background: linear-gradient(to right, #e2e8f0 50%, #4a5568 50%);
+}
+
+.theme-info {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  justify-content: center;
+  position: relative;
+  z-index: 1;
+}
+
+.theme-icon {
+  font-size: 18px;
+  color: #42b983;
+}
+
+.theme-name {
+  font-weight: 500;
+  color: #2d3748;
 }
 
 .note {
-  font-size: 0.9em;
-  color: #666;
-  margin-top: 10px;
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  font-size: 0.875rem;
+  color: #6b7280;
+  background-color: #f8fafc;
+  padding: 12px;
+  border-radius: 8px;
+  border-left: 3px solid #42b983;
 }
 
-.alert {
-  padding: 15px;
-  border-radius: 4px;
-  margin-top: 20px;
+/* Transitions */
+.fade-enter-active, .fade-leave-active {
+  transition: all 0.3s ease;
 }
 
-.alert-success {
-  background-color: #d4edda;
-  color: #155724;
-  border: 1px solid #c3e6cb;
+.fade-enter-from, .fade-leave-to {
+  opacity: 0;
+  transform: translateY(-10px);
+}
+
+/* Mobile Responsive */
+@media (max-width: 768px) {
+  .page-header h1 {
+    font-size: 24px;
+  }
+  
+  .theme-grid {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+  
+  .theme-card {
+    padding: 12px;
+  }
+  
+  .theme-preview {
+    height: 80px;
+  }
+  
+  .card-body {
+    padding: 16px;
+  }
+  
+  .language-preview {
+    padding: 16px;
+  }
+}
+
+@media (max-width: 480px) {
+  .page-header {
+    margin-bottom: 20px;
+    padding-bottom: 16px;
+  }
+  
+  .page-header h1 {
+    font-size: 20px;
+  }
+  
+  .theme-info {
+    flex-direction: column;
+    gap: 4px;
+  }
+  
+  .theme-icon {
+    font-size: 16px;
+  }
+  
+  .theme-name {
+    font-size: 0.875rem;
+  }
+}
+
+/* Animation for theme selection */
+@keyframes pulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+  100% { transform: scale(1); }
+}
+
+.theme-card.active {
+  animation: pulse 0.3s ease-out;
+}
+
+/* Accessibility improvements */
+.theme-card:focus {
+  outline: 2px solid #42b983;
+  outline-offset: 2px;
+}
+
+.form-select:focus {
+  outline: 2px solid #42b983;
+  outline-offset: 2px;
+}
+
+/* Print styles */
+@media print {
+  .theme-preview {
+    border: 2px solid #000 !important;
+  }
+  
+  .theme-card.active {
+    border: 3px solid #000 !important;
+  }
 }
 </style>

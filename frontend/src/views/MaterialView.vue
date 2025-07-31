@@ -107,7 +107,10 @@
               <td>{{ $formatCost(transaction.totalPrice) }}</td>
               <td>{{ formatStatus(transaction.status) }}</td>
               <td>
-                <router-link :to="`/transactions/${transaction.transactionId}`" class="btn btn-sm">{{ $t('common.details') }}</router-link>
+                <ActionMenu 
+                  :actions="getTransactionActions(transaction)" 
+                  @action="handleTransactionAction($event, transaction)"
+                />
               </td>
             </tr>
           </tbody>
@@ -154,8 +157,12 @@
 <script>
 import materialService from '../services/materialService';
 import supplierService from '../services/supplierService';
+import ActionMenu from '../components/ActionMenu.vue';
 
 export default {
+  components: {
+    ActionMenu
+  },
   name: 'MaterialView',
   props: {
     id: {
@@ -341,6 +348,36 @@ export default {
     goToPage(page) {
       if (page >= 1 && page <= this.totalPages) {
         this.fetchPurchaseTransactions(page);
+      }
+    },
+
+    getTransactionActions(transaction) {
+      return [
+        {
+          key: 'view',
+          label: this.$t('common.view'),
+          icon: 'fas fa-eye',
+          variant: 'default',
+          tooltip: 'View transaction details'
+        },
+        {
+          key: 'edit',
+          label: this.$t('common.edit'),
+          icon: 'fas fa-edit',
+          variant: 'primary',
+          tooltip: 'Edit transaction'
+        }
+      ];
+    },
+
+    handleTransactionAction(actionKey, transaction) {
+      switch (actionKey) {
+        case 'view':
+          this.$router.push(`/transactions/${transaction.transactionId}/view`);
+          break;
+        case 'edit':
+          this.$router.push(`/transactions/${transaction.transactionId}/edit`);
+          break;
       }
     }
   }

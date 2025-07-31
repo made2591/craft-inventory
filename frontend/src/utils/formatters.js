@@ -74,6 +74,16 @@ export function formatCost(cost, currency = '€') {
 }
 
 /**
+ * Formats currency values (alias for formatCost for consistency)
+ * @param {number|string} value - The currency value to format
+ * @param {string} currency - Currency symbol (default: '€')
+ * @returns {string} Formatted currency value
+ */
+export function formatCurrency(value, currency = '€') {
+  return formatCost(value, currency);
+}
+
+/**
  * Formats a number for input fields (no currency symbol)
  * @param {number|string} value - The value to format
  * @param {number} maxDecimals - Maximum decimal places

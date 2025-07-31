@@ -65,7 +65,7 @@
             </div>
             <div class="info-item">
               <span class="label">{{ $t('transactions.totalAmount') }}:</span>
-              <span class="value">{{ $formatCost(transaction.totalAmount) }}</span>
+              <span class="value">{{ $formatCurrency(transaction.totalAmount) }}</span>
             </div>
             <div class="info-item" v-if="transaction.transactionType === 'purchase'">
               <span class="label">{{ $t('transactions.supplier') }}:</span>
@@ -106,14 +106,14 @@
                 <span v-else>{{ $t('common.unknownItem') }}</span>
               </td>
               <td>{{ $formatQuantity(item.quantity) }}</td>
-              <td>{{ $formatCost(item.unitPrice) }}</td>
-              <td>{{ $formatCost(item.quantity * item.unitPrice) }}</td>
+              <td>{{ $formatCurrency(item.unitPrice) }}</td>
+              <td>{{ $formatCurrency(item.quantity * item.unitPrice) }}</td>
             </tr>
           </tbody>
           <tfoot>
             <tr>
               <td colspan="3" class="total-label">{{ $t('transactions.total') }}</td>
-              <td class="total-value">{{ $formatCost(transaction.totalAmount) }}</td>
+              <td class="total-value">{{ $formatCurrency(transaction.totalAmount) }}</td>
             </tr>
           </tfoot>
         </table>

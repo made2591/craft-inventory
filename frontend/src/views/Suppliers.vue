@@ -1,138 +1,208 @@
 <template>
-  <div class="suppliers">
-    <h1>{{ $t('suppliers.title') }}</h1>
-    
-    <div class="actions">
-      <router-link to="/suppliers/new" class="btn btn-primary">{{ $t('suppliers.newSupplier') }}</router-link>
+  <div class="container">
+    <div class="page-header">
+      <h1 class="text-3xl font-bold text-center">{{ $t('suppliers.title') }}</h1>
+      <div class="flex justify-center">
+        <router-link to="/suppliers/new" class="btn btn-primary">
+          <i class="fas fa-plus"></i>
+          {{ $t('suppliers.newSupplier') }}
+        </router-link>
+      </div>
     </div>
     
-    <div v-if="loading" class="loading">
-      {{ $t('common.loading') }}
-    </div>
-    
-    <div v-else-if="error" class="error">
-      {{ error }}
-    </div>
-    
-    <div v-else-if="suppliers.length === 0" class="empty-state">
-      {{ $t('suppliers.noSuppliersFound') }}
-    </div>
-    
-    <div v-else class="suppliers-list">
-      <!-- Filtri e opzioni di paginazione -->
-      <div class="table-controls">
-        <div class="search-filter">
-          <input 
-            type="text" 
-            v-model="searchQuery" 
-            :placeholder="$t('suppliers.searchPlaceholder')" 
-            @input="filterSuppliers"
-          >
+    <!-- Controls Card -->
+    <div class="card">
+      <div class="grid grid-auto gap-4">
+        <div class="form-group" style="margin-bottom: 0;">
+          <div class="flex items-center gap-2">
+            <i class="fas fa-search text-muted"></i>
+            <input 
+              type="text" 
+              v-model="searchQuery" 
+              :placeholder="$t('suppliers.searchPlaceholder')" 
+              @input="filterSuppliers"
+              class="form-input"
+              style="margin: 0;"
+            >
+          </div>
         </div>
-        <div class="pagination-controls">
-          <label for="itemsPerPage">{{ $t('common.itemsPerPage') }}:</label>
-          <select id="itemsPerPage" v-model="itemsPerPage" @change="updatePagination">
-            <option value="5">5</option>
-            <option value="10">10</option>
-            <option value="20">20</option>
-            <option value="50">50</option>
-          </select>
+        
+        <div class="form-group" style="margin-bottom: 0;">
+          <div class="flex items-center gap-2">
+            <label for="itemsPerPage" class="form-label text-sm" style="margin: 0;">{{ $t('common.itemsPerPage') }}:</label>
+            <select id="itemsPerPage" v-model="itemsPerPage" @change="updatePagination" class="form-select">
+              <option value="5">5</option>
+              <option value="10">10</option>
+              <option value="20">20</option>
+              <option value="50">50</option>
+            </select>
+          </div>
         </div>
       </div>
-      
-      <table>
-        <thead>
-          <tr>
-            <th @click="sortBy('name')" class="sortable">
-              {{ $t('suppliers.name') }}
-              <span v-if="sortKey === 'name'" class="sort-icon">
-                {{ sortOrder === 'asc' ? '▲' : '▼' }}
-              </span>
-            </th>
-            <th @click="sortBy('contactPerson')" class="sortable">
-              {{ $t('suppliers.contact') }}
-              <span v-if="sortKey === 'contactPerson'" class="sort-icon">
-                {{ sortOrder === 'asc' ? '▲' : '▼' }}
-              </span>
-            </th>
-            <th @click="sortBy('email')" class="sortable">
-              {{ $t('suppliers.email') }}
-              <span v-if="sortKey === 'email'" class="sort-icon">
-                {{ sortOrder === 'asc' ? '▲' : '▼' }}
-              </span>
-            </th>
-            <th @click="sortBy('phone')" class="sortable">
-              {{ $t('suppliers.phone') }}
-              <span v-if="sortKey === 'phone'" class="sort-icon">
-                {{ sortOrder === 'asc' ? '▲' : '▼' }}
-              </span>
-            </th>
-            <th @click="sortBy('address')" class="sortable">
-              {{ $t('suppliers.address') }}
-              <span v-if="sortKey === 'address'" class="sort-icon">
-                {{ sortOrder === 'asc' ? '▲' : '▼' }}
-              </span>
-            </th>
-            <!-- Removed actions column header -->
-          </tr>
-        </thead>
-        <tbody>
-          <tr v-for="supplier in paginatedSuppliers" :key="supplier.id" style="position:relative;">
-            <td>
-              <router-link :to="`/suppliers/${supplier.id}/view`" class="name-link">
-                {{ supplier.name }}
-              </router-link>
-            </td>
-            <td>{{ supplier.contactPerson || 'N/A' }}</td>
-            <td>{{ supplier.email || 'N/A' }}</td>
-            <td>{{ supplier.phone || 'N/A' }}</td>
-            <td>{{ supplier.address || 'N/A' }}</td>
-            <td style="position:relative;">
-              <div class="actions-menu-row" @mousedown.stop @click.stop>
-                <button @mousedown.stop @click.stop="toggleMenu(supplier.id)" class="btn btn-sm btn-menu">&#8942;</button>
-                <div v-if="openMenuId === supplier.id" class="menu-dropdown" @mousedown.stop @click.stop>
-                  <button @click="viewSupplier(supplier.id)" class="btn btn-sm btn-view">{{ $t('common.view') }}</button>
-                  <button @click="editSupplier(supplier.id)" class="btn btn-sm btn-edit">{{ $t('common.edit') }}</button>
-                  <button @click="deleteSupplier(supplier.id)" class="btn btn-sm btn-danger">{{ $t('common.delete') }}</button>
-                </div>
+    </div>
+    
+    <div v-if="loading" class="card text-center">
+      <div class="loading">
+        <div class="spinner"></div>
+        {{ $t('common.loading') }}
+      </div>
+    </div>
+    
+    <div v-else-if="error" class="card text-center">
+      <div class="text-danger">
+        <i class="fas fa-exclamation-triangle"></i>
+        {{ error }}
+      </div>
+    </div>
+    
+    <div v-else-if="filteredSuppliers.length === 0" class="card text-center">
+      <div class="text-muted">
+        <i class="fas fa-truck text-2xl"></i>
+        <p class="text-lg">{{ $t('suppliers.noSuppliersFound') }}</p>
+      </div>
+    </div>
+    
+    <div v-else class="suppliers-content">
+      <!-- Desktop Table View -->
+      <div class="table-responsive hidden-mobile">
+        <table class="table">
+          <thead>
+            <tr>
+              <th @click="sortBy('name')" class="sortable cursor-pointer">
+                {{ $t('suppliers.name') }}
+                <i v-if="sortKey === 'name'" :class="sortOrder === 'asc' ? 'fas fa-sort-up' : 'fas fa-sort-down'" class="ml-1"></i>
+              </th>
+              <th @click="sortBy('contactPerson')" class="sortable cursor-pointer">
+                {{ $t('suppliers.contact') }}
+                <i v-if="sortKey === 'contactPerson'" :class="sortOrder === 'asc' ? 'fas fa-sort-up' : 'fas fa-sort-down'" class="ml-1"></i>
+              </th>
+              <th @click="sortBy('email')" class="sortable cursor-pointer">
+                {{ $t('suppliers.email') }}
+                <i v-if="sortKey === 'email'" :class="sortOrder === 'asc' ? 'fas fa-sort-up' : 'fas fa-sort-down'" class="ml-1"></i>
+              </th>
+              <th @click="sortBy('phone')" class="sortable cursor-pointer">
+                {{ $t('suppliers.phone') }}
+                <i v-if="sortKey === 'phone'" :class="sortOrder === 'asc' ? 'fas fa-sort-up' : 'fas fa-sort-down'" class="ml-1"></i>
+              </th>
+              <th>{{ $t('common.actions') }}</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-for="supplier in paginatedSuppliers" :key="supplier.id">
+              <td>
+                <router-link :to="`/suppliers/${supplier.id}/view`" class="text-primary font-medium">
+                  {{ supplier.name }}
+                </router-link>
+              </td>
+              <td>{{ supplier.contactPerson || $t('common.notApplicable') }}</td>
+              <td>
+                <a v-if="supplier.email" :href="`mailto:${supplier.email}`" class="text-primary">
+                  {{ supplier.email }}
+                </a>
+                <span v-else class="text-muted">{{ $t('common.notApplicable') }}</span>
+              </td>
+              <td>
+                <a v-if="supplier.phone" :href="`tel:${supplier.phone}`" class="text-primary">
+                  {{ supplier.phone }}
+                </a>
+                <span v-else class="text-muted">{{ $t('common.notApplicable') }}</span>
+              </td>
+              <td>
+                <ActionMenu 
+                  :actions="getSupplierActions(supplier)" 
+                  @action="handleSupplierAction($event, supplier)"
+                />
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Mobile Card View -->
+      <div class="visible-mobile">
+        <div class="grid gap-4">
+          <div v-for="supplier in paginatedSuppliers" :key="supplier.id" class="card">
+            <div class="flex justify-between items-start mb-3">
+              <div>
+                <router-link :to="`/suppliers/${supplier.id}/view`" class="text-lg font-bold text-primary">
+                  {{ supplier.name }}
+                </router-link>
+                <p class="text-sm text-muted">{{ supplier.contactPerson || 'No contact person' }}</p>
               </div>
-            </td>
-          </tr>
-        </tbody>
-      </table>
-      
-      <!-- Paginazione -->
-      <div class="pagination">
-        <button 
-          @click="goToPage(currentPage - 1)" 
-          :disabled="currentPage === 1" 
-          class="btn btn-sm"
-        >
-          {{ $t('common.previous') }}
-        </button>
-        
-        <div class="page-numbers">
-          <button 
-            v-for="page in totalPages" 
-            :key="page" 
-            @click="goToPage(page)" 
-            :class="['btn', 'btn-sm', currentPage === page ? 'btn-active' : '']"
-          >
-            {{ page }}
-          </button>
+              <span class="badge badge-info">
+                <i class="fas fa-truck"></i>
+                {{ $t('suppliers.title') }}
+              </span>
+            </div>
+            
+            <div class="grid gap-3 mb-4">
+              <div v-if="supplier.email">
+                <p class="text-xs text-muted font-medium">{{ $t('suppliers.email') }}</p>
+                <a :href="`mailto:${supplier.email}`" class="text-primary font-medium">
+                  <i class="fas fa-envelope mr-1"></i>
+                  {{ supplier.email }}
+                </a>
+              </div>
+              <div v-if="supplier.phone">
+                <p class="text-xs text-muted font-medium">{{ $t('suppliers.phone') }}</p>
+                <a :href="`tel:${supplier.phone}`" class="text-primary font-medium">
+                  <i class="fas fa-phone mr-1"></i>
+                  {{ supplier.phone }}
+                </a>
+              </div>
+              <div v-if="supplier.address">
+                <p class="text-xs text-muted font-medium">{{ $t('suppliers.address') }}</p>
+                <p class="font-medium">{{ supplier.address }}</p>
+              </div>
+              <div v-if="supplier.website">
+                <p class="text-xs text-muted font-medium">{{ $t('suppliers.website') }}</p>
+                <a :href="supplier.website" target="_blank" class="text-primary font-medium">
+                  <i class="fas fa-external-link-alt mr-1"></i>
+                  {{ supplier.website }}
+                </a>
+              </div>
+            </div>
+            
+            <div class="mobile-actions">
+              <ActionMenu 
+                :actions="getSupplierActions(supplier)" 
+                @action="handleSupplierAction($event, supplier)"
+              />
+            </div>
+          </div>
         </div>
-        
-        <button 
-          @click="goToPage(currentPage + 1)" 
-          :disabled="currentPage === totalPages" 
-          class="btn btn-sm"
-        >
-          {{ $t('common.next') }}
-        </button>
       </div>
       
-      <div class="pagination-info">
-        {{ $t('common.paginationInfo', { start: startIndex + 1, end: endIndex, total: filteredSuppliers.length }) }}
+      <!-- Pagination -->
+      <div class="card">
+        <div class="flex flex-md-col gap-4 justify-between items-center">
+          <div class="flex items-center gap-2">
+            <button @click="goToPage(currentPage - 1)" :disabled="currentPage === 1" class="btn btn-secondary btn-sm">
+              <i class="fas fa-chevron-left"></i>
+              <span class="hidden-mobile">{{ $t('common.previous') }}</span>
+            </button>
+
+            <div class="flex gap-1">
+              <button 
+                v-for="page in visiblePages" 
+                :key="page" 
+                @click="goToPage(page)"
+                :class="['btn', 'btn-sm', currentPage === page ? 'btn-primary' : 'btn-secondary']"
+              >
+                {{ page }}
+              </button>
+            </div>
+
+            <button @click="goToPage(currentPage + 1)" :disabled="currentPage === totalPages" class="btn btn-secondary btn-sm">
+              <span class="hidden-mobile">{{ $t('common.next') }}</span>
+              <i class="fas fa-chevron-right"></i>
+            </button>
+          </div>
+
+          <div class="text-sm text-muted text-center">
+            {{ $t('common.paginationInfo', { start: startIndex + 1, end: endIndex, total: filteredSuppliers.length }) }}
+          </div>
+        </div>
       </div>
     </div>
   </div>
@@ -140,8 +210,12 @@
 
 <script>
 import api from '../services/api';
+import ActionMenu from '../components/ActionMenu.vue';
 
 export default {
+  components: {
+    ActionMenu
+  },
   name: 'SuppliersView',
   data() {
     return {
@@ -170,6 +244,24 @@ export default {
     },
     paginatedSuppliers() {
       return this.filteredSuppliers.slice(this.startIndex, this.endIndex);
+    },
+    visiblePages() {
+      const pages = [];
+      const maxVisible = window.innerWidth < 768 ? 3 : 7;
+      const half = Math.floor(maxVisible / 2);
+      
+      let start = Math.max(1, this.currentPage - half);
+      let end = Math.min(this.totalPages, start + maxVisible - 1);
+      
+      if (end - start + 1 < maxVisible) {
+        start = Math.max(1, end - maxVisible + 1);
+      }
+      
+      for (let i = start; i <= end; i++) {
+        pages.push(i);
+      }
+      
+      return pages;
     }
   },
   created() {
@@ -280,6 +372,63 @@ export default {
         } else {
           alert(this.$t('errors.deleteSupplier'));
         }
+      }
+    },
+
+    getSupplierActions(supplier) {
+      return [
+        {
+          key: 'view',
+          label: this.$t('common.view'),
+          icon: 'fas fa-eye',
+          variant: 'default',
+          tooltip: 'View supplier details'
+        },
+        {
+          key: 'edit',
+          label: this.$t('common.edit'),
+          icon: 'fas fa-edit',
+          variant: 'primary',
+          tooltip: 'Edit supplier'
+        },
+        {
+          key: 'contact',
+          label: this.$t('suppliers.contact'),
+          icon: 'fas fa-envelope',
+          variant: 'default',
+          tooltip: 'Contact supplier',
+          disabled: !supplier.email
+        },
+        {
+          key: 'delete',
+          label: this.$t('common.delete'),
+          icon: 'fas fa-trash',
+          variant: 'danger',
+          tooltip: 'Delete supplier'
+        }
+      ];
+    },
+
+    handleSupplierAction(actionKey, supplier) {
+      switch (actionKey) {
+        case 'view':
+          this.viewSupplier(supplier.id);
+          break;
+        case 'edit':
+          this.editSupplier(supplier.id);
+          break;
+        case 'contact':
+          this.contactSupplier(supplier);
+          break;
+        case 'delete':
+          this.deleteSupplier(supplier.id);
+          break;
+      }
+    },
+
+    contactSupplier(supplier) {
+      if (supplier.email) {
+        window.location.href = `mailto:${supplier.email}`;
       }
     },
     
