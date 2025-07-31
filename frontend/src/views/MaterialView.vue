@@ -118,13 +118,17 @@
                 </tr>
               </thead>
               <tbody>
-                <tr v-for="transaction in paginatedPurchases" :key="transaction.id" :class="getStatusClass(transaction.status)">
+                <tr v-for="transaction in paginatedPurchases" :key="transaction.id">
                   <td>{{ formatDate(transaction.date) }}</td>
                   <td>{{ transaction.supplierName || 'N/A' }}</td>
                   <td>{{ $formatQuantity(transaction.quantity) }} {{ material.unitOfMeasure }}</td>
                   <td>{{ $formatCost(transaction.unitPrice) }}</td>
                   <td>{{ $formatCost(transaction.totalPrice) }}</td>
-                  <td>{{ formatStatus(transaction.status) }}</td>
+                  <td>
+                    <span :class="getStatusClass(transaction.status)">
+                      {{ formatStatus(transaction.status) }}
+                    </span>
+                  </td>
                   <td>
                     <ActionMenu 
                       :actions="getTransactionActions(transaction)" 
@@ -157,13 +161,17 @@
                 </tr>
               </thead>
               <tbody>
-                <tr v-for="transaction in paginatedSales" :key="transaction.id" :class="getStatusClass(transaction.status)">
+                <tr v-for="transaction in paginatedSales" :key="transaction.id">
                   <td>{{ formatDate(transaction.date) }}</td>
                   <td>{{ transaction.customerName || 'N/A' }}</td>
                   <td>{{ $formatQuantity(transaction.quantity) }} {{ material.unitOfMeasure }}</td>
                   <td>{{ $formatCost(transaction.unitPrice) }}</td>
                   <td>{{ $formatCost(transaction.totalPrice) }}</td>
-                  <td>{{ formatStatus(transaction.status) }}</td>
+                  <td>
+                    <span :class="getStatusClass(transaction.status)">
+                      {{ formatStatus(transaction.status) }}
+                    </span>
+                  </td>
                   <td>
                     <ActionMenu 
                       :actions="getTransactionActions(transaction)" 
