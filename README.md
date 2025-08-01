@@ -27,9 +27,33 @@ Questa applicazione è progettata per aiutare gli artigiani a gestire il loro in
 
 ## Avvio dell'applicazione
 
+### Modalità standard
 1. Clona il repository
 2. Esegui `docker-compose up -d` nella directory principale
 3. Accedi all'applicazione su http://localhost:3000
+
+### Modalità KIOSK (ambiente separato)
+Per eseguire un ambiente completamente separato con modalità KIOSK abilitata:
+
+1. Clona il repository
+2. Esegui `docker-compose -f docker-compose-kiosk.yml up -d`
+3. Accedi all'applicazione KIOSK su http://localhost:3001
+4. Backend KIOSK disponibile su http://localhost:8081
+
+### Esecuzione contemporanea
+Puoi eseguire entrambi gli ambienti contemporaneamente:
+
+```bash
+# Ambiente standard
+docker-compose up -d
+
+# Ambiente KIOSK (in parallelo)
+docker-compose -f docker-compose-kiosk.yml up -d
+```
+
+**Porte utilizzate:**
+- **Standard**: Frontend 3000, Backend 8080, Database 5432
+- **KIOSK**: Frontend 3001, Backend 8081, Database 5433
 
 ## Dati di test
 
@@ -85,6 +109,43 @@ L'applicazione viene inizializzata con dati di test per facilitare lo sviluppo e
   - Ordine mensile da Boutique Artigianale (completato)
   - Ordine da cliente privato Mario Bianchi (completato)
   - Ordine da marketplace Artigianato Online (in attesa)
+
+## Modalità KIOSK
+
+L'applicazione supporta una modalità KIOSK che resetta automaticamente il database ogni 15 minuti con i dati di test. Questa modalità è utile per demo, fiere o ambienti di testing.
+
+### Attivazione della modalità KIOSK
+
+Per abilitare la modalità KIOSK, modifica la variabile d'ambiente `KIOSK_MODE` nei file docker-compose:
+
+```yaml
+environment:
+  KIOSK_MODE: "true"  # Imposta a "true" per abilitare il reset automatico ogni 15 minuti
+```
+
+### Funzionalità della modalità KIOSK
+
+- ✅ **Reset automatico**: Il database viene resettato ogni 15 minuti
+- ✅ **Reset manuale**: Endpoint API per il reset su richiesta
+- ✅ **Status API**: Endpoint per verificare lo stato della modalità KIOSK
+- ✅ **Logging dettagliato**: Log chiari per monitorare le operazioni di reset
+
+### API Endpoints per la modalità KIOSK
+
+- `GET /api/kiosk/status` - Ottieni lo stato della modalità KIOSK
+- `POST /api/kiosk/reset` - Esegui un reset manuale del database (solo se KIOSK_MODE è abilitato)
+
+### Esempio di utilizzo
+
+```bash
+# Verifica lo stato della modalità KIOSK
+curl http://localhost:8080/api/kiosk/status
+
+# Esegui un reset manuale (solo se KIOSK_MODE=true)
+curl -X POST http://localhost:8080/api/kiosk/reset
+```
+
+⚠️ **Attenzione**: La modalità KIOSK elimina TUTTI i dati dal database e li sostituisce con i dati di test. Non utilizzare in produzione!
 
 ## Utente di test
 
