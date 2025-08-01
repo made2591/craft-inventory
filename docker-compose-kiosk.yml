@@ -7,7 +7,7 @@ services:
       POSTGRES_PASSWORD: craftpassword
       POSTGRES_DB: craftdb
     ports:
-      - "5433:5432"
+      - "5432:5432"
     volumes:
       - postgres_kiosk_data:/var/lib/postgresql/data
       - ./backend/init-db:/docker-entrypoint-initdb.d
@@ -22,7 +22,7 @@ services:
       dockerfile: Dockerfile
     container_name: craft-backend-kiosk
     ports:
-      - "8081:8080"
+      - "8080:8080"
     environment:
       NODE_ENV: development
       DATABASE_URL: postgres://craftuser:craftpassword@172.30.1.2:5432/craftdb
@@ -40,7 +40,7 @@ services:
       dockerfile: Dockerfile
     container_name: craft-frontend-kiosk
     ports:
-      - "3001:80"
+      - "3000:80"
     depends_on:
       - backend-kiosk
     networks:
