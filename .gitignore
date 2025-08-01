@@ -1,0 +1,50 @@
+# Dependencies
+**/node_modules
+backend/node_modules/
+
+# Environment files - keep these local for security and customization
+backend/.env
+backend/.env.kiosk
+frontend/.env.local
+frontend/.env.kiosk
+
+# Docker Compose environment files
+.env
+.env.kiosk
+.env.cloudflared
+
+# Other sensitive files
+*.log
+*.key
+*.pem
+*.p12
+*.crt
+*.env.local
+*.env.development
+*.env.production
+
+# Cleanup reports and temporary documentation
+CLEANUP_REPORT_*.md
+cleanup_report_*.md
+
+# Cloudflare tunnel configuration and credentials
+cloudflared/config.yml
+cloudflared/*.json
+cloudflared-demo/
+cloudflared-lightcutdesign/
+
+# Application-specific directories
+backend/uploads/*
+!backend/uploads/.gitkeep
+backend/logs/*
+!backend/logs/.gitkeep
+backend/backups/*
+!backend/backups/.gitkeep
+
+# Preserve example environment files
+!.env.example
+!.env.*.example
+!backend/.env.example
+!frontend/.env.example
+!cloudflared/config.yml.example
+advanced_cleanup_repo.sh

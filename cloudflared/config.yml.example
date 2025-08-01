@@ -1,0 +1,21 @@
+# Cloudflare Tunnel Configuration Example
+# Copy this file to config.yml and configure with your tunnel details
+
+tunnel: your-tunnel-uuid-here
+credentials-file: /etc/cloudflared/your-tunnel-uuid.json
+
+ingress:
+  # Route to frontend application  
+  - hostname: your-domain.com
+    service: http://172.28.1.4:80
+  
+  # Optional: Route API subdomain to backend
+  - hostname: api.your-domain.com  
+    service: http://172.28.1.3:8080
+    
+  # Catch-all rule (required)
+  - service: http_status:404
+
+# Optional: Logging configuration
+# logLevel: info
+# logFile: /var/log/cloudflared.log
