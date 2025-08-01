@@ -4,8 +4,11 @@
   "private": true,
   "scripts": {
     "dev": "vite",
+    "dev:kiosk": "vite --config vite.config.kiosk.js",
     "build": "vite build",
+    "build:kiosk": "vite build --config vite.config.kiosk.js",
     "preview": "vite preview",
+    "preview:kiosk": "vite preview --config vite.config.kiosk.js",
     "lint": "eslint . --ext .vue,.js,.jsx,.cjs,.mjs --fix --ignore-path .gitignore"
   },
   "dependencies": {
