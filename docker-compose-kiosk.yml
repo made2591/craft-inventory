@@ -1,0 +1,72 @@
+services:
+  postgres-kiosk:
+    image: postgres:14-alpine
+    container_name: craft-postgres-kiosk
+    environment:
+      POSTGRES_USER: craftuser
+      POSTGRES_PASSWORD: craftpassword
+      POSTGRES_DB: craftdb
+    ports:
+      - "5433:5432"
+    volumes:
+      - postgres_kiosk_data:/var/lib/postgresql/data
+      - ./backend/init-db:/docker-entrypoint-initdb.d
+    networks:
+      craft-kiosk-network:
+        ipv4_address: 172.30.1.2
+    restart: unless-stopped
+
+  backend-kiosk:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: craft-backend-kiosk
+    ports:
+      - "8081:8080"
+    environment:
+      NODE_ENV: development
+      DATABASE_URL: postgres://craftuser:craftpassword@172.30.1.2:5432/craftdb
+      KIOSK_MODE: "true"  # KIOSK MODE ABILITATO per reset automatico ogni 15 minuti
+    depends_on:
+      - postgres-kiosk
+    networks:
+      craft-kiosk-network:
+        ipv4_address: 172.30.1.3
+    restart: unless-stopped
+
+  frontend-kiosk:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: craft-frontend-kiosk
+    ports:
+      - "3001:80"
+    depends_on:
+      - backend-kiosk
+    networks:
+      craft-kiosk-network:
+        ipv4_address: 172.30.1.4
+    restart: unless-stopped
+
+  cloudflared-kiosk:
+    image: cloudflare/cloudflared:latest
+    restart: unless-stopped
+    command: tunnel run warehouse-demo-kiosk
+    depends_on:
+      - backend-kiosk
+    networks:
+      craft-kiosk-network:
+        ipv4_address: 172.30.1.5
+    volumes:
+      - ./cloudflared:/etc/cloudflared
+
+networks:
+  craft-kiosk-network:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.30.0.0/16
+          gateway: 172.30.0.1
+
+volumes:
+  postgres_kiosk_data:

@@ -27,9 +27,33 @@ Questa applicazione è progettata per aiutare gli artigiani a gestire il loro in
 
 ## Avvio dell'applicazione
 
+### Modalità standard
 1. Clona il repository
 2. Esegui `docker-compose up -d` nella directory principale
 3. Accedi all'applicazione su http://localhost:3000
+
+### Modalità KIOSK (ambiente separato)
+Per eseguire un ambiente completamente separato con modalità KIOSK abilitata:
+
+1. Clona il repository
+2. Esegui `docker-compose -f docker-compose-kiosk.yml up -d`
+3. Accedi all'applicazione KIOSK su http://localhost:3001
+4. Backend KIOSK disponibile su http://localhost:8081
+
+### Esecuzione contemporanea
+Puoi eseguire entrambi gli ambienti contemporaneamente:
+
+```bash
+# Ambiente standard
+docker-compose up -d
+
+# Ambiente KIOSK (in parallelo)
+docker-compose -f docker-compose-kiosk.yml up -d
+```
+
+**Porte utilizzate:**
+- **Standard**: Frontend 3000, Backend 8080, Database 5432
+- **KIOSK**: Frontend 3001, Backend 8081, Database 5433
 
 ## Dati di test
 

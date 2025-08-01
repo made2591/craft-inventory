@@ -13,7 +13,27 @@ La modalità KIOSK è una funzionalità speciale dell'applicazione Craft Invento
 
 ## Configurazione
 
-### Abilitazione tramite Docker Compose
+### Metodo 1: Docker Compose dedicato (RACCOMANDATO)
+
+Il modo più semplice per utilizzare la modalità KIOSK è usare il file docker-compose dedicato che ha già tutto configurato:
+
+```bash
+# Avvia l'ambiente KIOSK
+docker-compose -f docker-compose-kiosk.yml up -d
+
+# Accedi all'applicazione KIOSK
+# Frontend: http://localhost:3001
+# Backend: http://localhost:8081
+```
+
+**Vantaggi del docker-compose-kiosk.yml:**
+- ✅ KIOSK_MODE già abilitato di default
+- ✅ Porte diverse per evitare conflitti
+- ✅ Subnet di rete separata (172.29.x.x)
+- ✅ Volume database separato
+- ✅ Può funzionare in parallelo all'ambiente standard
+
+### Metodo 2: Modifica del docker-compose esistente
 
 Modifica il file `docker-compose.yml` o `docker-compose-mac.yml`:
 
@@ -183,32 +203,55 @@ Durante un reset tramite API:
 
 ## Esempio completo
 
-### 1. Abilitazione
+### Metodo 1: Docker Compose KIOSK dedicato (RACCOMANDATO)
 
 ```bash
-# Modifica docker-compose.yml
+# 1. Avvia l'ambiente KIOSK
+docker-compose -f docker-compose-kiosk.yml up -d
+
+# 2. Verifica stato
+curl http://localhost:8081/api/kiosk/status
+
+# 3. Reset manuale (opzionale)
+curl -X POST http://localhost:8081/api/kiosk/reset
+
+# 4. Monitoraggio
+docker-compose -f docker-compose-kiosk.yml logs -f backend-kiosk
+
+# 5. Arresta l'ambiente KIOSK
+docker-compose -f docker-compose-kiosk.yml down
+```
+
+### Metodo 2: Docker Compose standard modificato
+
+```bash
+# 1. Modifica docker-compose.yml
 vim docker-compose.yml
 
-# Riavvia i container
+# 2. Riavvia i container
 docker-compose down
 docker-compose up -d
-```
 
-### 2. Verifica stato
-
-```bash
+# 3. Verifica stato
 curl http://localhost:8080/api/kiosk/status
-```
 
-### 3. Reset manuale (opzionale)
-
-```bash
+# 4. Reset manuale (opzionale)
 curl -X POST http://localhost:8080/api/kiosk/reset
+
+# 5. Monitoraggio
+docker-compose logs -f backend
 ```
 
-### 4. Monitoraggio
+### Esecuzione contemporanea di entrambi gli ambienti
 
 ```bash
-# Segui i log del backend
-docker-compose logs -f backend
+# Avvia ambiente standard
+docker-compose up -d
+
+# Avvia ambiente KIOSK in parallelo
+docker-compose -f docker-compose-kiosk.yml up -d
+
+# Ora hai:
+# - Ambiente standard: http://localhost:3000 (frontend), http://localhost:8080 (backend)
+# - Ambiente KIOSK: http://localhost:3001 (frontend), http://localhost:8081 (backend)
 ```

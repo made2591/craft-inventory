@@ -51,7 +51,7 @@ services:
   cloudflared:
     image: cloudflare/cloudflared:latest
     restart: unless-stopped
-    command: tunnel run inventree-tunnel
+    command: tunnel run warehouse-lightcutdesign
     depends_on:
       - backend
     networks:
