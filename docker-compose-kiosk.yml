@@ -5,9 +5,9 @@ services:
     environment:
       POSTGRES_USER: craftuser
       POSTGRES_PASSWORD: craftpassword
-      POSTGRES_DB: craftdb
+      POSTGRES_DB: craftdb_kiosk  # Separate database name for kiosk mode
     ports:
-      - "5433:5432"
+      - "5433:5432"  # Different external port
     volumes:
       - postgres_kiosk_data:/var/lib/postgresql/data
       - ./backend/init-db:/docker-entrypoint-initdb.d
