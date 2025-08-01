@@ -80,16 +80,71 @@ const runMigrations = async () => {
   }
 };
 
+// Funzione per inizializzare i dati di test
+const initTestData = async () => {
+  try {
+    console.log('🔄 Initializing test data...');
+
+    // Ottieni le credenziali del database dalla stringa di connessione
+    const connectionString = process.env.DATABASE_URL || 'postgres://craftuser:craftpassword@172.28.1.2:5432/craftdb';
+    const match = connectionString.match(/postgres:\/\/([^:]+):([^@]+)@([^:]+):(\d+)\/(.+)/);
+
+    if (!match) {
+      throw new Error('Impossibile analizzare la stringa di connessione del database');
+    }
+
+    const [, user, password, host, port, database] = match;
+
+    // Percorsi dei file di inizializzazione e seed del database
+    const initDbFile = path.join(__dirname, 'init-db/01-init.sql');
+    const seedDbFile = path.join(__dirname, 'init-db/02-seed-data.sql');
+
+    // Verifica che i file esistano
+    if (!fs.existsSync(initDbFile)) {
+      throw new Error('File di inizializzazione del database non trovato');
+    }
+
+    if (!fs.existsSync(seedDbFile)) {
+      throw new Error('File di seed del database non trovato');
+    }
+
+    // Leggi ed esegui il file di seed
+    console.log('🔄 Executing seed data file...');
+    const seedSql = fs.readFileSync(seedDbFile, 'utf8');
+    
+    // Dividi il file SQL in singole istruzioni per evitare conflitti
+    const statements = seedSql
+      .split(';')
+      .map(stmt => stmt.trim())
+      .filter(stmt => stmt && !stmt.startsWith('--'));
+    
+    await pool.query('BEGIN');
+    
+    try {
+      for (const statement of statements) {
+        if (statement) {
+          await pool.query(statement);
+        }
+      }
+      
+      await pool.query('COMMIT');
+      console.log('✅ Test data initialization completed successfully');
+      
+    } catch (err) {
+      await pool.query('ROLLBACK');
+      throw err;
+    }
+    
+  } catch (err) {
+    console.error('❌ Error initializing test data:', err);
+    throw err;
+  }
+};
+
 // Funzione per resettare il database e ripopolarlo con i dati di test
 const resetDatabase = async () => {
   try {
     console.log('🔄 KIOSK MODE: Resetting database...');
-
-    // Leggi i file di inizializzazione
-    const initDbDir = path.join(__dirname, 'init-db');
-    const initFiles = fs.readdirSync(initDbDir)
-      .filter(file => file.endsWith('.sql'))
-      .sort(); // Ordina i file per nome
 
     // Prima, elimina tutti i dati dalle tabelle (mantenendo la struttura)
     await pool.query('BEGIN');
@@ -119,37 +174,11 @@ const resetDatabase = async () => {
       // Riabilita i vincoli di chiave esterna
       await pool.query('SET session_replication_role = DEFAULT;');
       
-      // Esegui i file di inizializzazione per ripopolare il database
-      for (const file of initFiles) {
-        console.log(`🔄 KIOSK MODE: Executing init file: ${file}`);
-        
-        const filePath = path.join(initDbDir, file);
-        const sql = fs.readFileSync(filePath, 'utf8');
-        
-        // Dividi il file SQL in singole istruzioni per evitare conflitti
-        const statements = sql
-          .split(';')
-          .map(stmt => stmt.trim())
-          .filter(stmt => stmt && !stmt.startsWith('--'));
-        
-        for (const statement of statements) {
-          if (statement) {
-            try {
-              await pool.query(statement);
-            } catch (err) {
-              // Ignora errori per tabelle/vincoli già esistenti
-              if (!err.message.includes('already exists') && 
-                  !err.message.includes('does not exist') &&
-                  !err.message.includes('duplicate key')) {
-                console.warn(`Warning executing statement: ${err.message}`);
-              }
-            }
-          }
-        }
-      }
-      
       await pool.query('COMMIT');
-      console.log('✅ KIOSK MODE: Database reset completed successfully');
+      console.log('✅ KIOSK MODE: Database cleared successfully');
+      
+      // Ora inizializza con i dati di test
+      await initTestData();
       
     } catch (err) {
       await pool.query('ROLLBACK');

@@ -449,7 +449,8 @@
     "inventoryItemDetails": "2 for each model",
     "resetSuccess": "Database reset successfully.",
     "confirmInitTestData": "Are you sure you want to initialize the database with test data? All existing data will be deleted.",
-    "initSuccess": "Initialization completed successfully! Created: {suppliers} suppliers, {materials} materials, {components} components, {models} models, and {inventoryItems} inventory items."
+    "initSuccess": "Initialization completed successfully! Created: {suppliers} suppliers, {materials} materials, {components} components, {models} models, and {inventoryItems} inventory items.",
+    "initTestData": "Initialize with Test Data"
   },
   "charts": {
     "materialValue": "Material Value (€)",

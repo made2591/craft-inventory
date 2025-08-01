@@ -17,15 +17,55 @@ const __dirname = path.dirname(__filename);
  */
 export default function kioskRoutes(pool, toCamelCase) {
   
+  // Funzione per inizializzare i dati di test
+  const initTestData = async () => {
+    try {
+      console.log('🔄 API: Initializing test data...');
+
+      // Percorso del file di seed del database
+      const seedDbFile = path.join(__dirname, '..', 'init-db', '02-seed-data.sql');
+
+      // Verifica che il file esista
+      if (!fs.existsSync(seedDbFile)) {
+        throw new Error('File di seed del database non trovato');
+      }
+
+      // Leggi ed esegui il file di seed
+      console.log('🔄 API: Executing seed data file...');
+      const seedSql = fs.readFileSync(seedDbFile, 'utf8');
+      
+      // Dividi il file SQL in singole istruzioni per evitare conflitti
+      const statements = seedSql
+        .split(';')
+        .map(stmt => stmt.trim())
+        .filter(stmt => stmt && !stmt.startsWith('--'));
+      
+      await pool.query('BEGIN');
+      
+      try {
+        for (const statement of statements) {
+          if (statement) {
+            await pool.query(statement);
+          }
+        }
+        
+        await pool.query('COMMIT');
+        console.log('✅ API: Test data initialization completed successfully');
+        
+      } catch (err) {
+        await pool.query('ROLLBACK');
+        throw err;
+      }
+      
+    } catch (err) {
+      console.error('❌ API: Error initializing test data:', err);
+      throw err;
+    }
+  };
+
   // Funzione per resettare il database
   const resetDatabase = async () => {
     console.log('🔄 API: Resetting database...');
-
-    // Leggi i file di inizializzazione
-    const initDbDir = path.join(__dirname, '..', 'init-db');
-    const initFiles = fs.readdirSync(initDbDir)
-      .filter(file => file.endsWith('.sql'))
-      .sort(); // Ordina i file per nome
 
     // Prima, elimina tutti i dati dalle tabelle (mantenendo la struttura)
     await pool.query('BEGIN');
@@ -55,37 +95,12 @@ export default function kioskRoutes(pool, toCamelCase) {
       // Riabilita i vincoli di chiave esterna
       await pool.query('SET session_replication_role = DEFAULT;');
       
-      // Esegui i file di inizializzazione per ripopolare il database
-      for (const file of initFiles) {
-        console.log(`🔄 API: Executing init file: ${file}`);
-        
-        const filePath = path.join(initDbDir, file);
-        const sql = fs.readFileSync(filePath, 'utf8');
-        
-        // Dividi il file SQL in singole istruzioni per evitare conflitti
-        const statements = sql
-          .split(';')
-          .map(stmt => stmt.trim())
-          .filter(stmt => stmt && !stmt.startsWith('--'));
-        
-        for (const statement of statements) {
-          if (statement) {
-            try {
-              await pool.query(statement);
-            } catch (err) {
-              // Ignora errori per tabelle/vincoli già esistenti
-              if (!err.message.includes('already exists') && 
-                  !err.message.includes('does not exist') &&
-                  !err.message.includes('duplicate key')) {
-                console.warn(`Warning executing statement: ${err.message}`);
-              }
-            }
-          }
-        }
-      }
-      
       await pool.query('COMMIT');
-      console.log('✅ API: Database reset completed successfully');
+      console.log('✅ API: Database cleared successfully');
+      
+      // Ora inizializza con i dati di test
+      await initTestData();
+      
       return true;
       
     } catch (err) {
