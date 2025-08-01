@@ -58,7 +58,7 @@ services:
       craft-kiosk-network:
         ipv4_address: 172.30.1.5
     volumes:
-      - ./cloudflared:/etc/cloudflared
+      - ./cloudflared-demo:/etc/cloudflared
 
 networks:
   craft-kiosk-network:
