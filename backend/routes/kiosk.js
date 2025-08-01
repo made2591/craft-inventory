@@ -122,6 +122,7 @@ export default function kioskRoutes(pool, toCamelCase) {
         });
       }
       
+      console.log('🔧 API: Manual database reset requested');
       await resetDatabase();
       
       res.json({ 
@@ -142,16 +143,81 @@ export default function kioskRoutes(pool, toCamelCase) {
   // GET /api/kiosk/status - Ottieni lo stato del KIOSK_MODE
   router.get('/status', (req, res) => {
     const KIOSK_MODE = process.env.KIOSK_MODE === 'true';
-    const KIOSK_RESET_INTERVAL = 15; // minuti
+    const KIOSK_RESET_INTERVAL_MINUTES = parseInt(process.env.KIOSK_RESET_INTERVAL_MINUTES) || 15;
+    const kioskState = global.kioskState || {};
     
-    res.json({
+    const now = Date.now();
+    const response = {
       kioskMode: KIOSK_MODE,
-      resetInterval: KIOSK_MODE ? `${KIOSK_RESET_INTERVAL} minuti` : null,
+      resetInterval: KIOSK_MODE ? `${KIOSK_RESET_INTERVAL_MINUTES} minuti` : null,
+      resetIntervalMinutes: KIOSK_MODE ? KIOSK_RESET_INTERVAL_MINUTES : null,
+      resetIntervalMs: KIOSK_MODE ? KIOSK_RESET_INTERVAL_MINUTES * 60 * 1000 : null,
       status: KIOSK_MODE ? 'ATTIVO - Reset automatico abilitato' : 'DISATTIVO - Reset automatico disabilitato',
       message: KIOSK_MODE 
-        ? `Il database viene automaticamente resettato ogni ${KIOSK_RESET_INTERVAL} minuti`
-        : 'Per abilitare la modalità kiosk, imposta KIOSK_MODE=true nel docker-compose'
-    });
+        ? `Il database viene automaticamente resettato ogni ${KIOSK_RESET_INTERVAL_MINUTES} minuti`
+        : 'Per abilitare la modalità kiosk, imposta KIOSK_MODE=true nel docker-compose',
+      configuration: KIOSK_MODE ? {
+        configuredInterval: `${KIOSK_RESET_INTERVAL_MINUTES} minuti`,
+        environmentVariable: 'KIOSK_RESET_INTERVAL_MINUTES',
+        defaultValue: '15 minuti',
+        currentValue: KIOSK_RESET_INTERVAL_MINUTES,
+        validRange: '1-1440 minuti (1 minuto - 24 ore)'
+      } : null,
+      features: {
+        automaticReset: KIOSK_MODE,
+        testDataReload: KIOSK_MODE,
+        manualReset: KIOSK_MODE,
+        configurableInterval: true
+      },
+      timestamp: new Date().toISOString()
+    };
+
+    if (KIOSK_MODE && kioskState.startTime) {
+      const uptimeMs = now - kioskState.startTime;
+      const nextResetIn = kioskState.nextReset ? Math.max(0, kioskState.nextReset - now) : null;
+      
+      response.statistics = {
+        uptime: `${Math.floor(uptimeMs / 1000 / 60)} minuti`,
+        uptimeMs: uptimeMs,
+        resetCount: kioskState.resetCount || 0,
+        lastReset: kioskState.lastReset ? new Date(kioskState.lastReset).toISOString() : null,
+        nextReset: kioskState.nextReset ? new Date(kioskState.nextReset).toISOString() : null,
+        nextResetIn: nextResetIn ? `${Math.floor(nextResetIn / 1000 / 60)} minuti e ${Math.floor((nextResetIn % (1000 * 60)) / 1000)} secondi` : null,
+        nextResetInMs: nextResetIn
+      };
+    }
+    
+    res.json(response);
+  });
+
+  // POST /api/kiosk/test-data - Reload solo i dati di test (per debug)
+  router.post('/test-data', async (req, res) => {
+    try {
+      const KIOSK_MODE = process.env.KIOSK_MODE === 'true';
+      
+      if (!KIOSK_MODE) {
+        return res.status(403).json({ 
+          error: 'Test data reload non consentito: KIOSK_MODE non è abilitato',
+          kioskMode: false
+        });
+      }
+      
+      console.log('🔧 API: Manual test data reload requested');
+      await initTestData();
+      
+      res.json({ 
+        message: 'Dati di test ricaricati con successo',
+        timestamp: new Date().toISOString(),
+        kioskMode: true
+      });
+      
+    } catch (error) {
+      console.error('❌ API: Error reloading test data:', error);
+      res.status(500).json({ 
+        error: 'Errore durante il reload dei dati di test',
+        details: error.message
+      });
+    }
   });
 
   return router;

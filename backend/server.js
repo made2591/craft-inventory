@@ -83,7 +83,8 @@ const runMigrations = async () => {
 // Funzione per inizializzare i dati di test
 const initTestData = async () => {
   try {
-    console.log('🔄 Initializing test data...');
+    console.log('🔄 KIOSK MODE: Initializing test data...');
+    const startTime = Date.now();
 
     // Ottieni le credenziali del database dalla stringa di connessione
     const connectionString = process.env.DATABASE_URL || 'postgres://craftuser:craftpassword@172.28.1.2:5432/craftdb';
@@ -109,7 +110,7 @@ const initTestData = async () => {
     }
 
     // Leggi ed esegui il file di seed
-    console.log('🔄 Executing seed data file...');
+    console.log('🔄 KIOSK MODE: Executing seed data file...');
     const seedSql = fs.readFileSync(seedDbFile, 'utf8');
     
     // Dividi il file SQL in singole istruzioni per evitare conflitti
@@ -118,17 +119,23 @@ const initTestData = async () => {
       .map(stmt => stmt.trim())
       .filter(stmt => stmt && !stmt.startsWith('--'));
     
+    console.log(`🔄 KIOSK MODE: Found ${statements.length} SQL statements to execute`);
+    
     await pool.query('BEGIN');
     
     try {
+      let executedCount = 0;
       for (const statement of statements) {
         if (statement) {
           await pool.query(statement);
+          executedCount++;
         }
       }
       
       await pool.query('COMMIT');
-      console.log('✅ Test data initialization completed successfully');
+      const duration = Date.now() - startTime;
+      console.log(`✅ KIOSK MODE: Test data initialization completed successfully`);
+      console.log(`✅ KIOSK MODE: Executed ${executedCount} SQL statements in ${duration}ms`);
       
     } catch (err) {
       await pool.query('ROLLBACK');
@@ -136,7 +143,8 @@ const initTestData = async () => {
     }
     
   } catch (err) {
-    console.error('❌ Error initializing test data:', err);
+    console.error('❌ KIOSK MODE: Error initializing test data:', err);
+    console.error('❌ KIOSK MODE: Full error details:', err.stack);
     throw err;
   }
 };
@@ -144,7 +152,15 @@ const initTestData = async () => {
 // Funzione per resettare il database e ripopolarlo con i dati di test
 const resetDatabase = async () => {
   try {
-    console.log('🔄 KIOSK MODE: Resetting database...');
+    console.log('🔄 KIOSK MODE: Starting database reset...');
+    const startTime = Date.now();
+
+    // Update global state
+    if (global.kioskState) {
+      global.kioskState.resetCount++;
+      global.kioskState.lastReset = startTime;
+      global.kioskState.nextReset = startTime + global.kioskState.resetInterval;
+    }
 
     // Prima, elimina tutti i dati dalle tabelle (mantenendo la struttura)
     await pool.query('BEGIN');
@@ -167,18 +183,30 @@ const resetDatabase = async () => {
         'users'
       ];
       
+      console.log('🗑️  KIOSK MODE: Clearing existing data from tables...');
+      let totalRowsCleared = 0;
       for (const table of tablesToClear) {
-        await pool.query(`DELETE FROM ${table};`);
+        const result = await pool.query(`DELETE FROM ${table};`);
+        const rowCount = result.rowCount || 0;
+        totalRowsCleared += rowCount;
+        console.log(`   ↳ Cleared ${rowCount} rows from ${table}`);
       }
       
       // Riabilita i vincoli di chiave esterna
       await pool.query('SET session_replication_role = DEFAULT;');
       
       await pool.query('COMMIT');
-      console.log('✅ KIOSK MODE: Database cleared successfully');
+      console.log(`✅ KIOSK MODE: Database cleared successfully (${totalRowsCleared} total rows removed)`);
       
       // Ora inizializza con i dati di test
+      console.log('🔄 KIOSK MODE: Reinitializing with test data...');
       await initTestData();
+      
+      const duration = Date.now() - startTime;
+      console.log(`✅ KIOSK MODE: Database reset completed successfully in ${duration}ms`);
+      if (global.kioskState) {
+        console.log(`🏪 KIOSK MODE: Reset #${global.kioskState.resetCount} - Next reset scheduled for ${new Date(global.kioskState.nextReset).toLocaleString()}`);
+      }
       
     } catch (err) {
       await pool.query('ROLLBACK');
@@ -187,23 +215,57 @@ const resetDatabase = async () => {
     
   } catch (err) {
     console.error('❌ KIOSK MODE: Error resetting database:', err);
+    console.error('❌ KIOSK MODE: Full error details:', err.stack);
   }
 };
 
 // Configurazione KIOSK MODE
 const KIOSK_MODE = process.env.KIOSK_MODE === 'true';
-const KIOSK_RESET_INTERVAL = 15 * 60 * 1000; // 15 minuti in millisecondi
+// Configurable reset interval - default to 15 minutes if not specified
+const KIOSK_RESET_INTERVAL_MINUTES = parseInt(process.env.KIOSK_RESET_INTERVAL_MINUTES) || 15;
+const KIOSK_RESET_INTERVAL = KIOSK_RESET_INTERVAL_MINUTES * 60 * 1000; // Convert to milliseconds
+
+// Global state for kiosk mode tracking
+global.kioskState = {
+  mode: KIOSK_MODE,
+  resetInterval: KIOSK_RESET_INTERVAL,
+  resetIntervalMinutes: KIOSK_RESET_INTERVAL_MINUTES,
+  lastReset: null,
+  nextReset: null,
+  resetCount: 0,
+  startTime: Date.now()
+};
 
 if (KIOSK_MODE) {
-  console.log('🏪 KIOSK MODE ENABLED: Database will be reset every 15 minutes');
+  console.log(`🏪 KIOSK MODE ENABLED: Database will be reset every ${KIOSK_RESET_INTERVAL_MINUTES} minutes`);
+  console.log(`🏪 KIOSK MODE: Reset interval set to ${KIOSK_RESET_INTERVAL_MINUTES} minutes (${KIOSK_RESET_INTERVAL}ms)`);
   
-  // Esegui il primo reset dopo 15 minuti dall'avvio
+  // Validate reset interval
+  if (KIOSK_RESET_INTERVAL_MINUTES < 1) {
+    console.warn('⚠️  KIOSK MODE: Reset interval is less than 1 minute, using minimum of 1 minute');
+    global.kioskState.resetIntervalMinutes = 1;
+    global.kioskState.resetInterval = 60 * 1000;
+  } else if (KIOSK_RESET_INTERVAL_MINUTES > 1440) {
+    console.warn('⚠️  KIOSK MODE: Reset interval is more than 24 hours, consider if this is intended');
+  }
+  
+  // Calculate when the first reset will happen
+  global.kioskState.nextReset = Date.now() + global.kioskState.resetInterval;
+  
+  // Esegui il primo reset dopo l'intervallo configurato dall'avvio
   setTimeout(() => {
+    console.log(`🏪 KIOSK MODE: Starting first scheduled reset (after ${KIOSK_RESET_INTERVAL_MINUTES} minutes)...`);
     resetDatabase();
     
-    // Poi impostalo per ripetersi ogni 15 minuti
-    setInterval(resetDatabase, KIOSK_RESET_INTERVAL);
-  }, KIOSK_RESET_INTERVAL);
+    // Poi impostalo per ripetersi ogni intervallo configurato
+    console.log(`🏪 KIOSK MODE: Setting up recurring reset timer (every ${KIOSK_RESET_INTERVAL_MINUTES} minutes)...`);
+    setInterval(() => {
+      console.log(`🏪 KIOSK MODE: Starting scheduled reset (${KIOSK_RESET_INTERVAL_MINUTES} minute interval)...`);
+      resetDatabase();
+    }, global.kioskState.resetInterval);
+  }, global.kioskState.resetInterval);
+  
+  console.log(`🏪 KIOSK MODE: First reset scheduled in ${KIOSK_RESET_INTERVAL_MINUTES} minutes at ${new Date(global.kioskState.nextReset).toLocaleString()}`);
 } else {
   console.log('🔒 KIOSK MODE DISABLED: Database will not be automatically reset');
 }
