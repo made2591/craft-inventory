@@ -1,8 +1,14 @@
 #!/bin/bash
 set -e
 
-# Utilizziamo direttamente l'indirizzo IP statico
-host="172.28.1.2"
+# Estrai l'host dal DATABASE_URL o usa il default
+if [ -n "$DATABASE_URL" ]; then
+  # Estrae l'host dal DATABASE_URL (formato: postgres://user:pass@host:port/db)
+  host=$(echo "$DATABASE_URL" | sed -n 's|postgres://[^@]*@\([^:]*\):.*|\1|p')
+else
+  # Fallback al default
+  host="172.28.1.2"
+fi
 
 echo "Waiting for PostgreSQL to be ready at $host..."
 # Check if PostgreSQL is accepting connections
