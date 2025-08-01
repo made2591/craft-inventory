@@ -86,6 +86,43 @@ L'applicazione viene inizializzata con dati di test per facilitare lo sviluppo e
   - Ordine da cliente privato Mario Bianchi (completato)
   - Ordine da marketplace Artigianato Online (in attesa)
 
+## Modalità KIOSK
+
+L'applicazione supporta una modalità KIOSK che resetta automaticamente il database ogni 15 minuti con i dati di test. Questa modalità è utile per demo, fiere o ambienti di testing.
+
+### Attivazione della modalità KIOSK
+
+Per abilitare la modalità KIOSK, modifica la variabile d'ambiente `KIOSK_MODE` nei file docker-compose:
+
+```yaml
+environment:
+  KIOSK_MODE: "true"  # Imposta a "true" per abilitare il reset automatico ogni 15 minuti
+```
+
+### Funzionalità della modalità KIOSK
+
+- ✅ **Reset automatico**: Il database viene resettato ogni 15 minuti
+- ✅ **Reset manuale**: Endpoint API per il reset su richiesta
+- ✅ **Status API**: Endpoint per verificare lo stato della modalità KIOSK
+- ✅ **Logging dettagliato**: Log chiari per monitorare le operazioni di reset
+
+### API Endpoints per la modalità KIOSK
+
+- `GET /api/kiosk/status` - Ottieni lo stato della modalità KIOSK
+- `POST /api/kiosk/reset` - Esegui un reset manuale del database (solo se KIOSK_MODE è abilitato)
+
+### Esempio di utilizzo
+
+```bash
+# Verifica lo stato della modalità KIOSK
+curl http://localhost:8080/api/kiosk/status
+
+# Esegui un reset manuale (solo se KIOSK_MODE=true)
+curl -X POST http://localhost:8080/api/kiosk/reset
+```
+
+⚠️ **Attenzione**: La modalità KIOSK elimina TUTTI i dati dal database e li sostituisce con i dati di test. Non utilizzare in produzione!
+
 ## Utente di test
 
 - **Username**: admin

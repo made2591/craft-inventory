@@ -8,6 +8,7 @@ import transactionsRoutes from './transactions.js';
 import authRoutes from './auth.js';
 import databaseRoutes from './database.js';
 import testDataRoutes from './test-data.js';
+import kioskRoutes from './kiosk.js';
 
 /**
  * Configura tutti i router per l'applicazione
@@ -32,4 +33,5 @@ export default function setupRoutes(app, pool, toCamelCase) {
   app.use('/api/auth', authRoutes(pool, toCamelCase));
   app.use('/api/database', databaseRoutes(pool, toCamelCase));
   app.use('/api/test-data', testDataRoutes(pool, toCamelCase));
+  app.use('/api/kiosk', kioskRoutes(pool, toCamelCase));
 }

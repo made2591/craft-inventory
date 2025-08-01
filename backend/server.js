@@ -80,6 +80,105 @@ const runMigrations = async () => {
   }
 };
 
+// Funzione per resettare il database e ripopolarlo con i dati di test
+const resetDatabase = async () => {
+  try {
+    console.log('🔄 KIOSK MODE: Resetting database...');
+
+    // Leggi i file di inizializzazione
+    const initDbDir = path.join(__dirname, 'init-db');
+    const initFiles = fs.readdirSync(initDbDir)
+      .filter(file => file.endsWith('.sql'))
+      .sort(); // Ordina i file per nome
+
+    // Prima, elimina tutti i dati dalle tabelle (mantenendo la struttura)
+    await pool.query('BEGIN');
+    
+    try {
+      // Disabilita temporaneamente i vincoli di chiave esterna
+      await pool.query('SET session_replication_role = replica;');
+      
+      // Elimina tutti i dati dalle tabelle principali
+      const tablesToClear = [
+        'transaction_materials',
+        'transactions',
+        'model_components',
+        'product_models',
+        'component_materials',
+        'components',
+        'materials',
+        'suppliers',
+        'customers',
+        'users'
+      ];
+      
+      for (const table of tablesToClear) {
+        await pool.query(`DELETE FROM ${table};`);
+      }
+      
+      // Riabilita i vincoli di chiave esterna
+      await pool.query('SET session_replication_role = DEFAULT;');
+      
+      // Esegui i file di inizializzazione per ripopolare il database
+      for (const file of initFiles) {
+        console.log(`🔄 KIOSK MODE: Executing init file: ${file}`);
+        
+        const filePath = path.join(initDbDir, file);
+        const sql = fs.readFileSync(filePath, 'utf8');
+        
+        // Dividi il file SQL in singole istruzioni per evitare conflitti
+        const statements = sql
+          .split(';')
+          .map(stmt => stmt.trim())
+          .filter(stmt => stmt && !stmt.startsWith('--'));
+        
+        for (const statement of statements) {
+          if (statement) {
+            try {
+              await pool.query(statement);
+            } catch (err) {
+              // Ignora errori per tabelle/vincoli già esistenti
+              if (!err.message.includes('already exists') && 
+                  !err.message.includes('does not exist') &&
+                  !err.message.includes('duplicate key')) {
+                console.warn(`Warning executing statement: ${err.message}`);
+              }
+            }
+          }
+        }
+      }
+      
+      await pool.query('COMMIT');
+      console.log('✅ KIOSK MODE: Database reset completed successfully');
+      
+    } catch (err) {
+      await pool.query('ROLLBACK');
+      throw err;
+    }
+    
+  } catch (err) {
+    console.error('❌ KIOSK MODE: Error resetting database:', err);
+  }
+};
+
+// Configurazione KIOSK MODE
+const KIOSK_MODE = process.env.KIOSK_MODE === 'true';
+const KIOSK_RESET_INTERVAL = 15 * 60 * 1000; // 15 minuti in millisecondi
+
+if (KIOSK_MODE) {
+  console.log('🏪 KIOSK MODE ENABLED: Database will be reset every 15 minutes');
+  
+  // Esegui il primo reset dopo 15 minuti dall'avvio
+  setTimeout(() => {
+    resetDatabase();
+    
+    // Poi impostalo per ripetersi ogni 15 minuti
+    setInterval(resetDatabase, KIOSK_RESET_INTERVAL);
+  }, KIOSK_RESET_INTERVAL);
+} else {
+  console.log('🔒 KIOSK MODE DISABLED: Database will not be automatically reset');
+}
+
 // Test database connection e esegui le migrazioni in una funzione asincrona autoeseguita
 (async () => {
   try {

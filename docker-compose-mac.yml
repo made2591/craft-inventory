@@ -26,6 +26,7 @@ services:
     environment:
       NODE_ENV: development
       DATABASE_URL: postgres://craftuser:craftpassword@172.28.1.2:5432/craftdb
+      KIOSK_MODE: "false"  # Imposta a "true" per abilitare il reset automatico ogni 15 minuti
     depends_on:
       - postgres
     networks:
