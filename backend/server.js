@@ -100,7 +100,7 @@ const resetDatabase = async () => {
       
       // Elimina tutti i dati dalle tabelle principali
       const tablesToClear = [
-        'transaction_materials',
+        'transaction_items',
         'transactions',
         'model_components',
         'product_models',

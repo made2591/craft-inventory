@@ -61,7 +61,7 @@ services:
 1. **Inizio transazione**: Tutte le operazioni sono atomiche
 2. **Disabilitazione vincoli FK**: Temporaneamente per permettere la pulizia
 3. **Pulizia tabelle**: Eliminazione di tutti i dati dalle tabelle principali:
-   - `transaction_materials`
+   - `transaction_items`
    - `transactions`
    - `model_components`
    - `product_models`
