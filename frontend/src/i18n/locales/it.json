@@ -78,7 +78,8 @@
     "calculating": "Calcolo...",
     "calculateCost": "Calcola Costo",
     "sku": "SKU",
-    "all": "Tutti"
+    "all": "Tutti",
+    "unitCost": "Costo Unitario"
   },
   "dashboard": {
     "title": "Dashboard",

@@ -505,10 +505,24 @@ export default {
 </script>
 
 <style scoped>
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 1.5rem;
+  width: 100%;
+  box-sizing: border-box;
+}
+
 .page-header {
   margin-bottom: 32px;
   padding-bottom: 24px;
   border-bottom: 2px solid #f1f3f4;
+  text-align: center;
+}
+
+.page-header h1 {
+  color: var(--text-primary);
+  margin-bottom: 1rem;
 }
 
 .components-content {
@@ -533,10 +547,26 @@ export default {
   margin-left: 8px;
 }
 
+/* Responsive Design */
+@media (max-width: 992px) {
+  .flex-md-col {
+    flex-direction: column;
+  }
+  
+  .container {
+    padding: 1rem;
+  }
+}
+
 /* Mobile specific styles */
 @media (max-width: 768px) {
+  .container {
+    padding: 1rem;
+    max-width: 100%;
+  }
+  
   .page-header h1 {
-    font-size: 24px;
+    font-size: 1.8rem;
     margin-bottom: 16px;
   }
   
@@ -557,21 +587,44 @@ export default {
   .btn-group .btn {
     width: 100%;
     justify-content: center;
+    min-height: 44px;
+  }
+  
+  .flex-md-col {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  
+  .btn {
+    width: 100%;
+    justify-content: center;
+  }
+  
+  .form-input, .form-select {
+    font-size: 16px; /* Prevents zoom on iOS */
   }
 }
 
 @media (max-width: 480px) {
+  .container {
+    padding: 0.5rem;
+  }
+  
   .page-header {
     margin-bottom: 20px;
     padding-bottom: 16px;
   }
   
   .page-header h1 {
-    font-size: 20px;
+    font-size: 1.5rem;
   }
   
   .grid-2 {
     grid-template-columns: 1fr;
+  }
+  
+  .card {
+    padding: 0.75rem;
   }
 }
 
