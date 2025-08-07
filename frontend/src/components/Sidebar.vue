@@ -29,6 +29,18 @@
     
     <div class="sidebar-content">
       <div class="sidebar-menu">
+        <!-- Welcome Page - Only visible in kiosk mode -->
+        <router-link 
+          v-if="isKioskMode" 
+          to="/welcome" 
+          class="menu-item welcome-item" 
+          :title="isCollapsed && !isMobile ? $t('navigation.welcome') : ''" 
+          @click="handleMenuItemClick"
+        >
+          <i class="fas fa-star"></i>
+          <span v-if="!isCollapsed || isMobile">{{ $t('navigation.welcome') }}</span>
+        </router-link>
+        
         <router-link to="/" class="menu-item" :title="isCollapsed && !isMobile ? $t('navigation.dashboard') : ''" @click="handleMenuItemClick">
           <i class="fas fa-home"></i>
           <span v-if="!isCollapsed || isMobile">{{ $t('navigation.dashboard') }}</span>
@@ -152,7 +164,8 @@ export default {
         contacts: true,
         transactions: true,
         system: true
-      }
+      },
+      isKioskMode: false
     };
   },
   methods: {
@@ -180,9 +193,22 @@ export default {
       if (this.isMobile) {
         this.closeMobileMenu();
       }
+    },
+    async checkKioskMode() {
+      try {
+        const api = await import('../services/api.js');
+        const response = await api.default.get('/api/kiosk/status');
+        this.isKioskMode = response?.kioskMode || false;
+      } catch (error) {
+        console.error('Error checking kiosk mode:', error);
+        this.isKioskMode = false;
+      }
     }
   },
   created() {
+    // Check kiosk mode status
+    this.checkKioskMode();
+    
     // Recupera lo stato dal localStorage solo per desktop
     if (!this.isMobile) {
       const savedState = localStorage.getItem('sidebarCollapsed');
@@ -417,5 +443,37 @@ export default {
   .section-items .menu-item {
     padding: 10px 20px;
   }
+}
+
+/* Welcome item styling */
+.welcome-item {
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 8px;
+  background: linear-gradient(135deg, var(--fulvous-lighter) 0%, transparent 100%);
+  position: relative;
+}
+
+.welcome-item::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 3px;
+  background: var(--fulvous);
+  border-radius: 0 2px 2px 0;
+}
+
+.welcome-item:hover {
+  background: linear-gradient(135deg, var(--fulvous-light) 0%, var(--fulvous-lighter) 100%);
+}
+
+.welcome-item.router-link-active {
+  background: linear-gradient(135deg, var(--fulvous) 0%, var(--fulvous-light) 100%);
+  color: var(--snow);
+}
+
+.welcome-item.router-link-active::before {
+  background: var(--snow);
 }
 </style>

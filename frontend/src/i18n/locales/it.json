@@ -3,6 +3,7 @@
     "title": "Gestione Magazzino Artigianato"
   },
   "navigation": {
+    "welcome": "Benvenuto",
     "dashboard": "Dashboard",
     "inventory": "Inventario",
     "materials": "Materiali",
@@ -536,5 +537,65 @@
     "deleteMaterial": "Sei sicuro di voler eliminare questo materiale?",
     "deleteComponent": "Sei sicuro di voler eliminare questo componente?",
     "deleteModel": "Sei sicuro di voler eliminare questo prodotto?"
+  },
+  "welcome": {
+    "title": "Benvenuto in Craft Inventory",
+    "subtitle": "La tua soluzione completa per la gestione dell'inventario",
+    "aboutApp": {
+      "title": "Informazioni sull'Applicazione",
+      "description": "Craft Inventory è un sistema di gestione completo progettato per aiutarti a organizzare e tracciare materiali, componenti, prodotti finiti, fornitori, clienti e transazioni. Perfetto per artigiani, maker e piccole imprese.",
+      "features": {
+        "inventory": "Gestione Inventario",
+        "materials": "Tracciamento Materiali",
+        "components": "Assemblaggio Componenti",
+        "products": "Prodotti Finiti",
+        "contacts": "Gestione Fornitori e Clienti",
+        "transactions": "Storico Transazioni"
+      }
+    },
+    "kioskMode": {
+      "title": "Informazioni Modalità Kiosk",
+      "active": "Attiva",
+      "inactive": "Inattiva",
+      "resetInterval": "I dati si resettano ogni {interval} minuti",
+      "nextReset": "Prossimo reset tra: {time}",
+      "resettingSoon": "Reset imminente...",
+      "timeFormat": {
+        "minutes": "{minutes}m {seconds}s",
+        "seconds": "{seconds}s"
+      },
+      "whatIs": {
+        "title": "Cos'è la Modalità Kiosk?",
+        "description": "La Modalità Kiosk fornisce un ambiente di dimostrazione sicuro dove puoi esplorare tutte le funzionalità senza preoccuparti di modifiche permanenti ai dati."
+      },
+      "features": {
+        "autoReset": {
+          "title": "Reset Automatico",
+          "description": "Tutti i dati vengono automaticamente ripristinati ai valori demo predefiniti ogni 15 minuti, garantendo un'esperienza fresca per ogni utente."
+        },
+        "freshData": {
+          "title": "Dati Demo Freschi",
+          "description": "Inizia con materiali, componenti e prodotti di esempio che mostrano le capacità dell'applicazione."
+        },
+        "safeDemo": {
+          "title": "Esplorazione Sicura",
+          "description": "Prova ad aggiungere, modificare o eliminare elementi senza conseguenze permanenti - tutto si resetta automaticamente."
+        }
+      }
+    },
+    "demo": {
+      "title": "Avviso Ambiente Demo",
+      "isDemo": "Questa è una versione dimostrativa dell'applicazione",
+      "noGuarantee": "Nessuna garanzia sul funzionamento o disponibilità di questa demo",
+      "canChange": "Le funzionalità e i dati della demo potrebbero cambiare in futuro",
+      "dontStress": "Si prega di non stressare l'applicazione con richieste eccessive"
+    },
+    "gettingStarted": {
+      "title": "Per Iniziare",
+      "description": "Pronto per esplorare? Inizia controllando i nostri dati di esempio o prova ad aggiungere i tuoi elementi. Ricorda, tutto si resetta automaticamente in modalità kiosk!",
+      "viewMaterials": "Visualizza Materiali",
+      "viewComponents": "Visualizza Componenti",
+      "viewInventory": "Visualizza Inventario"
+    }
   }
 }
