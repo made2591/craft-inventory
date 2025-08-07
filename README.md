@@ -1,5 +1,7 @@
 # Craft Inventory Management System
 
+![Craft Inventory App](docs/img.jpg)
+
 A comprehensive inventory management application for artisan businesses, designed to track materials, components, finished products, and transactions with ease.
 
 ## 🚀 Quick Start
