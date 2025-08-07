@@ -1,28 +1,42 @@
 <template>
   <div class="app-container">
-    <!-- Mobile Menu Button - moved outside sidebar so it's always visible -->
-    <button class="mobile-menu-btn" @click="toggleMobileMenu" :class="{ 'active': isMobileMenuOpen }" v-if="isMobile">
+    <!-- Mobile Menu Button - only visible when sidebar is closed on mobile -->
+    <button 
+      class="mobile-menu-btn" 
+      @click="toggleMobileMenu" 
+      v-if="isMobile && !isMobileMenuOpen"
+      aria-label="Open menu"
+    >
       <span class="hamburger-line"></span>
       <span class="hamburger-line"></span>
       <span class="hamburger-line"></span>
     </button>
 
     <!-- Mobile Overlay -->
-    <div v-if="isMobileMenuOpen && isMobile" class="mobile-overlay" @click="closeMobileMenu"></div>
+    <div 
+      v-if="isMobileMenuOpen && isMobile" 
+      class="mobile-overlay" 
+      @click="closeMobileMenu"
+      @touchstart="closeMobileMenu"
+    ></div>
     
     <Sidebar 
       ref="sidebar"
       :is-mobile-menu-open="isMobileMenuOpen"
+      :is-mobile="isMobile"
       @close-mobile-menu="closeMobileMenu"
       @sidebar-toggle="handleSidebarToggle"
     />
     
-    <div class="content-wrapper" :class="{ 'sidebar-collapsed': isSidebarCollapsed }">
-      <main>
+    <div class="content-wrapper" :class="{ 
+      'sidebar-collapsed': isSidebarCollapsed && !isMobile,
+      'mobile-mode': isMobile 
+    }">
+      <main class="main-content">
         <router-view />
       </main>
       
-      <footer>
+      <footer class="app-footer">
         <p>&copy; {{ new Date().getFullYear() }} - {{ $t('app.title') }}</p>
       </footer>
     </div>
@@ -40,7 +54,7 @@ export default {
   data() {
     return {
       isSidebarCollapsed: false,
-      isMobileMenuOpen: false,
+      isMobileMenuOpen: false, // Start closed on mobile so hamburger is visible
       isMobile: false
     };
   },
@@ -79,22 +93,40 @@ export default {
       if (!this.isMobile && wasMobile && this.isMobileMenuOpen) {
         this.closeMobileMenu();
       }
+      
+      // Reset sidebar state on desktop
+      if (!this.isMobile && wasMobile) {
+        this.checkSidebarState();
+      }
     },
     toggleMobileMenu() {
+      if (!this.isMobile) return;
+      
       this.isMobileMenuOpen = !this.isMobileMenuOpen;
+      
       // Prevent body scroll when mobile menu is open
       if (this.isMobileMenuOpen) {
         document.body.style.overflow = 'hidden';
+        document.body.style.position = 'fixed';
+        document.body.style.width = '100%';
       } else {
         document.body.style.overflow = '';
+        document.body.style.position = '';
+        document.body.style.width = '';
       }
     },
     closeMobileMenu() {
+      if (!this.isMobile) return;
+      
       this.isMobileMenuOpen = false;
       document.body.style.overflow = '';
+      document.body.style.position = '';
+      document.body.style.width = '';
     },
     handleSidebarToggle(isCollapsed) {
-      this.isSidebarCollapsed = isCollapsed;
+      if (!this.isMobile) {
+        this.isSidebarCollapsed = isCollapsed;
+      }
     },
     handleStorageChange(event) {
       // Gestisce i cambiamenti nel localStorage
@@ -130,7 +162,7 @@ body {
 
 /* Mobile Menu Button */
 .mobile-menu-btn {
-  display: none;
+  display: flex;
   position: fixed;
   top: 20px;
   left: 20px;
@@ -147,15 +179,12 @@ body {
   gap: 4px;
   box-shadow: 0 4px 12px rgba(226, 132, 19, 0.3);
   transition: all 0.3s ease;
+  touch-action: manipulation;
 }
 
 .mobile-menu-btn:hover {
   box-shadow: 0 6px 20px rgba(226, 132, 19, 0.4);
   background: var(--fulvous-dark);
-}
-
-.mobile-menu-btn.active {
-  background: var(--danger);
 }
 
 .hamburger-line {
@@ -164,18 +193,6 @@ body {
   background: var(--surface);
   border-radius: 1px;
   transition: all 0.3s ease;
-}
-
-.mobile-menu-btn.active .hamburger-line:nth-child(1) {
-  transform: rotate(45deg) translate(5px, 5px);
-}
-
-.mobile-menu-btn.active .hamburger-line:nth-child(2) {
-  opacity: 0;
-}
-
-.mobile-menu-btn.active .hamburger-line:nth-child(3) {
-  transform: rotate(-45deg) translate(7px, -6px);
 }
 
 /* Mobile Overlay */
@@ -191,6 +208,7 @@ body {
   opacity: 1;
   visibility: visible;
   transition: all 0.3s ease;
+  touch-action: none;
 }
 
 .content-wrapper {
@@ -199,42 +217,51 @@ body {
   transition: margin-left 0.3s ease;
   display: flex;
   flex-direction: column;
+  min-height: 100vh;
+  width: calc(100% - 280px);
 }
 
 .content-wrapper.sidebar-collapsed {
   margin-left: 70px;
+  width: calc(100% - 70px);
 }
 
-main {
+.content-wrapper.mobile-mode {
+  margin-left: 0;
+  width: 100%;
+}
+
+.main-content {
   flex: 1;
   padding: 20px;
-  min-height: calc(100vh - 60px);
+  min-height: calc(100vh - 120px);
+  max-width: 100%;
+  overflow-x: hidden;
 }
 
-footer {
+.app-footer {
   padding: 20px;
   border-top: 1px solid var(--border);
   text-align: center;
   font-size: 0.9em;
   color: var(--text-muted);
+  margin-top: auto;
 }
 
 /* Mobile Responsive */
 @media (max-width: 768px) {
-  .mobile-menu-btn {
-    display: flex;
-  }
-  
-  .content-wrapper {
-    margin-left: 0;
-  }
-  
+  .content-wrapper,
   .content-wrapper.sidebar-collapsed {
     margin-left: 0;
+    width: 100%;
   }
   
-  main {
-    padding: 80px 15px 15px 15px; /* Top padding to avoid overlap with mobile menu button */
+  .main-content {
+    padding: 20px 15px 15px 15px;
+  }
+  
+  .app-container {
+    overflow-x: hidden;
   }
 }
 

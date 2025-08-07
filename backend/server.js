@@ -8,6 +8,21 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import setupRoutes from './routes/index.js';
 
+// Import security middleware
+import {
+  generalRateLimit,
+  authRateLimit,
+  speedLimiter,
+  securityHeaders,
+  requestSizeLimit,
+  sanitizeInput,
+  corsOptions,
+  securityErrorHandler,
+  compression,
+  hpp,
+  xss
+} from './middleware/security.js';
+
 // Ottieni il percorso della directory corrente
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -15,10 +30,38 @@ const __dirname = path.dirname(__filename);
 const app = express();
 const port = process.env.PORT || 8080;
 
-// Middleware
-app.use(cors());
-app.use(express.json());
-app.use(morgan('dev'));
+// Trust proxy for rate limiting (important for production behind reverse proxy)
+app.set('trust proxy', 1);
+
+// Security middleware (apply early)
+app.use(securityHeaders);
+app.use(compression());
+app.use(hpp()); // Prevent HTTP Parameter Pollution
+app.use(xss()); // Clean user input from malicious HTML
+
+// CORS with security options
+app.use(cors(corsOptions));
+
+// Rate limiting (apply before body parsing)
+app.use(generalRateLimit);
+app.use(speedLimiter);
+
+// Request size limiting
+app.use(requestSizeLimit);
+
+// Body parsing middleware with size limits
+app.use(express.json({ limit: '10mb' }));
+app.use(express.urlencoded({ extended: true, limit: '10mb' }));
+
+// Input sanitization (after body parsing)
+app.use(sanitizeInput);
+
+// Logging middleware
+if (process.env.NODE_ENV === 'production') {
+  app.use(morgan('combined')); // More detailed logging for production
+} else {
+  app.use(morgan('dev')); // Concise logging for development
+}
 
 // Database connection configuration
 const pool = new Pool({
@@ -330,7 +373,7 @@ const toCamelCase = (obj) => {
 
 // Manual reset endpoint for testing (only available in kiosk mode)
 if (KIOSK_MODE) {
-  app.post('/api/kiosk/reset', async (req, res) => {
+  app.post('/api/kiosk/reset', authRateLimit, async (req, res) => {
     try {
       console.log('🔧 MANUAL KIOSK RESET: Reset requested via API');
       await resetDatabase();
@@ -364,7 +407,36 @@ if (KIOSK_MODE) {
 // Configura i router per tutte le API
 setupRoutes(app, pool, toCamelCase);
 
+// Security error handler
+app.use(securityErrorHandler);
+
+// General error handler
+app.use((err, req, res, next) => {
+  console.error('Unhandled error:', err);
+  
+  // Don't leak error details in production
+  const isDevelopment = process.env.NODE_ENV !== 'production';
+  
+  res.status(err.status || 500).json({
+    error: 'Internal server error',
+    message: isDevelopment ? err.message : 'Something went wrong',
+    ...(isDevelopment && { stack: err.stack })
+  });
+});
+
+// 404 handler
+app.use('*', (req, res) => {
+  res.status(404).json({
+    error: 'Route not found',
+    path: req.originalUrl,
+    method: req.method
+  });
+});
+
 // Start server
 app.listen(port, () => {
-  console.log(`Server running at http://localhost:${port}`);
+  console.log(`🚀 Server running at http://localhost:${port}`);
+  console.log(`🔒 Security middleware enabled`);
+  console.log(`📊 Rate limiting: ${generalRateLimit.max} requests per ${generalRateLimit.windowMs / 60000} minutes`);
+  console.log(`🌐 Environment: ${process.env.NODE_ENV || 'development'}`);
 });

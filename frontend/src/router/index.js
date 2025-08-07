@@ -1,4 +1,7 @@
 import { createRouter, createWebHistory } from 'vue-router'
+import Home from '../views/Home.vue'
+
+const isKioskModeEnabled = __KIOSK_MODE__
 
 const routes = [
   {
@@ -6,6 +9,12 @@ const routes = [
     name: 'Home',
     component: () => import('../views/Home.vue')
   },
+  // Conditionally include Welcome route only if kiosk mode is enabled
+  ...(isKioskModeEnabled ? [{
+    path: '/welcome',
+    name: 'Welcome',
+    component: () => import('../views/Welcome.vue')
+  }] : []),
   {
     path: '/settings',
     name: 'Settings',

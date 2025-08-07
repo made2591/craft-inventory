@@ -3,6 +3,7 @@
     "title": "Craft Inventory Management"
   },
   "navigation": {
+    "welcome": "Welcome",
     "dashboard": "Dashboard",
     "inventory": "Inventory",
     "materials": "Materials",
@@ -78,7 +79,8 @@
     "calculating": "Calculating...",
     "calculateCost": "Calculate Cost",
     "sku": "SKU",
-    "all": "All"
+    "all": "All",
+    "unitCost": "Unit Cost"
   },
   "dashboard": {
     "title": "Dashboard",
@@ -535,5 +537,65 @@
     "deleteMaterial": "Are you sure you want to delete this material?",
     "deleteComponent": "Are you sure you want to delete this component?",
     "deleteModel": "Are you sure you want to delete this product?"
+  },
+  "welcome": {
+    "title": "Welcome to Craft Inventory",
+    "subtitle": "Your comprehensive inventory management solution",
+    "aboutApp": {
+      "title": "About This Application",
+      "description": "Craft Inventory is a comprehensive management system designed to help you organize and track your materials, components, finished products, suppliers, customers, and transactions. Perfect for crafters, makers, and small businesses.",
+      "features": {
+        "inventory": "Inventory Management",
+        "materials": "Materials Tracking",
+        "components": "Components Assembly",
+        "products": "Finished Products",
+        "contacts": "Supplier & Customer Management",
+        "transactions": "Transaction History"
+      }
+    },
+    "kioskMode": {
+      "title": "Kiosk Mode Information",
+      "active": "Active",
+      "inactive": "Inactive",
+      "resetInterval": "Data resets every {interval} minutes",
+      "nextReset": "Next reset in: {time}",
+      "resettingSoon": "Resetting soon...",
+      "timeFormat": {
+        "minutes": "{minutes}m {seconds}s",
+        "seconds": "{seconds}s"
+      },
+      "whatIs": {
+        "title": "What is Kiosk Mode?",
+        "description": "Kiosk Mode provides a safe demonstration environment where you can explore all features without worrying about permanent changes to the data."
+      },
+      "features": {
+        "autoReset": {
+          "title": "Automatic Reset",
+          "description": "All data is automatically restored to default demo values every 15 minutes, ensuring a fresh experience for every user."
+        },
+        "freshData": {
+          "title": "Fresh Demo Data",
+          "description": "Start with sample materials, components, and products that showcase the application's capabilities."
+        },
+        "safeDemo": {
+          "title": "Safe Exploration",
+          "description": "Try adding, editing, or deleting items without any permanent consequences - everything resets automatically."
+        }
+      }
+    },
+    "demo": {
+      "title": "Demo Environment Notice",
+      "isDemo": "This is a demonstration version of the application",
+      "noGuarantee": "No guarantee on the functioning or availability of this demo",
+      "canChange": "Demo features and data may change in the future",
+      "dontStress": "Please don't stress the application with excessive requests"
+    },
+    "gettingStarted": {
+      "title": "Getting Started",
+      "description": "Ready to explore? Start by checking out our sample data or try adding your own items. Remember, everything resets automatically in kiosk mode!",
+      "viewMaterials": "View Materials",
+      "viewComponents": "View Components",
+      "viewInventory": "View Inventory"
+    }
   }
 }

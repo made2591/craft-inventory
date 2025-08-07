@@ -458,6 +458,8 @@ export default {
   max-width: 1200px;
   margin: 0 auto;
   padding: 1.5rem;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .page-header {
@@ -578,10 +580,13 @@ export default {
 .table-responsive {
   overflow-x: auto;
   margin-bottom: 1.5rem;
+  width: 100%;
+  -webkit-overflow-scrolling: touch;
 }
 
 .table {
   width: 100%;
+  min-width: 800px;
   border-collapse: collapse;
   background: var(--surface);
   border-radius: 12px;
@@ -838,11 +843,16 @@ export default {
   .flex-md-col {
     flex-direction: column;
   }
+  
+  .container {
+    padding: 1rem;
+  }
 }
 
 @media (max-width: 768px) {
   .container {
     padding: 1rem;
+    max-width: 100%;
   }
   
   .hidden-mobile {
@@ -859,6 +869,11 @@ export default {
 
   .page-header {
     gap: 1rem;
+    text-align: center;
+  }
+  
+  .page-header h1 {
+    font-size: 1.8rem;
   }
   
   .flex-md-col {
@@ -869,6 +884,7 @@ export default {
   .btn {
     width: 100%;
     justify-content: center;
+    min-height: 44px;
   }
   
   .action-buttons {
@@ -878,6 +894,29 @@ export default {
   
   .action-buttons .btn {
     width: 100%;
+  }
+  
+  .card {
+    margin-bottom: 1rem;
+    padding: 1rem;
+  }
+  
+  .form-input, .form-select {
+    font-size: 16px; /* Prevents zoom on iOS */
+  }
+}
+
+@media (max-width: 480px) {
+  .container {
+    padding: 0.5rem;
+  }
+  
+  .page-header h1 {
+    font-size: 1.5rem;
+  }
+  
+  .card {
+    padding: 0.75rem;
   }
 }
 </style>

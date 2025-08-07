@@ -48,3 +48,5 @@ backend/backups/*
 !frontend/.env.example
 !cloudflared/config.yml.example
 advanced_cleanup_repo.sh
+advanced_cleanup_git_history.sh
+.vscode

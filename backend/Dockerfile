@@ -34,6 +34,7 @@ COPY --from=build /app/package*.json ./
 COPY --from=build /app/node_modules ./node_modules
 COPY --from=build /app/server.js ./
 COPY --from=build /app/routes ./routes
+COPY --from=build /app/middleware ./middleware
 COPY --from=build /app/migrations ./migrations
 COPY --from=build /app/init-db ./init-db
 
