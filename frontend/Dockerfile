@@ -7,6 +7,10 @@ WORKDIR /app
 ARG KIOSK_MODE=false
 ENV KIOSK_MODE=${KIOSK_MODE}
 
+# Debug: Print the KIOSK_MODE value during build
+RUN echo "🏪 Docker Build: KIOSK_MODE build arg = ${KIOSK_MODE}"
+RUN echo "🏪 Docker Build: KIOSK_MODE env var = $KIOSK_MODE"
+
 # Copia i file di configurazione
 COPY package*.json ./
 

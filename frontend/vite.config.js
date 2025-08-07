@@ -26,12 +26,12 @@ export default defineConfig({
   },
 
   define: {
-    // Make kiosk mode available to the frontend at build time
-    __KIOSK_MODE__: JSON.stringify(isKioskMode),
+    // Make kiosk mode available to the frontend at build time with fallback
+    __KIOSK_MODE__: isKioskMode,
     // Also provide it as a standard environment variable accessible in frontend
     __VITE_KIOSK_MODE__: JSON.stringify(isKioskMode ? 'true' : 'false'),
     // Define global constants for security
-    __APP_VERSION__: JSON.stringify(process.env.npm_package_version),
+    __APP_VERSION__: JSON.stringify(process.env.npm_package_version || '1.0.0'),
     __BUILD_TIME__: JSON.stringify(new Date().toISOString()),
     __DEV__: process.env.NODE_ENV === 'development'
   },

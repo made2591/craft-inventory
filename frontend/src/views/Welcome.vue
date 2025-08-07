@@ -163,7 +163,7 @@ export default {
       // Use build-time configuration for kiosk mode
       kioskStatus: {
         enabled: true,
-        kioskMode: __KIOSK_MODE__,
+        kioskMode: typeof __KIOSK_MODE__ !== 'undefined' ? __KIOSK_MODE__ : false,
         resetInterval: 15,
         nextReset: 'Unknown'
       },

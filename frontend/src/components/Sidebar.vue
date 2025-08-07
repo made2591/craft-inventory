@@ -165,8 +165,8 @@ export default {
         transactions: true,
         system: true
       },
-      // Use build-time environment variable for kiosk mode
-      isKioskMode: __KIOSK_MODE__
+      // Use build-time environment variable for kiosk mode with fallback
+      isKioskMode: typeof __KIOSK_MODE__ !== 'undefined' ? __KIOSK_MODE__ : false
     };
   },
   methods: {

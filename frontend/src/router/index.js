@@ -1,7 +1,8 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import Home from '../views/Home.vue'
 
-const isKioskModeEnabled = __KIOSK_MODE__
+// Safely get kiosk mode with fallback
+const isKioskModeEnabled = typeof __KIOSK_MODE__ !== 'undefined' ? __KIOSK_MODE__ : false
 
 const routes = [
   {
