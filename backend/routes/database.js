@@ -4,6 +4,7 @@ import fs from 'fs';
 import path from 'path';
 import multer from 'multer';
 import { fileURLToPath } from 'url';
+import { databaseRateLimit, authRateLimit } from '../middleware/security.js';
 
 const router = express.Router();
 
@@ -32,7 +33,9 @@ const upload = multer({
  */
 export default function databaseRoutes(_, __) {
   // GET /api/database/export - Esporta il database come file SQL
-  router.get('/export', async (req, res) => {
+  router.get('/export', 
+    databaseRateLimit,
+    async (req, res) => {
     try {
       // Controlla se l'utente vuole esportare solo i dati o lo schema completo
       const dataOnly = req.query.dataOnly === 'true';
@@ -162,7 +165,10 @@ export default function databaseRoutes(_, __) {
   });
 
   // POST /api/database/import - Importa un file SQL nel database
-  router.post('/import', upload.single('sqlFile'), async (req, res) => {
+  router.post('/import', 
+    databaseRateLimit,
+    upload.single('sqlFile'), 
+    async (req, res) => {
     try {
       if (!req.file) {
         return res.status(400).json({ error: 'Nessun file caricato' });

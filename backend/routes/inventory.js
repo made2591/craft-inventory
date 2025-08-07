@@ -1,5 +1,14 @@
 import express from 'express';
 import { v4 as uuidv4 } from 'uuid';
+import { pagination } from '../middleware/security.js';
+import {
+  validateUUID,
+  validateInventoryCreation,
+  validateInventoryUpdate,
+  validatePagination,
+  validateSearch,
+  handleValidationErrors
+} from '../middleware/validation.js';
 
 const router = express.Router();
 
@@ -10,54 +19,128 @@ const router = express.Router();
  * @returns {express.Router} Router configurato
  */
 export default function inventoryRoutes(pool, toCamelCase) {
-  // GET /api/inventory - Ottieni tutti gli articoli in inventario
-  router.get('/', async (req, res) => {
-    try {
-      const { modelId } = req.query;
-      
-      let query = 'SELECT i.*, p.name as model_name, p.sku as model_sku FROM inventory_items i JOIN product_models p ON i.model_id = p.id';
-      const params = [];
-      
-      // Filtra per modelId se specificato
-      if (modelId) {
-        query += ' WHERE i.model_id = $1';
-        params.push(modelId);
-      }
-      
-      query += ' ORDER BY i.created_at DESC';
-      
-      const result = await pool.query(query, params);
-
-      // Converti i dati in camelCase
-      const items = toCamelCase(result.rows);
-
-      // Assicurati che le date siano stringhe ISO
-      items.forEach(item => {
-        // Converti la data di produzione in una stringa ISO
-        if (item.production_date) {
-          try {
-            const date = new Date(item.production_date);
-            if (!isNaN(date.getTime())) {
-              item.production_date = date.toISOString();
-            } else {
-              item.production_date = null;
-            }
-          } catch (error) {
-            console.error('Error formatting production date:', error);
-            item.production_date = null;
-          }
+  // GET /api/inventory - Ottieni tutti gli articoli in inventario con paginazione
+  router.get('/', 
+    validatePagination, 
+    validateSearch,
+    handleValidationErrors, 
+    pagination, 
+    async (req, res) => {
+      try {
+        const { modelId, search, category, sortBy = 'created_at', sortOrder = 'desc' } = req.query;
+        const { limit, offset } = req.pagination;
+        
+        // Build query with security in mind
+        let baseQuery = `
+          FROM inventory_items i 
+          JOIN product_models p ON i.model_id = p.id
+        `;
+        
+        let whereConditions = [];
+        let queryParams = [];
+        let paramIndex = 1;
+        
+        // Filter by modelId if specified
+        if (modelId) {
+          whereConditions.push(`i.model_id = $${paramIndex}`);
+          queryParams.push(modelId);
+          paramIndex++;
         }
-      });
+        
+        // Search functionality
+        if (search) {
+          whereConditions.push(`(p.name ILIKE $${paramIndex} OR p.sku ILIKE $${paramIndex} OR i.notes ILIKE $${paramIndex})`);
+          queryParams.push(`%${search}%`);
+          paramIndex++;
+        }
+        
+        // Category filter (if applicable to your model)
+        if (category) {
+          whereConditions.push(`p.category = $${paramIndex}`);
+          queryParams.push(category);
+          paramIndex++;
+        }
+        
+        const whereClause = whereConditions.length > 0 ? `WHERE ${whereConditions.join(' AND ')}` : '';
+        
+        // Validate sort field to prevent SQL injection
+        const allowedSortFields = {
+          'created_at': 'i.created_at',
+          'updated_at': 'i.updated_at',
+          'name': 'p.name',
+          'quantity': 'i.quantity',
+          'production_date': 'i.production_date'
+        };
+        
+        const sortField = allowedSortFields[sortBy] || 'i.created_at';
+        const sortDirection = sortOrder.toLowerCase() === 'asc' ? 'ASC' : 'DESC';
+        
+        // Get total count
+        const countQuery = `SELECT COUNT(*) ${baseQuery} ${whereClause}`;
+        const countResult = await pool.query(countQuery, queryParams);
+        const totalItems = parseInt(countResult.rows[0].count);
+        const totalPages = Math.ceil(totalItems / limit);
 
-      res.json(items);
-    } catch (err) {
-      console.error('Error fetching inventory:', err);
-      res.status(500).json({ error: 'Internal server error' });
+        // Get paginated results
+        const dataQuery = `
+          SELECT i.*, p.name as model_name, p.sku as model_sku 
+          ${baseQuery} 
+          ${whereClause}
+          ORDER BY ${sortField} ${sortDirection}
+          LIMIT $${paramIndex} OFFSET $${paramIndex + 1}
+        `;
+        
+        queryParams.push(limit, offset);
+        const result = await pool.query(dataQuery, queryParams);
+
+        // Convert dates and camelCase
+        const items = toCamelCase(result.rows);
+        items.forEach(item => {
+          if (item.productionDate) {
+            try {
+              const date = new Date(item.productionDate);
+              if (!isNaN(date.getTime())) {
+                item.productionDate = date.toISOString();
+              } else {
+                item.productionDate = null;
+              }
+            } catch (error) {
+              console.error('Error formatting production date:', error);
+              item.productionDate = null;
+            }
+          }
+        });
+
+        res.json({
+          items,
+          pagination: {
+            currentPage: req.pagination.page,
+            totalPages,
+            totalItems,
+            itemsPerPage: limit,
+            hasNextPage: req.pagination.page < totalPages,
+            hasPreviousPage: req.pagination.page > 1
+          },
+          filters: {
+            modelId,
+            search,
+            category,
+            sortBy,
+            sortOrder
+          }
+        });
+      } catch (err) {
+        console.error('Error fetching inventory:', err);
+        res.status(500).json({ error: 'Internal server error' });
+      }
     }
-  });
+  );
 
   // GET /api/inventory/:id - Ottieni un articolo specifico dell'inventario
-  router.get('/:id', async (req, res) => {
+  router.get('/:id', 
+    validateUUID('id'), 
+    handleValidationErrors, 
+    async (req, res) => {
     try {
       const { id } = req.params;
       const result = await pool.query(
@@ -195,88 +278,93 @@ export default function inventoryRoutes(pool, toCamelCase) {
   });
 
   // POST /api/inventory - Crea un nuovo articolo in inventario
-  router.post('/', async (req, res) => {
-    try {
-      // Supporta sia camelCase che snake_case per compatibilità
-      const model_id = req.body.modelId || req.body.model_id;
-      const quantity = req.body.quantity;
-      const production_date = req.body.productionDate || req.body.production_date;
-      const notes = req.body.notes;
+  router.post('/', 
+    validateInventoryCreation, 
+    handleValidationErrors, 
+    async (req, res) => {
+      const client = await pool.connect();
+      
+      try {
+        await client.query('BEGIN');
+        
+        // Supporta sia camelCase che snake_case per compatibilità
+        const model_id = req.body.modelId || req.body.model_id;
+        const quantity = req.body.quantity;
+        const production_date = req.body.productionDate || req.body.production_date;
+        const notes = req.body.notes;
 
-      // Validate required fields
-      if (!model_id) {
-        return res.status(400).json({ error: 'Il modello è obbligatorio' });
-      }
+        const now = new Date();
 
-      if (!quantity || quantity <= 0) {
-        return res.status(400).json({ error: 'La quantità deve essere maggiore di zero' });
-      }
-
-      const now = new Date();
-
-      // Verifica che il modello esista
-      const modelCheck = await pool.query('SELECT id FROM product_models WHERE id = $1', [model_id]);
-      if (modelCheck.rows.length === 0) {
-        return res.status(400).json({ error: 'Il modello selezionato non esiste' });
-      }
-
-      // Assicurati che la data di produzione sia in un formato valido
-      let formattedProductionDate = null;
-      if (production_date) {
-        try {
-          formattedProductionDate = new Date(production_date);
-          // Verifica se la data è valida
-          if (isNaN(formattedProductionDate.getTime())) {
-            formattedProductionDate = now; // Usa la data corrente se la data fornita non è valida
-          }
-        } catch (error) {
-          console.error('Error parsing production date:', error);
-          formattedProductionDate = now; // Usa la data corrente in caso di errore
+        // Verifica che il modello esista
+        const modelCheck = await client.query('SELECT id FROM product_models WHERE id = $1', [model_id]);
+        if (modelCheck.rows.length === 0) {
+          await client.query('ROLLBACK');
+          return res.status(400).json({ error: 'Il modello specificato non esiste' });
         }
-      }
 
-      // Start a transaction
-      await pool.query('BEGIN');
-
-      // Verifica se esiste già un articolo per questo modello
-      const existingItemResult = await pool.query(
-        'SELECT * FROM inventory_items WHERE model_id = $1 LIMIT 1',
-        [model_id]
-      );
-
-      let result;
-      
-      if (existingItemResult.rows.length > 0) {
-        // Se esiste già un articolo per questo modello, aggiorna la quantità e la data di produzione
-        const existingItem = existingItemResult.rows[0];
-        const newQuantity = parseInt(existingItem.quantity, 10) + parseInt(quantity, 10);
-        
-        result = await pool.query(
-          'UPDATE inventory_items SET quantity = $1, production_date = $2, notes = $3, updated_at = $4 WHERE id = $5 RETURNING *',
-          [newQuantity, formattedProductionDate || existingItem.production_date, notes || existingItem.notes, now, existingItem.id]
-        );
-      } else {
-        // Se non esiste un articolo per questo modello, creane uno nuovo
         const id = uuidv4();
-        
-        result = await pool.query(
-          'INSERT INTO inventory_items (id, model_id, quantity, production_date, notes, created_at, updated_at) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *',
-          [id, model_id, quantity, formattedProductionDate, notes, now, now]
-        );
-      }
 
-      await pool.query('COMMIT');
-      
-      res.status(201).json(toCamelCase(result.rows[0]));
-    } catch (err) {
-      await pool.query('ROLLBACK');
-      console.error('Error creating inventory item:', err);
-      res.status(500).json({ error: 'Internal server error' });
+        // Assicurati che la data di produzione sia in un formato valido
+        let formattedProductionDate = null;
+        if (production_date) {
+          try {
+            formattedProductionDate = new Date(production_date);
+            // Verifica se la data è valida
+            if (isNaN(formattedProductionDate.getTime())) {
+              await client.query('ROLLBACK');
+              return res.status(400).json({ error: 'Formato data di produzione non valido' });
+            }
+          } catch (error) {
+            console.error('Error parsing production date:', error);
+            await client.query('ROLLBACK');
+            return res.status(400).json({ error: 'Formato data di produzione non valido' });
+          }
+        }
+
+        // Verifica se esiste già un articolo per questo modello
+        const existingItemResult = await client.query(
+          'SELECT * FROM inventory_items WHERE model_id = $1 LIMIT 1',
+          [model_id]
+        );
+
+        let result;
+        
+        if (existingItemResult.rows.length > 0) {
+          // Se esiste già un articolo per questo modello, aggiorna la quantità e la data di produzione
+          const existingItem = existingItemResult.rows[0];
+          const newQuantity = parseInt(existingItem.quantity, 10) + parseInt(quantity, 10);
+          
+          result = await client.query(
+            'UPDATE inventory_items SET quantity = $1, production_date = $2, notes = $3, updated_at = $4 WHERE id = $5 RETURNING *',
+            [newQuantity, formattedProductionDate || existingItem.production_date, notes || existingItem.notes, now, existingItem.id]
+          );
+        } else {
+          // Se non esiste un articolo per questo modello, creane uno nuovo
+          result = await client.query(
+            'INSERT INTO inventory_items (id, model_id, quantity, production_date, notes, created_at, updated_at) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *',
+            [id, model_id, quantity, formattedProductionDate, notes, now, now]
+          );
+        }
+
+        await client.query('COMMIT');
+        
+        res.status(201).json(toCamelCase(result.rows[0]));
+      } catch (err) {
+        await client.query('ROLLBACK');
+        console.error('Error creating inventory item:', err);
+        res.status(500).json({ error: 'Internal server error' });
+      } finally {
+        client.release();
+      }
     }
-  });
+  );
 
   // PUT /api/inventory/:id - Aggiorna un articolo esistente dell'inventario
-  router.put('/:id', async (req, res) => {
+  router.put('/:id', 
+    validateUUID('id'),
+    validateInventoryUpdate,
+    handleValidationErrors,
+    async (req, res) => {
     try {
       const { id } = req.params;
       const { quantity, notes } = req.body;
