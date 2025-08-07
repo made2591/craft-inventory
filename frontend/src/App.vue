@@ -1,12 +1,11 @@
 <template>
   <div class="app-container">
-    <!-- Mobile Menu Button - always visible on mobile -->
+    <!-- Mobile Menu Button - only visible when sidebar is closed on mobile -->
     <button 
       class="mobile-menu-btn" 
       @click="toggleMobileMenu" 
-      :class="{ 'active': isMobileMenuOpen }" 
-      v-if="isMobile"
-      :aria-label="isMobileMenuOpen ? 'Close menu' : 'Open menu'"
+      v-if="isMobile && !isMobileMenuOpen"
+      aria-label="Open menu"
     >
       <span class="hamburger-line"></span>
       <span class="hamburger-line"></span>
@@ -55,7 +54,7 @@ export default {
   data() {
     return {
       isSidebarCollapsed: false,
-      isMobileMenuOpen: false,
+      isMobileMenuOpen: false, // Start closed on mobile so hamburger is visible
       isMobile: false
     };
   },
@@ -163,7 +162,7 @@ body {
 
 /* Mobile Menu Button */
 .mobile-menu-btn {
-  display: none;
+  display: flex;
   position: fixed;
   top: 20px;
   left: 20px;
@@ -188,28 +187,12 @@ body {
   background: var(--fulvous-dark);
 }
 
-.mobile-menu-btn.active {
-  background: var(--danger);
-}
-
 .hamburger-line {
   width: 20px;
   height: 2px;
   background: var(--surface);
   border-radius: 1px;
   transition: all 0.3s ease;
-}
-
-.mobile-menu-btn.active .hamburger-line:nth-child(1) {
-  transform: rotate(45deg) translate(5px, 5px);
-}
-
-.mobile-menu-btn.active .hamburger-line:nth-child(2) {
-  opacity: 0;
-}
-
-.mobile-menu-btn.active .hamburger-line:nth-child(3) {
-  transform: rotate(-45deg) translate(7px, -6px);
 }
 
 /* Mobile Overlay */
@@ -267,10 +250,6 @@ body {
 
 /* Mobile Responsive */
 @media (max-width: 768px) {
-  .mobile-menu-btn {
-    display: flex;
-  }
-  
   .content-wrapper,
   .content-wrapper.sidebar-collapsed {
     margin-left: 0;
@@ -278,7 +257,7 @@ body {
   }
   
   .main-content {
-    padding: 80px 15px 15px 15px; /* Top padding to avoid overlap with mobile menu button */
+    padding: 20px 15px 15px 15px;
   }
   
   .app-container {
