@@ -1,16 +1,7 @@
 import { createRouter, createWebHistory } from 'vue-router'
-import api from '../services/api.js'
+import Home from '../views/Home.vue'
 
-// Function to check if kiosk mode is enabled
-const isKioskModeEnabled = async () => {
-  try {
-    const response = await api.get('/api/kiosk/status');
-    return response?.kioskMode || false;
-  } catch (error) {
-    console.error('Error checking kiosk mode:', error);
-    return false;
-  }
-};
+const isKioskModeEnabled = __KIOSK_MODE__
 
 const routes = [
   {
@@ -18,20 +9,12 @@ const routes = [
     name: 'Home',
     component: () => import('../views/Home.vue')
   },
-  {
+  // Conditionally include Welcome route only if kiosk mode is enabled
+  ...(isKioskModeEnabled ? [{
     path: '/welcome',
     name: 'Welcome',
-    component: () => import('../views/Welcome.vue'),
-    beforeEnter: async (to, from, next) => {
-      const kioskEnabled = await isKioskModeEnabled();
-      if (kioskEnabled) {
-        next();
-      } else {
-        // Redirect to home if kiosk mode is not enabled
-        next('/');
-      }
-    }
-  },
+    component: () => import('../views/Welcome.vue')
+  }] : []),
   {
     path: '/settings',
     name: 'Settings',

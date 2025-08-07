@@ -3,6 +3,10 @@ FROM node:20-alpine as build-stage
 
 WORKDIR /app
 
+# Accept build argument for kiosk mode
+ARG KIOSK_MODE=false
+ENV KIOSK_MODE=${KIOSK_MODE}
+
 # Copia i file di configurazione
 COPY package*.json ./
 

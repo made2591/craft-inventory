@@ -65,10 +65,6 @@
                 <i class="fas fa-clock"></i>
                 {{ $t('welcome.kioskMode.resetInterval', { interval: kioskStatus.resetIntervalMinutes }) }}
               </p>
-              <div class="next-reset" v-if="timeUntilReset">
-                <i class="fas fa-stopwatch"></i>
-                {{ $t('welcome.kioskMode.nextReset', { time: timeUntilReset }) }}
-              </div>
             </div>
           </div>
           
@@ -160,20 +156,25 @@
 </template>
 
 <script>
-import api from '../services/api.js';
-
 export default {
   name: 'Welcome',
   data() {
     return {
-      kioskStatus: null,
+      // Use build-time configuration for kiosk mode
+      kioskStatus: {
+        enabled: true,
+        kioskMode: __KIOSK_MODE__,
+        resetInterval: 15,
+        nextReset: 'Unknown'
+      },
       timeUntilReset: null,
       updateInterval: null
     };
   },
-  async created() {
-    await this.fetchKioskStatus();
-    this.startTimer();
+  mounted() {
+    if (this.kioskStatus.kioskMode) {
+      this.startTimer();
+    }
   },
   beforeUnmount() {
     if (this.updateInterval) {
@@ -181,54 +182,25 @@ export default {
     }
   },
   methods: {
-    async fetchKioskStatus() {
-      try {
-        const response = await api.get('/api/kiosk/status');
-        this.kioskStatus = response;
-      } catch (error) {
-        console.error('Error fetching kiosk status:', error);
-        // Set default status if API call fails
-        this.kioskStatus = {
-          kioskMode: false,
-          resetIntervalMinutes: 15
-        };
-      }
-    },
-    
     updateTimeUntilReset() {
-      if (!this.kioskStatus?.kioskMode || !this.kioskStatus.statistics?.nextResetIn) {
+      if (!this.kioskStatus?.kioskMode) {
         return;
       }
 
-      const nextResetMs = this.kioskStatus.statistics.nextResetIn;
-      if (nextResetMs <= 0) {
-        this.timeUntilReset = this.$t('welcome.kioskMode.resettingSoon');
-        return;
-      }
-
-      const minutes = Math.floor(nextResetMs / (1000 * 60));
-      const seconds = Math.floor((nextResetMs % (1000 * 60)) / 1000);
-      
-      if (minutes > 0) {
-        this.timeUntilReset = this.$t('welcome.kioskMode.timeFormat.minutes', { minutes, seconds });
-      } else {
-        this.timeUntilReset = this.$t('welcome.kioskMode.timeFormat.seconds', { seconds });
-      }
+      // Since we don't have real-time data, show a generic message
+      this.timeUntilReset = this.$t('welcome.kioskMode.resetInterval', { 
+        interval: this.kioskStatus.resetIntervalMinutes 
+      });
     },
     
     startTimer() {
-      // Update the timer every 5 seconds
+      // Update the timer display
+      this.updateTimeUntilReset();
+      
+      // Update every 30 seconds for demo purposes
       this.updateInterval = setInterval(() => {
         this.updateTimeUntilReset();
-        
-        // Refresh kiosk status every 30 seconds
-        if (Date.now() % 30000 < 5000) {
-          this.fetchKioskStatus();
-        }
-      }, 5000);
-      
-      // Initial timer update
-      this.updateTimeUntilReset();
+      }, 30000);
     }
   }
 };

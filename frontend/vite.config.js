@@ -3,6 +3,10 @@ import { defineConfig } from 'vite'
 import vue from '@vitejs/plugin-vue'
 import { visualizer } from 'rollup-plugin-visualizer'
 
+// Check if kiosk mode is enabled
+const isKioskMode = process.env.KIOSK_MODE === 'true'
+console.log('🏪 Build-time Kiosk Mode:', isKioskMode, '(from KIOSK_MODE env var:', process.env.KIOSK_MODE, ')')
+
 // https://vitejs.dev/config/
 export default defineConfig({
   plugins: [
@@ -19,6 +23,17 @@ export default defineConfig({
     alias: {
       '@': fileURLToPath(new URL('./src', import.meta.url))
     }
+  },
+
+  define: {
+    // Make kiosk mode available to the frontend at build time
+    __KIOSK_MODE__: JSON.stringify(isKioskMode),
+    // Also provide it as a standard environment variable accessible in frontend
+    __VITE_KIOSK_MODE__: JSON.stringify(isKioskMode ? 'true' : 'false'),
+    // Define global constants for security
+    __APP_VERSION__: JSON.stringify(process.env.npm_package_version),
+    __BUILD_TIME__: JSON.stringify(new Date().toISOString()),
+    __DEV__: process.env.NODE_ENV === 'development'
   },
 
   // Security-focused build configuration
@@ -114,13 +129,6 @@ export default defineConfig({
       'Referrer-Policy': 'strict-origin-when-cross-origin',
       'Content-Security-Policy': "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self'; connect-src 'self' http://localhost:8080"
     }
-  },
-
-  // Define global constants for security
-  define: {
-    __APP_VERSION__: JSON.stringify(process.env.npm_package_version),
-    __BUILD_TIME__: JSON.stringify(new Date().toISOString()),
-    __DEV__: process.env.NODE_ENV === 'development'
   },
 
   // CSS configuration
